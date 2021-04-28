@@ -22,16 +22,18 @@ type Receiver struct {
 	readDataFn      func(name string) ([]byte, error)
 } //                                                                    Receiver
 
-// RunReceiver _ _
+// RunReceiver starts a goroutine that runs the receiver in an infinite loop.
 func RunReceiver(
 	writeDataFn func(name string, data []byte) error,
 	readDataFn func(name string) ([]byte, error),
 ) {
-	receiver := Receiver{
-		writeDataFn: writeDataFn,
-		readDataFn:  readDataFn,
-	}
-	receiver.run()
+	go func() {
+		receiver := Receiver{
+			writeDataFn: writeDataFn,
+			readDataFn:  readDataFn,
+		}
+		receiver.run()
+	}()
 } //                                                                 RunReceiver
 
 // -----------------------------------------------------------------------------
@@ -46,9 +48,10 @@ func (ob *Receiver) run() error {
 	if err != nil {
 		return logError(0xE14BC8, err)
 	}
-	logInfo(strings.Repeat("-", 80))
-	logInfo("VPSS started in receiver mode")
-	//
+	if Config.VerboseReceiver {
+		logInfo(strings.Repeat("-", 80))
+		logInfo("UDPT started in receiver mode")
+	}
 	udpAddr, err := net.ResolveUDPAddr("udp",
 		fmt.Sprintf("0.0.0.0:%d", Config.Port))
 	if err != nil {
@@ -65,68 +68,67 @@ func (ob *Receiver) run() error {
 		}
 	}()
 	if Config.VerboseReceiver {
-		logInfo("Receiver called ListenPacket")
+		logInfo("Receiver.run() called net.ListenUDP")
 	}
 	encryptedReq := make([]byte, Config.PacketSizeLimit)
-	go func() {
-		for {
-			// 'encryptedReq' is overwritten after every readFromUDPConn
-			nRead, addr, err := readFromUDPConn(conn, encryptedReq)
-			if err != nil {
-				logError(0xEA288A, "(readFromUDPConn):", err)
-				continue
-			}
-			recv, err := aesDecrypt(encryptedReq[:nRead], Config.AESKey)
-			if err != nil {
-				logError(0xE7D2C4, "(aesDecrypt):", err)
-				continue
-			}
-			if Config.VerboseReceiver {
-				logInfo()
-				logInfo(strings.Repeat("-", 80))
-				logInfo("Receiver read", nRead, "bytes from", addr)
-			}
-			var reply []byte
-			switch {
-			case bytes.HasPrefix(recv, []byte(DATA_ITEM_HASH)):
-				reply, err = ob.sendDataItemHash(recv)
-				if err != nil {
-					logError(0xE98D72, "(sendDataItemHash):", err)
-					continue
-				}
-			case bytes.HasPrefix(recv, []byte(FRAGMENT)):
-				reply, err = ob.receiveFragment(recv)
-				if err != nil {
-					logError(0xE3A46C, "(receiveFragment):", err)
-					continue
-				}
-			default:
-				logError(0xE985CC, ": Invalid packet header")
-				reply = []byte("invalid_packet_header")
-			}
-			encryptedReply, err := aesEncrypt(reply, Config.AESKey)
-			if err != nil {
-				logError(0xE6E8C7, "(aesEncrypt):", err)
-				continue
-			}
-			deadline := time.Now().Add(Config.WriteTimeout)
-			err = conn.SetWriteDeadline(deadline)
-			if err != nil {
-				logError(0xE1F2C4, "(SetWriteDeadline):", err)
-				continue
-			}
-			nWrit, err := conn.WriteTo(encryptedReply, addr)
-			if err != nil {
-				logError(0xEA63C4, "(WriteTo):", err)
-				continue
-			}
-			if Config.VerboseReceiver {
-				logInfo("Receiver wrote", nWrit, "bytes to", addr)
-			}
+	for {
+		// 'encryptedReq' is overwritten after every readFromUDPConn
+		nRead, addr, err := readFromUDPConn(conn, encryptedReq)
+		if err != nil {
+			logError(0xEA288A, "(readFromUDPConn):", err)
+			continue
 		}
-	}()
-	time.Sleep(100 * 365 * 24 * time.Hour) // sleep for a 100 years
-	return nil
+		recv, err := aesDecrypt(encryptedReq[:nRead], Config.AESKey)
+		if err != nil {
+			logError(0xE7D2C4, "(aesDecrypt):", err)
+			continue
+		}
+		if Config.VerboseReceiver {
+			logInfo()
+			logInfo(strings.Repeat("-", 80))
+			logInfo("Receiver read", nRead, "bytes from", addr)
+		}
+		var reply []byte
+		switch {
+		case len(recv) == 0:
+			logError(0xE6B3BA, ": received no data")
+			continue
+		case bytes.HasPrefix(recv, []byte(DATA_ITEM_HASH)):
+			reply, err = ob.sendDataItemHash(recv)
+			if err != nil {
+				logError(0xE98D72, "(sendDataItemHash):", err)
+				continue
+			}
+		case bytes.HasPrefix(recv, []byte(FRAGMENT)):
+			reply, err = ob.receiveFragment(recv)
+			if err != nil {
+				logError(0xE3A46C, "(receiveFragment):", err)
+				continue
+			}
+		default:
+			logError(0xE985CC, ": Invalid packet header")
+			reply = []byte("invalid_packet_header")
+		}
+		encryptedReply, err := aesEncrypt(reply, Config.AESKey)
+		if err != nil {
+			logError(0xE6E8C7, "(aesEncrypt):", err)
+			continue
+		}
+		deadline := time.Now().Add(Config.WriteTimeout)
+		err = conn.SetWriteDeadline(deadline)
+		if err != nil {
+			logError(0xE1F2C4, "(SetWriteDeadline):", err)
+			continue
+		}
+		nWrit, err := conn.WriteTo(encryptedReply, addr)
+		if err != nil {
+			logError(0xEA63C4, "(WriteTo):", err)
+			continue
+		}
+		if Config.VerboseReceiver {
+			logInfo("Receiver wrote", nWrit, "bytes to", addr)
+		}
+	}
 } //                                                                         run
 
 // -----------------------------------------------------------------------------
