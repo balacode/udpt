@@ -14,6 +14,11 @@ import (
 // to return the hash of the data item named by 'name'. If the receiver
 // can locate the data item, returns its hash, otherwise returns nil.
 func requestDataItemHash(name string) []byte {
+	err := Config.Validate()
+	if err != nil {
+		logError(0xE5BC2E, err)
+		return nil
+	}
 	conn, err := connect()
 	if err != nil {
 		logError(0xE7DF8B, "(connect):", err)
@@ -29,7 +34,17 @@ func requestDataItemHash(name string) []byte {
 		logError(0xE7F316, "(sendPacket):", err)
 		return nil
 	}
-	reply := getReplyPacket(conn)
+	encryptedReply := make([]byte, Config.PacketSizeLimit)
+	nRead, _ /*addr*/, err := readFromUDPConn(conn, encryptedReply)
+	if err != nil {
+		logError(0xE97FC3, "(ReadFrom):", err)
+		return nil
+	}
+	reply, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
+	if err != nil {
+		logError(0xE2B5A1, "(aesDecrypt):", err)
+		return nil
+	}
 	var hash []byte
 	if len(reply) > 0 {
 		if !bytes.HasPrefix(reply, []byte(DATA_ITEM_HASH)) {
