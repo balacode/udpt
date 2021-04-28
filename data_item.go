@@ -61,15 +61,19 @@ func (ob *DataItem) Reset() {
 	ob.UncompressedSizeInfo = 0
 } //                                                                       Reset
 
-// Retain _ _
+// Retain changes the Name, Hash and empties CompressedPieces if the passed
+// name, hash, and packetCount don't match their existing values in the object.
 func (ob *DataItem) Retain(name string, hash []byte, packetCount int) {
-	if ob.Name != name || !bytes.Equal(ob.Hash, hash) ||
-		len(ob.CompressedPieces) != packetCount {
-		//
-		ob.Name = name
-		ob.Hash = hash
-		ob.CompressedPieces = make([][]byte, packetCount)
+	if ob.Name == name &&
+		bytes.Equal(ob.Hash, hash) &&
+		len(ob.CompressedPieces) == packetCount {
+		return
 	}
+	ob.Name = name
+	ob.Hash = hash
+	ob.CompressedPieces = make([][]byte, packetCount)
+	ob.CompressedSizeInfo = 0
+	ob.UncompressedSizeInfo = 0
 } //                                                                      Retain
 
 // UnpackBytes _ _
