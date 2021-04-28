@@ -210,19 +210,27 @@ func (ob *udpSender) collectConfirmations() {
 			// 'encryptedReply' is overwritten after every readFromUDPConn
 			nRead, addr, err := readFromUDPConn(ob.conn, encryptedReply)
 			if err != nil {
-				if !strings.Contains(err.Error(), "closed network connection") {
-					logError(0xE7B6B2, "(ReadFrom):", err)
+				if strings.Contains(err.Error(), "closed network connection") {
+					return
 				}
-				return
+				logError(0xE7B6B2, "(ReadFrom):", err)
+				continue
+			}
+			if nRead == 0 {
+				logError(0xE4CB0B, ": received no data")
+				continue
 			}
 			recv, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
 			if err != nil {
 				logError(0xE5C43E, "(aesDecrypt):", err)
-				return
+				continue
 			}
 			if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
 				logError(0xE5AF24, ": bad reply header")
-				return
+				if Config.VerboseSender {
+					logInfo("ERROR received:", len(recv), "bytes")
+				}
+				continue
 			}
 			confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
 			if Config.VerboseSender {
