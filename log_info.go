@@ -33,12 +33,12 @@ func initLog() {
 	}
 	logChan = make(chan string, LogBufferSize)
 	go func() {
-		for s := range logChan {
-			fmt.Println(s)
+		for msg := range logChan {
+			fmt.Println(msg)
 			file, err := os.OpenFile( // -> (*os.File, error)
 				LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 			if err == nil {
-				file.WriteString(s + "\n")
+				file.WriteString(msg + "\n")
 				file.Close()
 			} else {
 				logError(0xE5CB4B, "Opening file", LogFile, ":", err)
@@ -55,21 +55,21 @@ func logInfo(args ...interface{}) {
 	ts := time.Now().String()[:19]
 	//
 	// join all the parts into a single string
-	var s string
+	var msg string
 	{
 		strs := make([]string, len(args))
 		for i, arg := range args {
 			strs[i] = fmt.Sprint(arg)
 		}
-		s = strings.Join(strs, " ")
+		msg = strings.Join(strs, " ")
 	}
 	// prefix each line with a timestamp
-	var lines = strings.Split(s, "\n")
+	var lines = strings.Split(msg, "\n")
 	for i, line := range lines {
 		lines[i] = ts + " " + line
 	}
-	s = strings.Join(lines, "\n")
-	logChan <- s
+	msg = strings.Join(lines, "\n")
+	logChan <- msg
 } //                                                                     logInfo
 
 // end

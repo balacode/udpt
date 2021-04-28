@@ -180,7 +180,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	it.Retain(name, hash, packetCount)
 	compressedData := recv[dataOffset:]
 	if len(compressedData) < 1 {
-		return nil, logError(0xE92B0F, ": no data")
+		return nil, logError(0xE92B0F, ": received no data")
 	}
 	// store the current piece
 	if len(it.CompressedPieces[index]) == 0 {

@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-// readFromUDPConn reads data from the UDP connection conn.
+// readFromUDPConn reads data from the UDP connection 'conn'.
 func readFromUDPConn(
 	conn *net.UDPConn,
-	buf []byte,
+	tempBuf []byte,
 ) (
 	nRead int,
 	addr net.Addr,
@@ -25,7 +25,7 @@ func readFromUDPConn(
 		return 0, nil, logError(0xE14A90, "(SetReadDeadline):", err)
 	}
 	// contents of 'buf' is overwritten after every ReadFrom
-	nRead, addr, err = conn.ReadFrom(buf)
+	nRead, addr, err = conn.ReadFrom(tempBuf)
 	if err != nil &&
 		strings.Contains(err.Error(), "closed network connection") {
 		err = nil

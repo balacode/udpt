@@ -63,7 +63,8 @@ func Send(name string, data []byte) error {
 	hash := getHash(data)
 	if Config.VerboseSender {
 		logInfo("\n" + strings.Repeat("-", 80) + "\n" +
-			fmt.Sprintf("Send name:%s size:%d hash:%X", name, len(data), hash))
+			fmt.Sprintf("Send name: %s size: %d hash: %X",
+				name, len(data), hash))
 	}
 	remoteHash := requestDataItemHash(name)
 	if bytes.Equal(hash, remoteHash) {

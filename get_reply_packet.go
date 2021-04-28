@@ -17,7 +17,7 @@ func getReplyPacket(conn *net.UDPConn) []byte {
 		return []byte{}
 	}
 	encryptedReply := make([]byte, Config.PacketSizeLimit)
-	nRead, _, err := readFromUDPConn(conn, encryptedReply)
+	nRead, _ /*addr*/, err := readFromUDPConn(conn, encryptedReply)
 	if err != nil {
 		logError(0xE97FC3, "(ReadFrom):", err)
 		return []byte{}
