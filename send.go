@@ -205,49 +205,47 @@ func (ob *udpSender) collectConfirmations() {
 		logError(0xE44C4A, err)
 		return
 	}
-	go func() {
-		encryptedReply := make([]byte, Config.PacketSizeLimit)
-		for {
-			// 'encryptedReply' is overwritten after every readFromUDPConn
-			nRead, addr, err := readFromUDPConn(ob.conn, encryptedReply)
-			if err != nil {
-				if strings.Contains(err.Error(), "closed network connection") {
-					return
-				}
-				logError(0xE7B6B2, "(ReadFrom):", err)
-				continue
+	encryptedReply := make([]byte, Config.PacketSizeLimit)
+	for {
+		// 'encryptedReply' is overwritten after every readFromUDPConn
+		nRead, addr, err := readFromUDPConn(ob.conn, encryptedReply)
+		if err != nil {
+			if strings.Contains(err.Error(), "closed network connection") {
+				return
 			}
-			if nRead == 0 {
-				logError(0xE4CB0B, ": received no data")
-				continue
-			}
-			recv, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
-			if err != nil {
-				logError(0xE5C43E, "(aesDecrypt):", err)
-				continue
-			}
-			if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
-				logError(0xE5AF24, ": bad reply header")
-				if Config.VerboseSender {
-					logInfo("ERROR received:", len(recv), "bytes")
-				}
-				continue
-			}
-			confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
-			if Config.VerboseSender {
-				logInfo("udpSender received", nRead, "bytes from", addr)
-			}
-			go func(confirmedHash []byte) {
-				for i, packet := range ob.packets {
-					if bytes.Equal(packet.sentHash, confirmedHash) {
-						ob.packets[i].confirmedTime = time.Now()
-						ob.packets[i].confirmedHash = confirmedHash
-						break
-					}
-				}
-			}(confirmedHash)
+			logError(0xE7B6B2, "(ReadFrom):", err)
+			continue
 		}
-	}()
+		if nRead == 0 {
+			logError(0xE4CB0B, ": received no data")
+			continue
+		}
+		recv, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
+		if err != nil {
+			logError(0xE5C43E, "(aesDecrypt):", err)
+			continue
+		}
+		if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
+			logError(0xE5AF24, ": bad reply header")
+			if Config.VerboseSender {
+				logInfo("ERROR received:", len(recv), "bytes")
+			}
+			continue
+		}
+		confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
+		if Config.VerboseSender {
+			logInfo("udpSender received", nRead, "bytes from", addr)
+		}
+		go func(confirmedHash []byte) {
+			for i, packet := range ob.packets {
+				if bytes.Equal(packet.sentHash, confirmedHash) {
+					ob.packets[i].confirmedTime = time.Now()
+					ob.packets[i].confirmedHash = confirmedHash
+					break
+				}
+			}
+		}(confirmedHash)
+	}
 } //                                                        collectConfirmations
 
 // waitForAllConfirmations waits for all confirmation packets to
