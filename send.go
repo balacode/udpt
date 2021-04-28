@@ -12,7 +12,7 @@ package udpt
 //
 // # Methods (ob *udpSender)
 //   ) connect() error
-//   ) sendPackets() error
+//   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
 //   ) waitForAllConfirmations()
 //   ) close() error
@@ -102,7 +102,7 @@ func Send(name string, data []byte) error {
 	}
 	go sender.collectConfirmations()
 	for retries := 0; retries < Config.SendRetries; retries++ {
-		err = sender.sendPackets()
+		err = sender.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
 				err := sender.close()
@@ -110,7 +110,7 @@ func Send(name string, data []byte) error {
 					logError(0xE71C7A, "(close):", err)
 				}
 			}()
-			return logError(0xE23CE0, "(sendPackets):", err)
+			return logError(0xE23CE0, "(sendUndeliveredPackets):", err)
 		}
 		sender.waitForAllConfirmations()
 		if sender.deliveredAllParts() {
@@ -168,8 +168,9 @@ func (ob *udpSender) connect() error {
 	return nil
 } //                                                                     connect
 
-// sendPackets sends all undelivered packets to the destination Receiver.
-func (ob *udpSender) sendPackets() error {
+// sendUndeliveredPackets sends all undelivered
+// packets to the destination Receiver.
+func (ob *udpSender) sendUndeliveredPackets() error {
 	if ob == nil {
 		return logError(0xE8DB3F, ":", ENilReceiver)
 	}
@@ -191,7 +192,7 @@ func (ob *udpSender) sendPackets() error {
 		}()
 	}
 	return nil
-} //                                                                 sendPackets
+} //                                                      sendUndeliveredPackets
 
 // collectConfirmations _ _
 func (ob *udpSender) collectConfirmations() {
