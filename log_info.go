@@ -13,17 +13,22 @@ import (
 )
 
 var (
-	// LogFile _ _
+	// LogFile specifies the name of the output log file.
 	LogFile string
 
-	// LogBufferSize  _ _
+	// LogBufferSize specifies the number of messages buffered in logChan.
+	// If you don't specify it, initLog will set it to 1024 by default.
+	//
+	// To disable log buffering, set it to -1. This can be useful if you want
+	// to see log messages in-order with code execution, not after the fact.
+	// But this will slow it down while it waits for log messages to be written.
 	LogBufferSize int
 
-	// logChan _ _
+	// logChan is the channel into which messages are sent
 	logChan chan string
 )
 
-// initLog _ _
+// initLog initializes logging
 func initLog() {
 	if LogFile == "" {
 		LogFile = os.Args[0] + ".log"
@@ -31,23 +36,19 @@ func initLog() {
 	if LogBufferSize == 0 {
 		LogBufferSize = 1024
 	}
-	logChan = make(chan string, LogBufferSize)
+	size := LogBufferSize
+	if size < 0 {
+		size = 1
+	}
+	logChan = make(chan string, size)
 	go func() {
 		for msg := range logChan {
-			fmt.Println(msg)
-			file, err := os.OpenFile( // -> (*os.File, error)
-				LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-			if err == nil {
-				file.WriteString(msg + "\n")
-				file.Close()
-			} else {
-				logError(0xE5CB4B, "Opening file", LogFile, ":", err)
-			}
+			logOutput(msg)
 		}
 	}()
 } //                                                                     initLog
 
-// logInfo _ _
+// logInfo logs a message to the standard output and a log file
 func logInfo(args ...interface{}) {
 	if LogFile == "" || LogBufferSize == 0 {
 		initLog()
@@ -69,7 +70,25 @@ func logInfo(args ...interface{}) {
 		lines[i] = ts + " " + line
 	}
 	msg = strings.Join(lines, "\n")
-	logChan <- msg
+	if LogBufferSize > 0 {
+		logChan <- msg
+	} else {
+		logOutput(msg)
+	}
 } //                                                                     logInfo
+
+// logOutput prints a message to the standard output
+// and writes to the log file immediately
+func logOutput(msg string) {
+	fmt.Println(msg)
+	file, err := os.OpenFile( // -> (*os.File, error)
+		LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err == nil {
+		file.WriteString(msg + "\n")
+		file.Close()
+	} else {
+		logError(0xE5CB4B, "Opening file", LogFile, ":", err)
+	}
+} //                                                                   logOutput
 
 // end
