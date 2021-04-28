@@ -17,11 +17,11 @@ import (
 // is split into several smaller pieces that are sent as UDP packets.
 //
 type DataItem struct {
-	Name             string
-	Hash             []byte
-	CompressedPieces [][]byte
-	UncompressedSize int
-	CompressedSize   int
+	Name                 string
+	Hash                 []byte
+	CompressedPieces     [][]byte
+	CompressedSizeInfo   int
+	UncompressedSizeInfo int
 } //                                                                    DataItem
 
 // -----------------------------------------------------------------------------
@@ -48,8 +48,8 @@ func (ob *DataItem) PrintInfo(tag string) {
 	logInfo(tag+" name:", ob.Name)
 	logInfo(tag+" hash:", ob.Hash)
 	logInfo(tag+" pcs.:", len(ob.CompressedPieces))
-	logInfo(tag+" size:", ob.UncompressedSize, "bytes")
-	logInfo(tag+" comp:", ob.CompressedSize, "bytes")
+	logInfo(tag+" comp:", ob.CompressedSizeInfo, "bytes")
+	logInfo(tag+" size:", ob.UncompressedSizeInfo, "bytes")
 } //                                                                   PrintInfo
 
 // Reset discards the contents of the data item and clears its name and hash.
@@ -57,6 +57,8 @@ func (ob *DataItem) Reset() {
 	ob.Name = ""
 	ob.Hash = nil
 	ob.CompressedPieces = nil
+	ob.CompressedSizeInfo = 0
+	ob.UncompressedSizeInfo = 0
 } //                                                                       Reset
 
 // Retain _ _
@@ -78,14 +80,14 @@ func (ob *DataItem) UnpackBytes() ([]byte, error) {
 		return nil, logError(0xE76AF5, ": data item is incomplete")
 	}
 	compressed := bytes.Join(ob.CompressedPieces, nil)
-	ob.CompressedSize = len(compressed)
+	ob.CompressedSizeInfo = len(compressed)
 	//
 	// uncompress data
 	ret, err := uncompress(compressed)
 	if err != nil {
 		return nil, logError(0xE95DFB, "(uncompress):", err)
 	}
-	ob.UncompressedSize = len(ret)
+	ob.UncompressedSizeInfo = len(ret)
 	//
 	// hash of uncompressed data should match original hash
 	hash := getHash(ret)
