@@ -194,7 +194,8 @@ func (ob *udpSender) sendUndeliveredPackets() error {
 	return nil
 } //                                                      sendUndeliveredPackets
 
-// collectConfirmations _ _
+// collectConfirmations enters a loop that receives confirmation packets
+// from the sender, and marks all confirmed packets as delivered.
 func (ob *udpSender) collectConfirmations() {
 	if ob == nil {
 		logError(0xE8EA91, ":", ENilReceiver)

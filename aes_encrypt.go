@@ -29,7 +29,7 @@ func aesEncrypt(plaintext, secretKey []byte) (ciphertext []byte, err error) {
 			return nil, err
 		}
 	}
-	// nonce is byte array filled with cryptographically secure random bytes
+	// nonce is a byte array filled with cryptographically secure random bytes
 	var nonce []byte
 	{
 		n := gcm.NonceSize()

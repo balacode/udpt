@@ -76,7 +76,8 @@ func (ob *DataItem) Retain(name string, hash []byte, packetCount int) {
 	ob.UncompressedSizeInfo = 0
 } //                                                                      Retain
 
-// UnpackBytes _ _
+// UnpackBytes joins CompressedPieces and uncompresses
+// the resulting bytes to get the original data item.
 func (ob *DataItem) UnpackBytes() ([]byte, error) {
 	//
 	// join pieces (provided all have been collected) to get compressed data
