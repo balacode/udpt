@@ -73,8 +73,8 @@ func main() {
 } //                                                                        main
 
 // prt is like fmt.Println() but prefixes each line with a 'DEMO' tag.
-func prt(a ...interface{}) {
-	fmt.Println(append([]interface{}{"-------------> DEMO"}, a...)...)
+func prt(args ...interface{}) {
+	fmt.Println(append([]interface{}{"-------------> DEMO"}, args...)...)
 } //                                                                         prt
 
 // end

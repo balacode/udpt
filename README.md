@@ -8,7 +8,7 @@ UDP Transport
 Compresses, encrypts and transfers data between a sender and receiver using UDP protocol.
 
 ## Features and Design Aims:
-- Avoid the overhead of establishing a TCP and/or TLS handshake.
+- Avoid the overhead of establishing a TCP or TCP+TLS handshake.
 - Reliable transfer of data using an unreliable UDP connection.
 - Uses AES-256 symmetric cipher for encryption.
 - Uses zlib library for data compression.
@@ -97,8 +97,8 @@ func main() {
 } //                                                                        main
 
 // prt is like fmt.Println() but prefixes each line with a 'DEMO' tag.
-func prt(a ...interface{}) {
-    fmt.Println(append([]interface{}{"-------------> DEMO"}, a...)...)
+func prt(args ...interface{}) {
+    fmt.Println(append([]interface{}{"-------------> DEMO"}, args...)...)
 } //                                                                         prt
 ```
 
@@ -107,6 +107,7 @@ This project is in its DRAFT stage: very unstable. At this point it works, but t
 
 ## Ideas:
 - Write unit tests
-- Create a drop-in replacement for TCP and/or TLS connections
+- Create a drop-in replacement for TCP and TLS connections
 - Implement some form of transfer control
 - Improve performance
+- Allow multiple Senders and Receivers that use different Address and Port values.
