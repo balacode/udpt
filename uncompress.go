@@ -8,6 +8,7 @@ package udpt
 import (
 	"bytes"
 	"compress/zlib"
+	"encoding/binary"
 	"io"
 )
 
@@ -15,14 +16,23 @@ import (
 // the uncompressed bytes. If compressedData is invalid,
 // returns nil and the error description.
 func uncompress(compressedData []byte) ([]byte, error) {
+	nc := len(compressedData)
+	if len(compressedData) <= 4 {
+		return nil, logError(0xE8A8A9, "invalid compreseData")
+	}
+	// extract the uncompressed size from the end of compressedData
+	// so the size of the new buffer to allocate is known
+	nu := int64(binary.LittleEndian.Uint32(compressedData[nc-4:]))
+	compressedData = compressedData[:nc-4]
+	//
 	reader, err := zlib.NewReader(bytes.NewReader(compressedData))
 	if err != nil {
 		return nil, logError(0xE54F4B, "(NewReader):", err)
 	}
-	buf := bytes.NewBuffer(nil)
-	_, err = io.Copy(buf, reader)
+	buf := bytes.NewBuffer(make([]byte, 0, nu))
+	_, err = io.CopyN(buf, reader, nu)
 	if err != nil {
-		return nil, logError(0xE6A29D, "(Copy):", err)
+		return nil, logError(0xE6A29D, "(CopyN):", err)
 	}
 	err = reader.Close()
 	if err != nil {

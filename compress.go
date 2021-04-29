@@ -8,6 +8,7 @@ package udpt
 import (
 	"bytes"
 	"compress/zlib"
+	"encoding/binary"
 )
 
 // compress compresses data using zlib and returns the compressed bytes.
@@ -30,6 +31,12 @@ func compress(data []byte) ([]byte, error) {
 		return nil, logError(0xE39D8B, "(Close):", err)
 	}
 	ret := cbuf.Bytes()
+	//
+	// write the uncompressed size after the compressed data
+	nc := make([]byte, 4)
+	binary.LittleEndian.PutUint32(nc, uint32(len(data)))
+	ret = append(ret, nc...)
+	//
 	return ret, nil
 } //                                                                    compress
 
