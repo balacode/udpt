@@ -39,7 +39,9 @@ func joinArgs(prefix string, args ...interface{}) string {
 		lastChar  byte
 		retBuf    bytes.Buffer
 	)
-	ws := retBuf.WriteString
+	ws := func(s string) {
+		_, _ = retBuf.WriteString(s)
+	}
 	ws(prefix)
 	for i, arg := range args {
 		s := fmt.Sprint(arg)
