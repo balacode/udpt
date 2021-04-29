@@ -14,18 +14,18 @@ import (
 
 // sendPacket encrypts and sends packet through connection conn.
 // Returns an error if the packet could not be encrypted or sent.
-func sendPacket(packet *Packet, conn *net.UDPConn) error {
+func sendPacket(
+	packet *Packet,
+	aesKey []byte,
+	conn *net.UDPConn,
+) error {
 	if packet == nil {
 		return logError(0xE1D3B5, ENilReceiver)
 	}
 	if conn == nil {
 		return logError(0xE4B1BA, ENilReceiver)
 	}
-	err := Config.Validate()
-	if err != nil {
-		return logError(0xEFE6AE, err)
-	}
-	encryptedReq, err := aesEncrypt(packet.data, Config.AESKey)
+	encryptedReq, err := aesEncrypt(packet.data, aesKey)
 	if err != nil {
 		return logError(0xEB39C3, "(aesEncrypt):", err)
 	}

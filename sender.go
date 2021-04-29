@@ -172,7 +172,7 @@ func requestDataItemHash(name string) []byte {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = sendPacket(packet, conn)
+	err = sendPacket(packet, Config.AESKey, conn)
 	if err != nil {
 		_ = logError(0xE7F316, "(sendPacket):", err)
 		return nil
@@ -242,7 +242,7 @@ func (ob *udpSender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			err := sendPacket(packet, ob.conn)
+			err := sendPacket(packet, Config.AESKey, ob.conn)
 			if err != nil {
 				_ = logError(0xE67BA4, "(sendPacket):", err)
 			}
