@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// github.com/balacode/udpt                                           /[send.go]
+// github.com/balacode/udpt                                         /[sender.go]
 // (c) balarabe@protonmail.com                                      License: MIT
 // -----------------------------------------------------------------------------
 
