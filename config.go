@@ -84,6 +84,30 @@ type ConfigStruct struct {
 	VerboseSender bool
 } //                                                                ConfigStruct
 
+// DefaultConfig returns default configuration settings.
+func DefaultConfig() ConfigStruct {
+	return ConfigStruct{
+		//
+		// Main:
+		Address: "127.0.0.1",
+		Port:    0,
+		AESKey:  []byte{},
+		//
+		// Limits:
+		PacketSizeLimit:   1450,
+		PacketPayloadSize: 1024,
+		//
+		// Timeouts:
+		ReplyTimeout: 15 * time.Second,
+		SendRetries:  10,
+		WriteTimeout: 15 * time.Second,
+		//
+		// Logging:
+		VerboseReceiver: false,
+		VerboseSender:   false,
+	}
+} //                                                               DefaultConfig
+
 // Validate checks the configuration to make sure all required fields like
 // Address, Port and AESKey have been specified and are consistent.
 //
