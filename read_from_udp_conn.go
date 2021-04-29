@@ -21,12 +21,13 @@ import (
 func readFromUDPConn(
 	conn *net.UDPConn,
 	tempBuf []byte,
+	timeout time.Duration,
 ) (
 	nRead int,
 	addr net.Addr,
 	err error,
 ) {
-	err = conn.SetReadDeadline(time.Now().Add(Config.ReplyTimeout))
+	err = conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
 		return 0, nil, logError(0xE14A90, "(SetReadDeadline):", err)
 	}

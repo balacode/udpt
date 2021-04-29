@@ -179,7 +179,8 @@ func requestDataItemHash(name string) []byte {
 		return nil
 	}
 	encryptedReply := make([]byte, Config.PacketSizeLimit)
-	nRead, _ /*addr*/, err := readFromUDPConn(conn, encryptedReply)
+	nRead, _ /*addr*/, err :=
+		readFromUDPConn(conn, encryptedReply, Config.ReplyTimeout)
 	if err != nil {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
@@ -269,7 +270,8 @@ func (ob *udpSender) collectConfirmations() {
 	encryptedReply := make([]byte, Config.PacketSizeLimit)
 	for {
 		// 'encryptedReply' is overwritten after every readFromUDPConn
-		nRead, addr, err := readFromUDPConn(ob.conn, encryptedReply)
+		nRead, addr, err :=
+			readFromUDPConn(ob.conn, encryptedReply, Config.ReplyTimeout)
 		if err != nil {
 			if strings.Contains(err.Error(), "closed network connection") {
 				return

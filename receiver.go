@@ -76,7 +76,8 @@ func (ob *Receiver) run() error {
 	encryptedReq := make([]byte, Config.PacketSizeLimit)
 	for {
 		// 'encryptedReq' is overwritten after every readFromUDPConn
-		nRead, addr, err := readFromUDPConn(conn, encryptedReq)
+		nRead, addr, err :=
+			readFromUDPConn(conn, encryptedReq, Config.ReplyTimeout)
 		if err != nil {
 			_ = logError(0xEA288A, "(readFromUDPConn):", err)
 			continue
