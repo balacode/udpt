@@ -19,6 +19,9 @@ package udpt
 //   ) waitForAllConfirmations()
 //   ) close() error
 //
+// # Internal Helper Methods (ob *Sender)
+//   ) makePacket(data []byte) (*Packet, error)
+//
 // # Information Properties
 //   ) averageResponseMs() float64
 //   ) deliveredAllParts() bool
@@ -112,7 +115,7 @@ func Send(name string, data []byte) error { // TODO: change to method
 			"name:%s hash:%X sn:%d count:%d\n",
 			name, sender.dataHash, i+1, packetCount,
 		)
-		packet, err2 := makePacket(
+		packet, err2 := sender.makePacket(
 			append([]byte(header), compressed[a:b]...),
 		)
 		if err2 != nil {
@@ -176,7 +179,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE7DF8B, "(connect):", err)
 		return nil
 	}
-	packet, err := makePacket([]byte(DATA_ITEM_HASH + name))
+	packet, err := ob.makePacket([]byte(DATA_ITEM_HASH + name))
 	if err != nil {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
@@ -381,6 +384,24 @@ func (ob *Sender) close() error {
 } //                                                                       close
 
 // -----------------------------------------------------------------------------
+// # Internal Helper Methods (ob *Sender)
+
+// makePacket _ _
+func (ob *Sender) makePacket(data []byte) (*Packet, error) {
+	if len(data) > Config.PacketSizeLimit {
+		return nil, logError(0xE71F9B, "len(data)", len(data),
+			"> Config.PacketSizeLimit", Config.PacketSizeLimit)
+	}
+	packet := Packet{
+		data:     data,
+		sentHash: getHash(data),
+		sentTime: time.Now(),
+		// confirmedHash, confirmedTime: zero value
+	}
+	return &packet, nil
+} //                                                                  makePacket
+
+// -----------------------------------------------------------------------------
 // # Information Properties
 
 // averageResponseMs is the average response time, in milliseconds,
@@ -517,21 +538,6 @@ func (ob *Sender) updateInfo() {
 
 // -----------------------------------------------------------------------------
 // # Functions
-
-// makePacket _ _
-func makePacket(data []byte) (*Packet, error) {
-	if len(data) > Config.PacketSizeLimit {
-		return nil, logError(0xE71F9B, "len(data)", len(data),
-			"> Config.PacketSizeLimit", Config.PacketSizeLimit)
-	}
-	packet := Packet{
-		data:     data,
-		sentHash: getHash(data),
-		sentTime: time.Now(),
-		// confirmedHash, confirmedTime: zero value
-	}
-	return &packet, nil
-} //                                                                  makePacket
 
 // getPacketCount calculates the number of packets needed to send 'length'
 // bytes. This depends on the setting of Config.PacketPayloadSize.
