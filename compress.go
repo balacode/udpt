@@ -18,9 +18,9 @@ func compress(data []byte) ([]byte, error) {
 	_, err := wr.Write(data)
 	if err != nil {
 		defer func() {
-			err := wr.Close()
-			if err != nil {
-				_ = logError(0xE0A6F2, "(Close):", err)
+			err2 := wr.Close()
+			if err2 != nil {
+				_ = logError(0xE0A6F2, "(Close):", err2)
 			}
 		}()
 		return nil, logError(0xE5F7D3, "(Write):", err)

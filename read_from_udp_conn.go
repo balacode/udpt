@@ -15,7 +15,7 @@ import (
 //
 // 'tempBuf' contains a temporary buffer that holds the received
 // packet's data. It is reused between calls to this function to
-// avoid unneccessary memory allocations and de-allocations.
+// avoid unnecessary memory allocations and de-allocations.
 // The size of 'tempBuf' must be Config.PacketSizeLimit or greater.
 //
 func readFromUDPConn(

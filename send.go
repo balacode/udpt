@@ -90,9 +90,9 @@ func Send(name string, data []byte) error {
 			"name:%s hash:%X sn:%d count:%d\n",
 			name, sender.dataHash, i+1, packetCount,
 		)
-		packet, err := NewPacket(append([]byte(header), compressed[a:b]...))
-		if err != nil {
-			return logError(0xE567A4, "(NewPacket):", err)
+		packet, err2 := NewPacket(append([]byte(header), compressed[a:b]...))
+		if err2 != nil {
+			return logError(0xE567A4, "(NewPacket):", err2)
 		}
 		sender.packets[i] = *packet
 	}
@@ -105,9 +105,9 @@ func Send(name string, data []byte) error {
 		err = sender.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
-				err := sender.close()
-				if err != nil {
-					_ = logError(0xE71C7A, "(close):", err)
+				err2 := sender.close()
+				if err2 != nil {
+					_ = logError(0xE71C7A, "(close):", err2)
 				}
 			}()
 			return logError(0xE23CE0, "(sendUndeliveredPackets):", err)

@@ -153,7 +153,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	if dataOffset == -1 {
 		return nil, logError(0xE6CF52, ": newline not found")
 	}
-	dataOffset += 1 // skip newline
+	dataOffset++ // skip newline
 	var (
 		header  = string(recv[len(FRAGMENT):dataOffset])
 		name    = getPart(header, "name:", " ")
