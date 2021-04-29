@@ -63,6 +63,7 @@ var udpTotal udpInfo
 // a sequence of bytes to a listening Receiver.
 //
 type Sender struct {
+	Config    ConfigStruct
 	dataHash  []byte
 	startTime time.Time
 	packets   []Packet
@@ -78,12 +79,12 @@ type Sender struct {
 // Receiver specified by Config.Address and Config.Port.
 //
 func (ob *Sender) Send(name string, data []byte) error {
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		return logError(0xE5D92D, err)
 	}
 	hash := getHash(data)
-	if Config.VerboseSender {
+	if ob.Config.VerboseSender {
 		logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
 				name, len(data), hash))
@@ -101,8 +102,8 @@ func (ob *Sender) Send(name string, data []byte) error {
 	ob.startTime = time.Now()
 	ob.packets = make([]Packet, packetCount)
 	for i := range ob.packets {
-		a := i * Config.PacketPayloadSize
-		b := a + Config.PacketPayloadSize
+		a := i * ob.Config.PacketPayloadSize
+		b := a + ob.Config.PacketPayloadSize
 		if b > len(compressed) {
 			b = len(compressed)
 		}
@@ -123,7 +124,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return logError(0xE8B8D0, "(connect):", err)
 	}
 	go ob.collectConfirmations()
-	for retries := 0; retries < Config.SendRetries; retries++ {
+	for retries := 0; retries < ob.Config.SendRetries; retries++ {
 		err = ob.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
@@ -163,12 +164,12 @@ func (ob *Sender) Send(name string, data []byte) error {
 // to return the hash of the data item named by 'name'. If the receiver
 // can locate the data item, returns its hash, otherwise returns nil.
 func (ob *Sender) requestDataItemHash(name string) []byte {
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", Config.Address, Config.Port)
+	addr := fmt.Sprintf("%s:%d", ob.Config.Address, ob.Config.Port)
 	conn, err := connect(addr)
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
@@ -179,19 +180,19 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = sendPacket(packet, Config.AESKey, conn)
+	err = sendPacket(packet, ob.Config.AESKey, conn)
 	if err != nil {
 		_ = logError(0xE7F316, "(sendPacket):", err)
 		return nil
 	}
-	encryptedReply := make([]byte, Config.PacketSizeLimit)
+	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
 	nRead, _ /*addr*/, err :=
-		readFromUDPConn(conn, encryptedReply, Config.ReplyTimeout)
+		readFromUDPConn(conn, encryptedReply, ob.Config.ReplyTimeout)
 	if err != nil {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
 	}
-	reply, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
+	reply, err := aesDecrypt(encryptedReply[:nRead], ob.Config.AESKey)
 	if err != nil {
 		_ = logError(0xE2B5A1, "(aesDecrypt):", err)
 		return nil
@@ -222,7 +223,7 @@ func (ob *Sender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
 	}
-	addr := fmt.Sprintf("%s:%d", Config.Address, Config.Port)
+	addr := fmt.Sprintf("%s:%d", ob.Config.Address, ob.Config.Port)
 	conn, err := connect(addr)
 	if err != nil {
 		ob.conn = nil
@@ -238,7 +239,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 	if ob == nil {
 		return logError(0xE8DB3F, ":", ENilReceiver)
 	}
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		return logError(0xE86B5B, err)
 	}
@@ -251,7 +252,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			err := sendPacket(packet, Config.AESKey, ob.conn)
+			err := sendPacket(packet, ob.Config.AESKey, ob.conn)
 			if err != nil {
 				_ = logError(0xE67BA4, "(sendPacket):", err)
 			}
@@ -268,16 +269,16 @@ func (ob *Sender) collectConfirmations() {
 		_ = logError(0xE8EA91, ":", ENilReceiver)
 		return
 	}
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		_ = logError(0xE44C4A, err)
 		return
 	}
-	encryptedReply := make([]byte, Config.PacketSizeLimit)
+	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
 	for {
 		// 'encryptedReply' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(ob.conn, encryptedReply, Config.ReplyTimeout)
+			readFromUDPConn(ob.conn, encryptedReply, ob.Config.ReplyTimeout)
 		if err != nil {
 			if strings.Contains(err.Error(), "closed network connection") {
 				return
@@ -289,20 +290,20 @@ func (ob *Sender) collectConfirmations() {
 			_ = logError(0xE4CB0B, ": received no data")
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
+		recv, err := aesDecrypt(encryptedReply[:nRead], ob.Config.AESKey)
 		if err != nil {
 			_ = logError(0xE5C43E, "(aesDecrypt):", err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
 			_ = logError(0xE5AF24, ": bad reply header")
-			if Config.VerboseSender {
+			if ob.Config.VerboseSender {
 				logInfo("ERROR received:", len(recv), "bytes")
 			}
 			continue
 		}
 		confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
-		if Config.VerboseSender {
+		if ob.Config.VerboseSender {
 			logInfo("Sender received", nRead, "bytes from", addr)
 		}
 		go func(confirmedHash []byte) {
@@ -327,7 +328,7 @@ func (ob *Sender) waitForAllConfirmations() {
 		_ = logError(0xE2A34E, ":", ENilReceiver)
 		return
 	}
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		_ = logError(0xE4B72B, err)
 		return
@@ -339,13 +340,13 @@ func (ob *Sender) waitForAllConfirmations() {
 		time.Sleep(50 * time.Millisecond)
 		ok := ob.deliveredAllParts()
 		if ok {
-			if Config.VerboseSender {
+			if ob.Config.VerboseSender {
 				logInfo("Delivered all packets")
 			}
 			break
 		}
 		since := time.Since(t0)
-		if since >= Config.ReplyTimeout {
+		if since >= ob.Config.ReplyTimeout {
 			logInfo("Config.ReplyTimeout exceeded",
 				fmt.Sprintf("%0.1f", since.Seconds()))
 			break
@@ -360,7 +361,7 @@ func (ob *Sender) waitForAllConfirmations() {
 			ob.info.packsLost++
 		}
 	}
-	if Config.VerboseSender {
+	if ob.Config.VerboseSender {
 		logInfo("Waited:", time.Since(t0))
 	}
 } //                                                     waitForAllConfirmations
@@ -385,7 +386,7 @@ func (ob *Sender) close() error {
 // bytes. This depends on the setting of Config.PacketPayloadSize.
 //
 func (ob *Sender) getPacketCount(length int) int {
-	err := Config.Validate()
+	err := ob.Config.Validate()
 	if err != nil {
 		_ = logError(0xEC866E, err)
 		return 0
@@ -393,8 +394,8 @@ func (ob *Sender) getPacketCount(length int) int {
 	if length < 1 {
 		return 0
 	}
-	count := length / Config.PacketPayloadSize
-	if (count * Config.PacketPayloadSize) < length {
+	count := length / ob.Config.PacketPayloadSize
+	if (count * ob.Config.PacketPayloadSize) < length {
 		count++
 	}
 	return count
@@ -402,9 +403,9 @@ func (ob *Sender) getPacketCount(length int) int {
 
 // makePacket _ _
 func (ob *Sender) makePacket(data []byte) (*Packet, error) {
-	if len(data) > Config.PacketSizeLimit {
+	if len(data) > ob.Config.PacketSizeLimit {
 		return nil, logError(0xE71F9B, "len(data)", len(data),
-			"> Config.PacketSizeLimit", Config.PacketSizeLimit)
+			"> Config.PacketSizeLimit", ob.Config.PacketSizeLimit)
 	}
 	packet := Packet{
 		data:     data,

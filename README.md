@@ -89,7 +89,7 @@ func main() {
     //
     time.Sleep(1 * time.Second)
     prt("Sending a message")
-    sender := udpt.Sender{}
+    sender := udpt.Sender{Config: udpt.Config}
     err := sender.Send("demo_data", []byte("Hello World!"))
     if err != nil {
         prt("Failed sending:", err)
