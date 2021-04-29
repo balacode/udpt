@@ -81,20 +81,20 @@ func logInfo(args ...interface{}) {
 // and writes to the log file immediately
 func logOutput(msg string) {
 	fmt.Println(msg)
-	file, err := os.OpenFile( // -> (*os.File, error)
-		LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err == nil {
-		file.WriteString(msg + "\n")
-		n, err := file.WriteString(msg + "\n")
-		if n == 0 || err != nil {
-			_ = logError(0xE81F3D, "Failed writing", LogFile, ":", err)
-		}
-		err = file.Close()
-		if err != nil {
-			_ = logError(0xE2EC72, "Failed closing", LogFile, ":", err)
-		}
-	} else {
-		_ = logError(0xE5CB4B, "Opening file", LogFile, ":", err)
+	//
+	const mode = os.O_CREATE | os.O_APPEND | os.O_WRONLY
+	file, err := os.OpenFile(LogFile, mode, 0644) // -> (*os.File, error)
+	if err != nil {
+		_ = logError(0xE5CB4B, "Failed opening", LogFile, ":", err)
+		return
+	}
+	n, err := file.WriteString(msg + "\n")
+	if n == 0 || err != nil {
+		_ = logError(0xE81F3D, "Failed writing", LogFile, ":", err)
+	}
+	err = file.Close()
+	if err != nil {
+		_ = logError(0xE2EC72, "Failed closing", LogFile, ":", err)
 	}
 } //                                                                   logOutput
 
