@@ -10,6 +10,7 @@ package udpt
 //
 // # Public Methods
 //   ) Send(name string, data []byte) error
+//   ) SendString(name string, s string) error
 //
 // # Internal Lifecycle Methods (ob *Sender)
 //   ) requestDataItemHash(name string) []byte
@@ -156,6 +157,13 @@ func (ob *Sender) Send(name string, data []byte) error {
 	ob.printInfo()
 	return nil
 } //                                                                        Send
+
+// SendString sends (transfers) string 's' to the Receiver
+// specified by Config.Address and Config.Port.
+//
+func (ob *Sender) SendString(name string, s string) error {
+	return ob.Send(name, []byte(s))
+} //                                                                  SendString
 
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (ob *Sender)

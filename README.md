@@ -24,7 +24,7 @@ Compresses, encrypts and transfers data between a sender and receiver using UDP 
 ## Hello World:
 
 This demo runs a receiver using RunReceiver() which listens for incoming data,
-then sends a "Hello World" to the receiver using Send().
+then sends a "Hello World" to the receiver using Sender.SendString().
 
 ```go
 package main
@@ -90,7 +90,7 @@ func main() {
     time.Sleep(1 * time.Second)
     prt("Sending a message")
     sender := udpt.Sender{Config: udpt.Config}
-    err := sender.Send("demo_data", []byte("Hello World!"))
+    err := sender.SendString("demo_data", "Hello World!")
     if err != nil {
         prt("Failed sending:", err)
     }
