@@ -19,18 +19,18 @@ import (
 type Receiver struct {
 	currentDataItem DataItem
 	receiveData     func(name string, data []byte) error
-	readDataFn      func(name string) ([]byte, error)
+	provideData     func(name string) ([]byte, error)
 } //                                                                    Receiver
 
 // RunReceiver starts a goroutine that runs the receiver in an infinite loop.
 func RunReceiver(
 	receiveData func(name string, data []byte) error,
-	readDataFn func(name string) ([]byte, error),
+	provideData func(name string) ([]byte, error),
 ) {
 	go func() {
 		receiver := Receiver{
 			receiveData: receiveData,
-			readDataFn:  readDataFn,
+			provideData: provideData,
 		}
 		err := receiver.run()
 		if err != nil {
@@ -225,13 +225,13 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if !bytes.HasPrefix(req, []byte(DATA_ITEM_HASH)) {
 		return nil, logError(0xE7B653, ": missing header")
 	}
-	if ob.readDataFn == nil {
-		return nil, logError(0xE73A1C, "readDataFn is nil")
+	if ob.provideData == nil {
+		return nil, logError(0xE73A1C, "provideData is nil")
 	}
 	name := string(req[len(DATA_ITEM_HASH):])
-	data, err := ob.readDataFn(name)
+	data, err := ob.provideData(name)
 	if err != nil {
-		return nil, logError(0xE7F7C9, "(readDataFn):", err)
+		return nil, logError(0xE7F7C9, "(provideData):", err)
 	}
 	hash := getHash(data)
 	reply := []byte(DATA_ITEM_HASH + fmt.Sprintf("%X", hash))

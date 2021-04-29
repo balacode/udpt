@@ -53,15 +53,15 @@ func main() {
 		prt(div)
 		return nil
 	}
-	// read is the function used to read back the data previously
+	// provideData is the function used to read back the data previously
 	// received by the receiver. This data is never sent back to the
 	// sender. It is only used to generate a hash that is sent to
 	// the sender only to confirm that a data item has been sent.
-	read := func(name string) ([]byte, error) {
-		prt("Receiver's read()")
+	provideData := func(name string) ([]byte, error) {
+		prt("Receiver's provideData()")
 		return nil, nil
 	}
-	udpt.RunReceiver(receiveData, read)
+	udpt.RunReceiver(receiveData, provideData)
 	//
 	time.Sleep(1 * time.Second)
 	prt("Sending a message")
