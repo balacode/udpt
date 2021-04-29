@@ -11,7 +11,8 @@ package udpt
 // # Public Methods
 //   Send(name string, data []byte) error
 //
-// # Methods (ob *Sender)
+// # Internal Methods (ob *Sender)
+//   ) requestDataItemHash(name string) []byte
 //   ) connect() error
 //   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
@@ -86,7 +87,8 @@ func Send(name string, data []byte) error { // TODO: change to method
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
 				name, len(data), hash))
 	}
-	remoteHash := requestDataItemHash(name)
+	var sender Sender
+	remoteHash := sender.requestDataItemHash(name)
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
@@ -95,7 +97,7 @@ func Send(name string, data []byte) error { // TODO: change to method
 		return logError(0xE2A7C3, "(compress):", err)
 	}
 	packetCount := getPacketCount(len(compressed))
-	sender := Sender{
+	sender = Sender{
 		dataHash:  getHash(data),
 		startTime: time.Now(),
 		packets:   make([]Packet, packetCount),
@@ -148,7 +150,7 @@ func Send(name string, data []byte) error { // TODO: change to method
 	if !sender.deliveredAllParts() {
 		return logError(0xE1C3A7, ": undelivered packets")
 	}
-	remoteHash = requestDataItemHash(name)
+	remoteHash = sender.requestDataItemHash(name)
 	if !bytes.Equal(hash, remoteHash) {
 		return logError(0xE1F101, ": hash mismatch")
 	}
@@ -157,12 +159,12 @@ func Send(name string, data []byte) error { // TODO: change to method
 } //                                                                        Send
 
 // -----------------------------------------------------------------------------
-// # Methods (ob *Sender)
+// # Internal Methods (ob *Sender)
 
 // requestDataItemHash requests and waits for the listening receiver
 // to return the hash of the data item named by 'name'. If the receiver
 // can locate the data item, returns its hash, otherwise returns nil.
-func requestDataItemHash(name string) []byte {
+func (ob *Sender) requestDataItemHash(name string) []byte {
 	err := Config.Validate()
 	if err != nil {
 		_ = logError(0xE5BC2E, err)
