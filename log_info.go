@@ -85,7 +85,14 @@ func logOutput(msg string) {
 		LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err == nil {
 		file.WriteString(msg + "\n")
-		file.Close()
+		n, err := file.WriteString(msg + "\n")
+		if n == 0 || err != nil {
+			_ = logError(0xE81F3D, "Failed writing", LogFile, ":", err)
+		}
+		err = file.Close()
+		if err != nil {
+			_ = logError(0xE2EC72, "Failed closing", LogFile, ":", err)
+		}
 	} else {
 		_ = logError(0xE5CB4B, "Opening file", LogFile, ":", err)
 	}

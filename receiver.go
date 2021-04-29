@@ -32,7 +32,10 @@ func RunReceiver(
 			writeDataFn: writeDataFn,
 			readDataFn:  readDataFn,
 		}
-		receiver.run()
+		err := receiver.run()
+		if err != nil {
+			_ = logError(0xE0A4AC, err)
+		}
 	}()
 } //                                                                 RunReceiver
 

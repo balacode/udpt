@@ -187,7 +187,10 @@ func (ob *udpSender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			sendPacket(packet, ob.conn)
+			err := sendPacket(packet, ob.conn)
+			if err != nil {
+				_ = logError(0xE67BA4, "(sendPacket):", err)
+			}
 			ob.wg.Done()
 		}()
 	}

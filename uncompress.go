@@ -20,7 +20,10 @@ func uncompress(compressedData []byte) ([]byte, error) {
 		return nil, logError(0xE54F4B, "(NewReader):", err)
 	}
 	buf := bytes.NewBuffer(nil)
-	io.Copy(buf, reader)
+	_, err = io.Copy(buf, reader)
+	if err != nil {
+		return nil, logError(0xE6A29D, "(Copy):", err)
+	}
 	err = reader.Close()
 	if err != nil {
 		return nil, logError(0xE45AF8, "(Close):", err)

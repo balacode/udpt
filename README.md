@@ -89,8 +89,10 @@ func main() {
     //
     time.Sleep(1 * time.Second)
     prt("Sending a message")
-    udpt.Send("demo_data", []byte("Hello World!"))
-    //
+    err := udpt.Send("demo_data", []byte("Hello World!"))
+    if err != nil {
+        prt("Failed sending:", err)
+    }
     wait := 30 * time.Second
     prt("Waiting", wait, "before exiting")
     time.Sleep(wait)
