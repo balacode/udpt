@@ -84,28 +84,6 @@ type ConfigStruct struct {
 	VerboseSender bool
 } //                                                                ConfigStruct
 
-// Config contains global configuration settings.
-var Config = ConfigStruct{
-
-	// Main:
-	Address: "127.0.0.1",
-	Port:    0,
-	AESKey:  []byte{},
-
-	// Limits:
-	PacketSizeLimit:   1450,
-	PacketPayloadSize: 1024,
-
-	// Timeouts:
-	ReplyTimeout: 15 * time.Second,
-	SendRetries:  10,
-	WriteTimeout: 15 * time.Second,
-
-	// Logging:
-	VerboseReceiver: false,
-	VerboseSender:   false,
-} //                                                                      Config
-
 // Validate checks the configuration to make sure all required fields like
 // Address, Port and AESKey have been specified and are consistent.
 //
