@@ -24,34 +24,23 @@ type Receiver struct {
 	currentDataItem DataItem
 } //                                                                    Receiver
 
-// RunReceiver starts a goroutine that runs the receiver in an infinite loop.
-func RunReceiver(
-	receiveData func(name string, data []byte) error,
-	provideData func(name string) ([]byte, error),
-) {
-	go func() {
-		receiver := Receiver{
-			ReceiveData: receiveData,
-			ProvideData: provideData,
-		}
-		err := receiver.run()
-		if err != nil {
-			_ = logError(0xE0A4AC, err)
-		}
-	}()
-} //                                                                 RunReceiver
-
 // -----------------------------------------------------------------------------
-// # Main Loop
+// # Public Methods
 
-// run _ _
-func (ob *Receiver) run() error {
+// Run starts a goroutine that runs the receiver in an infinite loop.
+func (ob *Receiver) Run() error {
 	if ob == nil {
 		return logError(0xE1C1A9, ":", ENilReceiver)
 	}
 	err := ob.Config.Validate()
 	if err != nil {
 		return logError(0xE14BC8, err)
+	}
+	if ob.ReceiveData == nil {
+		return logError(0xE82C9E, ": ReceiveData func. is nil.")
+	}
+	if ob.ProvideData == nil {
+		return logError(0xE4E2C1, ": ProvideData func. is nil.")
 	}
 	if ob.Config.VerboseReceiver {
 		logInfo(strings.Repeat("-", 80))
@@ -73,7 +62,7 @@ func (ob *Receiver) run() error {
 		}
 	}()
 	if ob.Config.VerboseReceiver {
-		logInfo("Receiver.run() called net.ListenUDP")
+		logInfo("Receiver.Run() called net.ListenUDP")
 	}
 	encryptedReq := make([]byte, ob.Config.PacketSizeLimit)
 	for {
@@ -135,7 +124,7 @@ func (ob *Receiver) run() error {
 			logInfo("Receiver wrote", nWrit, "bytes to", addr)
 		}
 	}
-} //                                                                         run
+} //                                                                         Run
 
 // -----------------------------------------------------------------------------
 // # Handler Methods
