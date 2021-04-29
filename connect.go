@@ -6,23 +6,12 @@
 package udpt
 
 import (
-	"fmt"
 	"net"
-	"strings"
 )
 
-/// add Address and Port args
-// connect connects to the Receiver specified
-// by Config.Address and Config.Port
-func connect() (*net.UDPConn, error) {
-	err := Config.Validate()
-	if err != nil {
-		return nil, logError(0xE5D78C, err)
-	}
-	addr := fmt.Sprintf("%s:%d",
-		strings.TrimSpace(Config.Address), Config.Port,
-	)
-	raddr, err := net.ResolveUDPAddr("udp", addr)
+// connect connects to the Receiver specified by address
+func connect(address string) (*net.UDPConn, error) {
+	raddr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
 		return nil, logError(0xEC7C6B, "(ResolveUDPAddr):", err)
 	}

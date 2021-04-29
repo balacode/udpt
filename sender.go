@@ -162,7 +162,8 @@ func requestDataItemHash(name string) []byte {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	conn, err := connect()
+	addr := fmt.Sprintf("%s:%d", Config.Address, Config.Port)
+	conn, err := connect(addr)
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
 		return nil
@@ -214,7 +215,8 @@ func (ob *udpSender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
 	}
-	conn, err := connect()
+	addr := fmt.Sprintf("%s:%d", Config.Address, Config.Port)
+	conn, err := connect(addr)
 	if err != nil {
 		ob.conn = nil
 		return logError(0xE95B4D, "(connect):", err)
