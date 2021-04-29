@@ -5,12 +5,13 @@
 
 package udpt
 
-// Send(name string, data []byte) error
+// # Sender Class
+//   Sender struct
 //
-// # udpSender Helper Type
-//   udpSender struct
+// # Public Methods
+//   Send(name string, data []byte) error
 //
-// # Methods (ob *udpSender)
+// # Methods (ob *Sender)
 //   ) connect() error
 //   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
@@ -53,10 +54,28 @@ type udpInfo struct {
 // These statistics are accumulated after every call to Send.
 var udpTotal udpInfo
 
+// -----------------------------------------------------------------------------
+// # Sender Class
+
+// Sender is an internal class that coordinates sending
+// a sequence of bytes to a listening Receiver.
+//
+type Sender struct {
+	dataHash  []byte
+	startTime time.Time
+	packets   []Packet
+	conn      *net.UDPConn
+	wg        sync.WaitGroup
+	info      udpInfo
+} //                                                                      Sender
+
+// -----------------------------------------------------------------------------
+// # Public Methods
+
 // Send sends (transfers) a sequence of bytes ('data') to the
 // Receiver specified by Config.Address and Config.Port.
 //
-func Send(name string, data []byte) error {
+func Send(name string, data []byte) error { // TODO: change to method
 	err := Config.Validate()
 	if err != nil {
 		return logError(0xE5D92D, err)
@@ -76,7 +95,7 @@ func Send(name string, data []byte) error {
 		return logError(0xE2A7C3, "(compress):", err)
 	}
 	packetCount := getPacketCount(len(compressed))
-	sender := udpSender{
+	sender := Sender{
 		dataHash:  getHash(data),
 		startTime: time.Now(),
 		packets:   make([]Packet, packetCount),
@@ -136,22 +155,7 @@ func Send(name string, data []byte) error {
 } //                                                                        Send
 
 // -----------------------------------------------------------------------------
-// # udpSender Helper Type
-
-// udpSender is an internal class that coordinates sending
-// a sequence of bytes to a listening Receiver.
-//
-type udpSender struct {
-	dataHash  []byte
-	startTime time.Time
-	packets   []Packet
-	conn      *net.UDPConn
-	wg        sync.WaitGroup
-	info      udpInfo
-} //                                                                   udpSender
-
-// -----------------------------------------------------------------------------
-// # Methods (ob *udpSender)
+// # Methods (ob *Sender)
 
 // requestDataItemHash requests and waits for the listening receiver
 // to return the hash of the data item named by 'name'. If the receiver
@@ -212,7 +216,7 @@ func requestDataItemHash(name string) []byte {
 // connect connects to the Receiver specified
 // by Config.Address and Config.Port
 //
-func (ob *udpSender) connect() error {
+func (ob *Sender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
 	}
@@ -228,7 +232,7 @@ func (ob *udpSender) connect() error {
 
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
-func (ob *udpSender) sendUndeliveredPackets() error {
+func (ob *Sender) sendUndeliveredPackets() error {
 	if ob == nil {
 		return logError(0xE8DB3F, ":", ENilReceiver)
 	}
@@ -257,7 +261,7 @@ func (ob *udpSender) sendUndeliveredPackets() error {
 
 // collectConfirmations enters a loop that receives confirmation packets
 // from the sender, and marks all confirmed packets as delivered.
-func (ob *udpSender) collectConfirmations() {
+func (ob *Sender) collectConfirmations() {
 	if ob == nil {
 		_ = logError(0xE8EA91, ":", ENilReceiver)
 		return
@@ -297,7 +301,7 @@ func (ob *udpSender) collectConfirmations() {
 		}
 		confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
 		if Config.VerboseSender {
-			logInfo("udpSender received", nRead, "bytes from", addr)
+			logInfo("Sender received", nRead, "bytes from", addr)
 		}
 		go func(confirmedHash []byte) {
 			for i, packet := range ob.packets {
@@ -316,7 +320,7 @@ func (ob *udpSender) collectConfirmations() {
 // guaranteed, some confirmations may not be received. This method
 // will only wait for the duration specified in Config.ReplyTimeout
 //
-func (ob *udpSender) waitForAllConfirmations() {
+func (ob *Sender) waitForAllConfirmations() {
 	if ob == nil {
 		_ = logError(0xE2A34E, ":", ENilReceiver)
 		return
@@ -360,7 +364,7 @@ func (ob *udpSender) waitForAllConfirmations() {
 } //                                                     waitForAllConfirmations
 
 // close closes the UDP connection.
-func (ob *udpSender) close() error {
+func (ob *Sender) close() error {
 	if ob == nil {
 		return logError(0xE0561D, ":", ENilReceiver)
 	}
@@ -377,7 +381,7 @@ func (ob *udpSender) close() error {
 
 // averageResponseMs is the average response time, in milliseconds,
 // between a packet being sent and a confirmation being received.
-func (ob *udpSender) averageResponseMs() float64 {
+func (ob *Sender) averageResponseMs() float64 {
 	if ob == nil {
 		_ = logError(0xE1B78F, ":", ENilReceiver)
 		return 0.0
@@ -397,7 +401,7 @@ func (ob *udpSender) averageResponseMs() float64 {
 // data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
 //
-func (ob *udpSender) deliveredAllParts() bool {
+func (ob *Sender) deliveredAllParts() bool {
 	if ob == nil {
 		_ = logError(0xE52E72, ":", ENilReceiver)
 		return false
@@ -414,7 +418,7 @@ func (ob *udpSender) deliveredAllParts() bool {
 
 // transferSpeedKBpS returns the transfer speed of the current Send
 // operation, in Kilobytes (more accurately, Kibibytes) per Second.
-func (ob *udpSender) transferSpeedKBpS() float64 {
+func (ob *Sender) transferSpeedKBpS() float64 {
 	if ob == nil {
 		_ = logError(0xE6C59B, ":", ENilReceiver)
 		return 0.0
@@ -431,7 +435,7 @@ func (ob *udpSender) transferSpeedKBpS() float64 {
 // # Information Methods
 
 // printInfo prints the UDP transfer statistics to the standard output.
-func (ob *udpSender) printInfo() {
+func (ob *Sender) printInfo() {
 	if ob == nil {
 		_ = logError(0xE483B1, ":", ENilReceiver)
 		return
@@ -480,7 +484,7 @@ func (ob *udpSender) printInfo() {
 
 // updateInfo updates the global UDP transfer statistics
 // with the statistics of the current Send operation.
-func (ob *udpSender) updateInfo() {
+func (ob *Sender) updateInfo() {
 	if ob == nil {
 		_ = logError(0xED48D1, ":", ENilReceiver)
 		return
