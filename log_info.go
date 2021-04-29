@@ -87,7 +87,7 @@ func logOutput(msg string) {
 		file.WriteString(msg + "\n")
 		file.Close()
 	} else {
-		logError(0xE5CB4B, "Opening file", LogFile, ":", err)
+		_ = logError(0xE5CB4B, "Opening file", LogFile, ":", err)
 	}
 } //                                                                   logOutput
 

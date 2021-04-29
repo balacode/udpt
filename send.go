@@ -107,7 +107,7 @@ func Send(name string, data []byte) error {
 			defer func() {
 				err := sender.close()
 				if err != nil {
-					logError(0xE71C7A, "(close):", err)
+					_ = logError(0xE71C7A, "(close):", err)
 				}
 			}()
 			return logError(0xE23CE0, "(sendUndeliveredPackets):", err)
@@ -198,12 +198,12 @@ func (ob *udpSender) sendUndeliveredPackets() error {
 // from the sender, and marks all confirmed packets as delivered.
 func (ob *udpSender) collectConfirmations() {
 	if ob == nil {
-		logError(0xE8EA91, ":", ENilReceiver)
+		_ = logError(0xE8EA91, ":", ENilReceiver)
 		return
 	}
 	err := Config.Validate()
 	if err != nil {
-		logError(0xE44C4A, err)
+		_ = logError(0xE44C4A, err)
 		return
 	}
 	encryptedReply := make([]byte, Config.PacketSizeLimit)
@@ -214,20 +214,20 @@ func (ob *udpSender) collectConfirmations() {
 			if strings.Contains(err.Error(), "closed network connection") {
 				return
 			}
-			logError(0xE7B6B2, "(ReadFrom):", err)
+			_ = logError(0xE7B6B2, "(ReadFrom):", err)
 			continue
 		}
 		if nRead == 0 {
-			logError(0xE4CB0B, ": received no data")
+			_ = logError(0xE4CB0B, ": received no data")
 			continue
 		}
 		recv, err := aesDecrypt(encryptedReply[:nRead], Config.AESKey)
 		if err != nil {
-			logError(0xE5C43E, "(aesDecrypt):", err)
+			_ = logError(0xE5C43E, "(aesDecrypt):", err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
-			logError(0xE5AF24, ": bad reply header")
+			_ = logError(0xE5AF24, ": bad reply header")
 			if Config.VerboseSender {
 				logInfo("ERROR received:", len(recv), "bytes")
 			}
@@ -256,12 +256,12 @@ func (ob *udpSender) collectConfirmations() {
 //
 func (ob *udpSender) waitForAllConfirmations() {
 	if ob == nil {
-		logError(0xE2A34E, ":", ENilReceiver)
+		_ = logError(0xE2A34E, ":", ENilReceiver)
 		return
 	}
 	err := Config.Validate()
 	if err != nil {
-		logError(0xE4B72B, err)
+		_ = logError(0xE4B72B, err)
 		return
 	}
 	logInfo("Waiting . . .")
@@ -317,7 +317,7 @@ func (ob *udpSender) close() error {
 // between a packet being sent and a confirmation being received.
 func (ob *udpSender) averageResponseMs() float64 {
 	if ob == nil {
-		logError(0xE1B78F, ":", ENilReceiver)
+		_ = logError(0xE1B78F, ":", ENilReceiver)
 		return 0.0
 	}
 	if ob.info.packetsDelivered == 0 {
@@ -337,7 +337,7 @@ func (ob *udpSender) averageResponseMs() float64 {
 //
 func (ob *udpSender) deliveredAllParts() bool {
 	if ob == nil {
-		logError(0xE52E72, ":", ENilReceiver)
+		_ = logError(0xE52E72, ":", ENilReceiver)
 		return false
 	}
 	ret := true
@@ -354,7 +354,7 @@ func (ob *udpSender) deliveredAllParts() bool {
 // operation, in Kilobytes (more accurately, Kibibytes) per Second.
 func (ob *udpSender) transferSpeedKBpS() float64 {
 	if ob == nil {
-		logError(0xE6C59B, ":", ENilReceiver)
+		_ = logError(0xE6C59B, ":", ENilReceiver)
 		return 0.0
 	}
 	if ob.info.transferTime < 1 {
@@ -371,7 +371,7 @@ func (ob *udpSender) transferSpeedKBpS() float64 {
 // printInfo prints the UDP transfer statistics to the standard output.
 func (ob *udpSender) printInfo() {
 	if ob == nil {
-		logError(0xE483B1, ":", ENilReceiver)
+		_ = logError(0xE483B1, ":", ENilReceiver)
 		return
 	}
 	tItem := time.Duration(0)
@@ -420,7 +420,7 @@ func (ob *udpSender) printInfo() {
 // with the statistics of the current Send operation.
 func (ob *udpSender) updateInfo() {
 	if ob == nil {
-		logError(0xED48D1, ":", ENilReceiver)
+		_ = logError(0xED48D1, ":", ENilReceiver)
 		return
 	}
 	ob.info.transferTime = time.Since(ob.startTime)
@@ -454,7 +454,7 @@ func (ob *udpSender) updateInfo() {
 func getPacketCount(length int) int {
 	err := Config.Validate()
 	if err != nil {
-		logError(0xEC866E, err)
+		_ = logError(0xEC866E, err)
 		return 0
 	}
 	if length < 1 {

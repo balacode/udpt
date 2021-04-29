@@ -20,7 +20,7 @@ func compress(data []byte) ([]byte, error) {
 		defer func() {
 			err := wr.Close()
 			if err != nil {
-				logError(0xE0A6F2, "(Close):", err)
+				_ = logError(0xE0A6F2, "(Close):", err)
 			}
 		}()
 		return nil, logError(0xE5F7D3, "(Write):", err)

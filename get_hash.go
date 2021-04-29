@@ -14,13 +14,13 @@ func getHash(data []byte) []byte {
 	sha := sha256.New()
 	n, err := sha.Write(data)
 	if n != len(data) || err != nil {
-		logError(0xE3A9B8, "(Write):", err)
+		_ = logError(0xE3A9B8, "(Write):", err)
 		logInfo("n:", n, "len(data):", len(data))
 		return nil
 	}
 	ret := sha.Sum(nil)
 	if len(ret) != 32 {
-		logError(0xE4D3E1, "(sha.Sum)")
+		_ = logError(0xE4D3E1, "(sha.Sum)")
 		return nil
 	}
 	return ret
