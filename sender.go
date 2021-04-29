@@ -20,6 +20,7 @@ package udpt
 //   ) close() error
 //
 // # Internal Helper Methods (ob *Sender)
+//   ) getPacketCount(length int) int
 //   ) makePacket(data []byte) (*Packet, error)
 //
 // # Information Properties
@@ -29,9 +30,6 @@ package udpt
 //
 // # Information Methods
 //   ) printInfo()
-//
-// # Functions
-//   getPacketCount(length int) int
 
 import (
 	"bytes"
@@ -99,7 +97,7 @@ func Send(name string, data []byte) error { // TODO: change to method
 	if err != nil {
 		return logError(0xE2A7C3, "(compress):", err)
 	}
-	packetCount := getPacketCount(len(compressed))
+	packetCount := sender.getPacketCount(len(compressed))
 	sender = Sender{
 		dataHash:  getHash(data),
 		startTime: time.Now(),
@@ -386,6 +384,25 @@ func (ob *Sender) close() error {
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (ob *Sender)
 
+// getPacketCount calculates the number of packets needed to send 'length'
+// bytes. This depends on the setting of Config.PacketPayloadSize.
+//
+func (ob *Sender) getPacketCount(length int) int {
+	err := Config.Validate()
+	if err != nil {
+		_ = logError(0xEC866E, err)
+		return 0
+	}
+	if length < 1 {
+		return 0
+	}
+	count := length / Config.PacketPayloadSize
+	if (count * Config.PacketPayloadSize) < length {
+		count++
+	}
+	return count
+} //                                                              getPacketCount
+
 // makePacket _ _
 func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 	if len(data) > Config.PacketSizeLimit {
@@ -535,27 +552,5 @@ func (ob *Sender) updateInfo() {
 	}
 	udpTotal.transferSpeedKBpS = n
 } //                                                                  updateInfo
-
-// -----------------------------------------------------------------------------
-// # Functions
-
-// getPacketCount calculates the number of packets needed to send 'length'
-// bytes. This depends on the setting of Config.PacketPayloadSize.
-//
-func getPacketCount(length int) int {
-	err := Config.Validate()
-	if err != nil {
-		_ = logError(0xEC866E, err)
-		return 0
-	}
-	if length < 1 {
-		return 0
-	}
-	count := length / Config.PacketPayloadSize
-	if (count * Config.PacketPayloadSize) < length {
-		count++
-	}
-	return count
-} //                                                              getPacketCount
 
 // end
