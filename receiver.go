@@ -17,9 +17,10 @@ import (
 
 // Receiver _ _
 type Receiver struct {
+	ReceiveData func(name string, data []byte) error
+	ProvideData func(name string) ([]byte, error)
+	//
 	currentDataItem DataItem
-	receiveData     func(name string, data []byte) error
-	provideData     func(name string) ([]byte, error)
 } //                                                                    Receiver
 
 // RunReceiver starts a goroutine that runs the receiver in an infinite loop.
@@ -29,8 +30,8 @@ func RunReceiver(
 ) {
 	go func() {
 		receiver := Receiver{
-			receiveData: receiveData,
-			provideData: provideData,
+			ReceiveData: receiveData,
+			ProvideData: provideData,
 		}
 		err := receiver.run()
 		if err != nil {
@@ -195,16 +196,16 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		return nil, logError(0xE981DA, ": unknown packet change")
 	}
 	if it.IsLoaded() {
-		if ob.receiveData == nil {
-			return nil, logError(0xE49E2A, "receiveData is nil")
+		if ob.ReceiveData == nil {
+			return nil, logError(0xE49E2A, "ReceiveData is nil")
 		}
 		data, err := it.UnpackBytes()
 		if err != nil {
 			return nil, logError(0xE3DB1D, "(UnpackBytes):", err)
 		}
-		err = ob.receiveData(it.Name, data)
+		err = ob.ReceiveData(it.Name, data)
 		if err != nil {
-			return nil, logError(0xE9BD1B, "(receiveData):", err)
+			return nil, logError(0xE9BD1B, "(ReceiveData):", err)
 		}
 		logInfo("received:", it.Name)
 		if Config.VerboseReceiver {
@@ -225,13 +226,13 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if !bytes.HasPrefix(req, []byte(DATA_ITEM_HASH)) {
 		return nil, logError(0xE7B653, ": missing header")
 	}
-	if ob.provideData == nil {
-		return nil, logError(0xE73A1C, "provideData is nil")
+	if ob.ProvideData == nil {
+		return nil, logError(0xE73A1C, "ProvideData is nil")
 	}
 	name := string(req[len(DATA_ITEM_HASH):])
-	data, err := ob.provideData(name)
+	data, err := ob.ProvideData(name)
 	if err != nil {
-		return nil, logError(0xE7F7C9, "(provideData):", err)
+		return nil, logError(0xE7F7C9, "(ProvideData):", err)
 	}
 	hash := getHash(data)
 	reply := []byte(DATA_ITEM_HASH + fmt.Sprintf("%X", hash))
