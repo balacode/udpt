@@ -18,18 +18,18 @@ import (
 // Receiver _ _
 type Receiver struct {
 	currentDataItem DataItem
-	writeDataFn     func(name string, data []byte) error
+	receiveData     func(name string, data []byte) error
 	readDataFn      func(name string) ([]byte, error)
 } //                                                                    Receiver
 
 // RunReceiver starts a goroutine that runs the receiver in an infinite loop.
 func RunReceiver(
-	writeDataFn func(name string, data []byte) error,
+	receiveData func(name string, data []byte) error,
 	readDataFn func(name string) ([]byte, error),
 ) {
 	go func() {
 		receiver := Receiver{
-			writeDataFn: writeDataFn,
+			receiveData: receiveData,
 			readDataFn:  readDataFn,
 		}
 		err := receiver.run()
@@ -194,16 +194,16 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		return nil, logError(0xE981DA, ": unknown packet change")
 	}
 	if it.IsLoaded() {
-		if ob.writeDataFn == nil {
-			return nil, logError(0xE49E2A, "writeDataFn is nil")
+		if ob.receiveData == nil {
+			return nil, logError(0xE49E2A, "receiveData is nil")
 		}
 		data, err := it.UnpackBytes()
 		if err != nil {
 			return nil, logError(0xE3DB1D, "(UnpackBytes):", err)
 		}
-		err = ob.writeDataFn(it.Name, data)
+		err = ob.receiveData(it.Name, data)
 		if err != nil {
-			return nil, logError(0xE9BD1B, "(writeDataFn):", err)
+			return nil, logError(0xE9BD1B, "(receiveData):", err)
 		}
 		logInfo("received:", it.Name)
 		if Config.VerboseReceiver {

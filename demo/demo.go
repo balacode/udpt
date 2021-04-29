@@ -41,13 +41,13 @@ func main() {
 	//
 	prt("Running the receiver")
 	//
-	// write is the function that receives data sent to the receiver
-	write := func(name string, data []byte) error {
+	// receiveData is the function that receives data sent to the receiver
+	receiveData := func(name string, data []byte) error {
 		div := strings.Repeat("##", 40)
 		prt(div)
 		prt("You should see a 'Hello World!' message below:")
 		prt(div)
-		prt("Receiver's write()")
+		prt("Receiver's receiveData()")
 		prt("Received name:", name)
 		prt("Received data:", string(data))
 		prt(div)
@@ -61,7 +61,7 @@ func main() {
 		prt("Receiver's read()")
 		return nil, nil
 	}
-	udpt.RunReceiver(write, read)
+	udpt.RunReceiver(receiveData, read)
 	//
 	time.Sleep(1 * time.Second)
 	prt("Sending a message")
