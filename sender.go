@@ -9,9 +9,9 @@ package udpt
 //   Sender struct
 //
 // # Public Methods
-//   Send(name string, data []byte) error
+//   ) Send(name string, data []byte) error
 //
-// # Internal Methods (ob *Sender)
+// # Internal Lifecycle Methods (ob *Sender)
 //   ) requestDataItemHash(name string) []byte
 //   ) connect() error
 //   ) sendUndeliveredPackets() error
@@ -77,7 +77,7 @@ type Sender struct {
 // Send sends (transfers) a sequence of bytes ('data') to the
 // Receiver specified by Config.Address and Config.Port.
 //
-func Send(name string, data []byte) error { // TODO: change to method
+func (ob *Sender) Send(name string, data []byte) error {
 	err := Config.Validate()
 	if err != nil {
 		return logError(0xE5D92D, err)
@@ -88,8 +88,7 @@ func Send(name string, data []byte) error { // TODO: change to method
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
 				name, len(data), hash))
 	}
-	var sender Sender
-	remoteHash := sender.requestDataItemHash(name)
+	remoteHash := ob.requestDataItemHash(name)
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
@@ -97,13 +96,11 @@ func Send(name string, data []byte) error { // TODO: change to method
 	if err != nil {
 		return logError(0xE2A7C3, "(compress):", err)
 	}
-	packetCount := sender.getPacketCount(len(compressed))
-	sender = Sender{
-		dataHash:  getHash(data),
-		startTime: time.Now(),
-		packets:   make([]Packet, packetCount),
-	}
-	for i := range sender.packets {
+	packetCount := ob.getPacketCount(len(compressed))
+	ob.dataHash = getHash(data)
+	ob.startTime = time.Now()
+	ob.packets = make([]Packet, packetCount)
+	for i := range ob.packets {
 		a := i * Config.PacketPayloadSize
 		b := a + Config.PacketPayloadSize
 		if b > len(compressed) {
@@ -111,56 +108,56 @@ func Send(name string, data []byte) error { // TODO: change to method
 		}
 		header := FRAGMENT + fmt.Sprintf(
 			"name:%s hash:%X sn:%d count:%d\n",
-			name, sender.dataHash, i+1, packetCount,
+			name, ob.dataHash, i+1, packetCount,
 		)
-		packet, err2 := sender.makePacket(
+		packet, err2 := ob.makePacket(
 			append([]byte(header), compressed[a:b]...),
 		)
 		if err2 != nil {
 			return logError(0xE567A4, "(makePacket):", err2)
 		}
-		sender.packets[i] = *packet
+		ob.packets[i] = *packet
 	}
-	err = sender.connect()
+	err = ob.connect()
 	if err != nil {
 		return logError(0xE8B8D0, "(connect):", err)
 	}
-	go sender.collectConfirmations()
+	go ob.collectConfirmations()
 	for retries := 0; retries < Config.SendRetries; retries++ {
-		err = sender.sendUndeliveredPackets()
+		err = ob.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
-				err2 := sender.close()
+				err2 := ob.close()
 				if err2 != nil {
 					_ = logError(0xE71C7A, "(close):", err2)
 				}
 			}()
 			return logError(0xE23CE0, "(sendUndeliveredPackets):", err)
 		}
-		sender.waitForAllConfirmations()
-		if sender.deliveredAllParts() {
+		ob.waitForAllConfirmations()
+		if ob.deliveredAllParts() {
 			break
 		}
 		time.Sleep(250 * time.Millisecond)
 	}
-	sender.updateInfo()
-	err = sender.close()
+	ob.updateInfo()
+	err = ob.close()
 	if err != nil {
 		return logError(0xE40A05, "(close):", err)
 	}
-	if !sender.deliveredAllParts() {
+	if !ob.deliveredAllParts() {
 		return logError(0xE1C3A7, ": undelivered packets")
 	}
-	remoteHash = sender.requestDataItemHash(name)
+	remoteHash = ob.requestDataItemHash(name)
 	if !bytes.Equal(hash, remoteHash) {
 		return logError(0xE1F101, ": hash mismatch")
 	}
-	sender.printInfo()
+	ob.printInfo()
 	return nil
 } //                                                                        Send
 
 // -----------------------------------------------------------------------------
-// # Internal Methods (ob *Sender)
+// # Internal Lifecycle Methods (ob *Sender)
 
 // requestDataItemHash requests and waits for the listening receiver
 // to return the hash of the data item named by 'name'. If the receiver
