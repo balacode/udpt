@@ -97,6 +97,9 @@ func prt(args ...interface{}) {
 } //                                                                         prt
 ```
 
+## Security Notice:
+This is a new project and its use of cryptography has not been reviewed by experts. While I make use of established crypto algorithms available in the standard Go library and would not "roll my own" encryption, there may be weaknesses in my application of the algorithms. Please use caution and do your own security asessment of the code. At present, this library uses AES-256 in Galois Counter Mode to encrypt each packet of data, including its headers, and SHA-256 for hashing binary resources that are being transferred.
+
 ## Version History:
 This project is in its DRAFT stage: very unstable. At this point it works, but the API may change rapidly.
 
