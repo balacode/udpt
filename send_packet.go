@@ -16,18 +16,21 @@ import (
 // Returns an error if the packet could not be encrypted or sent.
 func sendPacket(
 	packet *Packet,
-	cryptoKey []byte,
+	cipher SymmetricCipher,
 	conn *net.UDPConn,
 ) error {
 	if packet == nil {
 		return logError(0xE1D3B5, ENilReceiver)
 	}
+	if cipher == nil {
+		return logError(0xE54A9D, "nil cipher")
+	}
 	if conn == nil {
 		return logError(0xE4B1BA, ENilReceiver)
 	}
-	encryptedReq, err := aesEncrypt(packet.data, cryptoKey)
+	encryptedReq, err := cipher.Encrypt(packet.data)
 	if err != nil {
-		return logError(0xEB39C3, "(aesEncrypt):", err)
+		return logError(0xEB39C3, "(Encrypt):", err)
 	}
 	packet.sentTime = time.Now()
 	_, err = io.Copy(conn, bytes.NewReader(encryptedReq))
