@@ -17,7 +17,18 @@ import (
 
 // Receiver _ _
 type Receiver struct {
-	Config      ConfigSettings
+	Config ConfigSettings
+
+	// Port is the port number of the listening server.
+	// This number must be between 1 and 65535.
+	Port int
+
+	// AESKey the secret AES encryption key that must be shared
+	// between the sendder (client) and the receiver (server).
+	// This key must be exactly 32 bytes long.
+	// This is the key AES uses for symmetric encryption.
+	AESKey []byte
+
 	ReceiveData func(name string, data []byte) error
 	ProvideData func(name string) ([]byte, error)
 	//
@@ -31,6 +42,13 @@ type Receiver struct {
 func (ob *Receiver) Run() error {
 	if ob == nil {
 		return logError(0xE1C1A9, ":", ENilReceiver)
+	}
+	if ob.Port < 1 || ob.Port > 65535 {
+		return logError(0xE58B2F, "invalid Port:", ob.Port)
+	}
+	if len(ob.AESKey) != 32 {
+		return logError(0xE3A5FF,
+			"AESKey must be 32, but is", len(ob.AESKey), "bytes long")
 	}
 	err := ob.Config.Validate()
 	if err != nil {
@@ -47,7 +65,7 @@ func (ob *Receiver) Run() error {
 		logInfo("UDPT started in receiver mode")
 	}
 	udpAddr, err := net.ResolveUDPAddr("udp",
-		fmt.Sprintf("0.0.0.0:%d", ob.Config.Port))
+		fmt.Sprintf("0.0.0.0:%d", ob.Port))
 	if err != nil {
 		return logError(0xE1D68C, "(ResolveUDPAddr):", err)
 	}
@@ -73,7 +91,7 @@ func (ob *Receiver) Run() error {
 			_ = logError(0xEA288A, "(readFromUDPConn):", err)
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReq[:nRead], ob.Config.AESKey)
+		recv, err := aesDecrypt(encryptedReq[:nRead], ob.AESKey)
 		if err != nil {
 			_ = logError(0xE7D2C4, "(aesDecrypt):", err)
 			continue
@@ -104,7 +122,7 @@ func (ob *Receiver) Run() error {
 			_ = logError(0xE985CC, ": Invalid packet header")
 			reply = []byte("invalid_packet_header")
 		}
-		encryptedReply, err := aesEncrypt(reply, ob.Config.AESKey)
+		encryptedReply, err := aesEncrypt(reply, ob.AESKey)
 		if err != nil {
 			_ = logError(0xE6E8C7, "(aesEncrypt):", err)
 			continue

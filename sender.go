@@ -64,7 +64,22 @@ var udpTotal udpInfo
 // a sequence of bytes to a listening Receiver.
 //
 type Sender struct {
-	Config    ConfigSettings
+	Config ConfigSettings
+
+	// Address is the domain name or IP address of the listening receiver,
+	// excluding the port number.
+	Address string
+
+	// Port is the port number of the listening server.
+	// This number must be between 1 and 65535.
+	Port int
+
+	// AESKey the secret AES encryption key that must be shared
+	// between the sendder (client) and the receiver (server).
+	// This key must be exactly 32 bytes long.
+	// This is the key AES uses for symmetric encryption.
+	AESKey []byte
+
 	dataHash  []byte
 	startTime time.Time
 	packets   []Packet
@@ -77,9 +92,20 @@ type Sender struct {
 // # Public Methods
 
 // Send sends (transfers) a sequence of bytes ('data') to the
-// Receiver specified by Config.Address and Config.Port.
+// Receiver specified by Sender.Address and Sender.Port.
 //
 func (ob *Sender) Send(name string, data []byte) error {
+	//
+	if strings.TrimSpace(ob.Address) == "" {
+		return logError(0xE5A04A, "missing Address")
+	}
+	if ob.Port < 1 || ob.Port > 65535 {
+		return logError(0xE7B72A, "invalid Port:", ob.Port)
+	}
+	if len(ob.AESKey) != 32 {
+		return logError(0xEB8484,
+			"AESKey must be 32, but is", len(ob.AESKey), "bytes long")
+	}
 	err := ob.Config.Validate()
 	if err != nil {
 		return logError(0xE5D92D, err)
@@ -159,7 +185,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 } //                                                                        Send
 
 // SendString sends (transfers) string 's' to the Receiver
-// specified by Config.Address and Config.Port.
+// specified by Sender.Address and Sender.Port.
 //
 func (ob *Sender) SendString(name string, s string) error {
 	return ob.Send(name, []byte(s))
@@ -177,7 +203,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", ob.Config.Address, ob.Config.Port)
+	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
 	conn, err := connect(addr)
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
@@ -188,7 +214,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = sendPacket(packet, ob.Config.AESKey, conn)
+	err = sendPacket(packet, ob.AESKey, conn)
 	if err != nil {
 		_ = logError(0xE7F316, "(sendPacket):", err)
 		return nil
@@ -200,7 +226,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
 	}
-	reply, err := aesDecrypt(encryptedReply[:nRead], ob.Config.AESKey)
+	reply, err := aesDecrypt(encryptedReply[:nRead], ob.AESKey)
 	if err != nil {
 		_ = logError(0xE2B5A1, "(aesDecrypt):", err)
 		return nil
@@ -224,14 +250,12 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	return hash
 } //                                                         requestDataItemHash
 
-// connect connects to the Receiver specified
-// by Config.Address and Config.Port
-//
+// connect connects to the Receiver at Sender.Address and Sender.Port
 func (ob *Sender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
 	}
-	addr := fmt.Sprintf("%s:%d", ob.Config.Address, ob.Config.Port)
+	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
 	conn, err := connect(addr)
 	if err != nil {
 		ob.conn = nil
@@ -260,7 +284,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			err := sendPacket(packet, ob.Config.AESKey, ob.conn)
+			err := sendPacket(packet, ob.AESKey, ob.conn)
 			if err != nil {
 				_ = logError(0xE67BA4, "(sendPacket):", err)
 			}
@@ -298,7 +322,7 @@ func (ob *Sender) collectConfirmations() {
 			_ = logError(0xE4CB0B, ": received no data")
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReply[:nRead], ob.Config.AESKey)
+		recv, err := aesDecrypt(encryptedReply[:nRead], ob.AESKey)
 		if err != nil {
 			_ = logError(0xE5C43E, "(aesDecrypt):", err)
 			continue

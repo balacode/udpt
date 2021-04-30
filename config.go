@@ -6,32 +6,12 @@
 package udpt
 
 import (
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 )
 
-// ConfigSettings contains UDP configuration settings, including
-// the address of the server to which Send() should connect.
+// ConfigSettings contains UDP configuration settings
 type ConfigSettings struct {
-
-	// -------------------------------------------------------------------------
-	// Main:
-
-	// Address is the domain name or IP address of the listening receiver,
-	// excluding the port number.
-	Address string
-
-	// Port is the port number of the listening server.
-	// This number must be between 1 and 65535.
-	Port int
-
-	// AESKey the secret AES encryption key that must be shared
-	// between the sendder (client) and the receiver (server).
-	// This key must be exactly 32 bytes long.
-	// This is the key AES uses for symmetric encryption.
-	AESKey []byte
 
 	// -------------------------------------------------------------------------
 	// Limits:
@@ -88,11 +68,6 @@ type ConfigSettings struct {
 func DefaultConfig() ConfigSettings {
 	return ConfigSettings{
 		//
-		// Main:
-		Address: "127.0.0.1",
-		Port:    0,
-		AESKey:  []byte{},
-		//
 		// Limits:
 		PacketSizeLimit:   1450,
 		PacketPayloadSize: 1024,
@@ -115,19 +90,6 @@ func DefaultConfig() ConfigSettings {
 //
 func (ob *ConfigSettings) Validate() error {
 	//
-	// Main:
-	if strings.TrimSpace(ob.Address) == "" {
-		return errors.New("missing Config.Address")
-	}
-	if ob.Port < 1 || ob.Port > 65535 {
-		return fmt.Errorf("invalid Config.Port: %d", ob.Port)
-	}
-	if len(ob.AESKey) != 32 {
-		return fmt.Errorf(
-			"Config.AESKey must be 32, but is %d bytes long",
-			len(ob.AESKey),
-		)
-	}
 	// Limits:
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
