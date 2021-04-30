@@ -64,7 +64,7 @@ var udpTotal udpInfo
 // a sequence of bytes to a listening Receiver.
 //
 type Sender struct {
-	Config    ConfigStruct
+	Config    ConfigSettings
 	dataHash  []byte
 	startTime time.Time
 	packets   []Packet

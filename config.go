@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-// ConfigStruct contains UDP configuration settings, including
+// ConfigSettings contains UDP configuration settings, including
 // the address of the server to which Send() should connect.
-type ConfigStruct struct {
+type ConfigSettings struct {
 
 	// -------------------------------------------------------------------------
 	// Main:
@@ -82,11 +82,11 @@ type ConfigStruct struct {
 	// VerboseSender specifies if Send() should print
 	// informational messages to the standard output.
 	VerboseSender bool
-} //                                                                ConfigStruct
+} //                                                              ConfigSettings
 
 // DefaultConfig returns default configuration settings.
-func DefaultConfig() ConfigStruct {
-	return ConfigStruct{
+func DefaultConfig() ConfigSettings {
+	return ConfigSettings{
 		//
 		// Main:
 		Address: "127.0.0.1",
@@ -113,7 +113,7 @@ func DefaultConfig() ConfigStruct {
 //
 // Returns nil if there is no problem, or the error code of the erorr.
 //
-func (ob *ConfigStruct) Validate() error {
+func (ob *ConfigSettings) Validate() error {
 	//
 	// Main:
 	if strings.TrimSpace(ob.Address) == "" {

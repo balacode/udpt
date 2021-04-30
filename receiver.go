@@ -17,7 +17,7 @@ import (
 
 // Receiver _ _
 type Receiver struct {
-	Config      ConfigStruct
+	Config      ConfigSettings
 	ReceiveData func(name string, data []byte) error
 	ProvideData func(name string) ([]byte, error)
 	//
