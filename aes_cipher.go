@@ -17,8 +17,8 @@ const errKeySize = "AES-256 key must be 32 bytes long"
 // AESCipher implements the SymmetricCipher interface that encrypts/decrypts
 // plaintext using the AES-256 symmetric cipher algorithm.
 type AESCipher struct {
-	aesKey []byte
-	gcm    cipher.AEAD
+	cryptoKey []byte
+	gcm       cipher.AEAD
 } //                                                                   AESCipher
 
 // ValidateKey checks if 'key' is acceptable for use with the cipher.
@@ -47,14 +47,14 @@ func (ob *AESCipher) InitCipher(key []byte) error {
 	if err != nil {
 		return err
 	}
-	ob.aesKey = key
+	ob.cryptoKey = key
 	return nil
 } //                                                                  InitCipher
 
 // Encrypt encrypts plaintext using the key given to InitCipher and
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
 func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
-	if len(ob.aesKey) != 32 {
+	if len(ob.cryptoKey) != 32 {
 		return nil, logError(0xE64A2E, errKeySize)
 	}
 	// nonce is a byte array filled with cryptographically secure random bytes
@@ -76,7 +76,7 @@ func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 // Decrypt decrypts ciphertext using the key given to InitCipher and
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
 func (ob *AESCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
-	if len(ob.aesKey) != 32 {
+	if len(ob.cryptoKey) != 32 {
 		return nil, logError(0xE35A87, errKeySize)
 	}
 	n := ob.gcm.NonceSize()

@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	// the AES key shared by the sender and receiver: must be 32 bytes log
-	var aesKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
+	// the encryption key shared by the sender and receiver
+	var cryptoKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
 	//
 	// disable log buffering and enable verbose logging: for demos/debugging
 	udpt.LogBufferSize = -1
@@ -26,9 +26,9 @@ func main() {
 	// set-up and run the receiver
 	prt("Running the receiver")
 	receiver := udpt.Receiver{
-		Port:   1234,
-		AESKey: aesKey,
-		Config: cfg,
+		Port:      1234,
+		CryptoKey: cryptoKey,
+		Config:    cfg,
 		//
 		// receives fully-transferred data items sent to the receiver
 		ReceiveData: func(name string, data []byte) error {
@@ -53,10 +53,10 @@ func main() {
 	time.Sleep(1 * time.Second)
 	prt("Sending a message")
 	sender := udpt.Sender{
-		Address: "127.0.0.1",
-		Port:    1234,
-		AESKey:  aesKey,
-		Config:  cfg,
+		Address:   "127.0.0.1",
+		Port:      1234,
+		CryptoKey: cryptoKey,
+		Config:    cfg,
 	}
 	err := sender.SendString("demo_data", "Hello World!")
 	if err != nil {

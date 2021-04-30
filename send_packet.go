@@ -16,7 +16,7 @@ import (
 // Returns an error if the packet could not be encrypted or sent.
 func sendPacket(
 	packet *Packet,
-	aesKey []byte,
+	cryptoKey []byte,
 	conn *net.UDPConn,
 ) error {
 	if packet == nil {
@@ -25,7 +25,7 @@ func sendPacket(
 	if conn == nil {
 		return logError(0xE4B1BA, ENilReceiver)
 	}
-	encryptedReq, err := aesEncrypt(packet.data, aesKey)
+	encryptedReq, err := aesEncrypt(packet.data, cryptoKey)
 	if err != nil {
 		return logError(0xEB39C3, "(aesEncrypt):", err)
 	}

@@ -73,11 +73,11 @@ type Sender struct {
 	// This number must be between 1 and 65535.
 	Port int
 
-	// AESKey the secret AES encryption key that must be shared
-	// between the sendder (client) and the receiver (server).
-	// This key must be exactly 32 bytes long.
-	// This is the key AES uses for symmetric encryption.
-	AESKey []byte
+	// CryptoKey is the secret symmetric encryption key that
+	// must be shared between the sender and the receiver.
+	// The correct size of this key depends
+	// on the implementation of SymmetricCipher.
+	CryptoKey []byte
 
 	// Config _ _
 	Config ConfigSettings
@@ -115,9 +115,9 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if ob.Port < 1 || ob.Port > 65535 {
 		return logError(0xE7B72A, "invalid Port:", ob.Port)
 	}
-	if len(ob.AESKey) != 32 {
-		return logError(0xEB8484,
-			"AESKey must be 32, but is", len(ob.AESKey), "bytes long")
+	if len(ob.CryptoKey) != 32 {
+		return logError(0xEB8484, "CryptoKey must be 32, but is",
+			len(ob.CryptoKey), "bytes long")
 	}
 	err := ob.Config.Validate()
 	if err != nil {
@@ -227,7 +227,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = sendPacket(packet, ob.AESKey, conn)
+	err = sendPacket(packet, ob.CryptoKey, conn)
 	if err != nil {
 		_ = logError(0xE7F316, "(sendPacket):", err)
 		return nil
@@ -239,7 +239,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
 	}
-	reply, err := aesDecrypt(encryptedReply[:nRead], ob.AESKey)
+	reply, err := aesDecrypt(encryptedReply[:nRead], ob.CryptoKey)
 	if err != nil {
 		_ = logError(0xE2B5A1, "(aesDecrypt):", err)
 		return nil
@@ -297,7 +297,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			err := sendPacket(packet, ob.AESKey, ob.conn)
+			err := sendPacket(packet, ob.CryptoKey, ob.conn)
 			if err != nil {
 				_ = logError(0xE67BA4, "(sendPacket):", err)
 			}
@@ -335,7 +335,7 @@ func (ob *Sender) collectConfirmations() {
 			_ = logError(0xE4CB0B, ": received no data")
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReply[:nRead], ob.AESKey)
+		recv, err := aesDecrypt(encryptedReply[:nRead], ob.CryptoKey)
 		if err != nil {
 			_ = logError(0xE5C43E, "(aesDecrypt):", err)
 			continue

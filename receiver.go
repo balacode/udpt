@@ -22,11 +22,11 @@ type Receiver struct {
 	// This number must be between 1 and 65535.
 	Port int
 
-	// AESKey the secret AES encryption key that must be shared
-	// between the sendder (client) and the receiver (server).
-	// This key must be exactly 32 bytes long.
-	// This is the key AES uses for symmetric encryption.
-	AESKey []byte
+	// CryptoKey is the secret symmetric encryption key that
+	// must be shared between the sender and the receiver.
+	// The correct size of this key depends
+	// on the implementation of SymmetricCipher.
+	CryptoKey []byte
 
 	// Config _ _
 	Config ConfigSettings
@@ -60,9 +60,9 @@ func (ob *Receiver) Run() error {
 	if ob.Port < 1 || ob.Port > 65535 {
 		return logError(0xE58B2F, "invalid Port:", ob.Port)
 	}
-	if len(ob.AESKey) != 32 {
-		return logError(0xE3A5FF,
-			"AESKey must be 32, but is", len(ob.AESKey), "bytes long")
+	if len(ob.CryptoKey) != 32 {
+		return logError(0xE3A5FF, "CryptoKey must be 32, but is",
+			len(ob.CryptoKey), "bytes long")
 	}
 	err := ob.Config.Validate()
 	if err != nil {
@@ -105,7 +105,7 @@ func (ob *Receiver) Run() error {
 			_ = logError(0xEA288A, "(readFromUDPConn):", err)
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReq[:nRead], ob.AESKey)
+		recv, err := aesDecrypt(encryptedReq[:nRead], ob.CryptoKey)
 		if err != nil {
 			_ = logError(0xE7D2C4, "(aesDecrypt):", err)
 			continue
@@ -136,7 +136,7 @@ func (ob *Receiver) Run() error {
 			_ = logError(0xE985CC, ": Invalid packet header")
 			reply = []byte("invalid_packet_header")
 		}
-		encryptedReply, err := aesEncrypt(reply, ob.AESKey)
+		encryptedReply, err := aesEncrypt(reply, ob.CryptoKey)
 		if err != nil {
 			_ = logError(0xE6E8C7, "(aesEncrypt):", err)
 			continue

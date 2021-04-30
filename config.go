@@ -84,7 +84,7 @@ func DefaultConfig() ConfigSettings {
 } //                                                               DefaultConfig
 
 // Validate checks the configuration to make sure all required fields like
-// Address, Port and AESKey have been specified and are consistent.
+// Address, Port and CryptoKey have been specified and are consistent.
 //
 // Returns nil if there is no problem, or the error code of the erorr.
 //
