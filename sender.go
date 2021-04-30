@@ -79,6 +79,14 @@ type Sender struct {
 	// on the implementation of SymmetricCipher.
 	CryptoKey []byte
 
+	// Cipher is the object that handles enryption and decryption.
+	//
+	// It must implement the SymmetricCipher interface which is defined in
+	// this package. If you don't specify Cipher, then encyption will
+	// be done using AESCipher, the default encryption used in this package.
+	//
+	Cipher SymmetricCipher
+
 	// Config _ _
 	Config ConfigSettings
 
@@ -115,11 +123,19 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if ob.Port < 1 || ob.Port > 65535 {
 		return logError(0xE7B72A, "invalid Port:", ob.Port)
 	}
-	if len(ob.CryptoKey) != 32 {
-		return logError(0xEB8484, "CryptoKey must be 32, but is",
-			len(ob.CryptoKey), "bytes long")
+	if ob.Cipher == nil {
+		var aes AESCipher
+		err := aes.InitCipher(ob.CryptoKey)
+		if err != nil {
+			return logError(0xE5EC36, "(aes.InitCipher):", err)
+		}
+		ob.Cipher = &aes
 	}
-	err := ob.Config.Validate()
+	err := ob.Cipher.ValidateKey(ob.CryptoKey)
+	if err != nil {
+		return logError(0xE3A5FF, "invalid Sender.CryptoKey:", err)
+	}
+	err = ob.Config.Validate()
 	if err != nil {
 		return logError(0xE5D92D, err)
 	}
@@ -239,9 +255,9 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
 	}
-	reply, err := aesDecrypt(encryptedReply[:nRead], ob.CryptoKey)
+	reply, err := ob.Cipher.Decrypt(encryptedReply[:nRead])
 	if err != nil {
-		_ = logError(0xE2B5A1, "(aesDecrypt):", err)
+		_ = logError(0xE2B5A1, "(Decrypt):", err)
 		return nil
 	}
 	var hash []byte
@@ -335,9 +351,9 @@ func (ob *Sender) collectConfirmations() {
 			_ = logError(0xE4CB0B, ": received no data")
 			continue
 		}
-		recv, err := aesDecrypt(encryptedReply[:nRead], ob.CryptoKey)
+		recv, err := ob.Cipher.Decrypt(encryptedReply[:nRead])
 		if err != nil {
-			_ = logError(0xE5C43E, "(aesDecrypt):", err)
+			_ = logError(0xE5C43E, "(Decrypt):", err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
