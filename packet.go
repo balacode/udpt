@@ -21,12 +21,12 @@ type Packet struct {
 	confirmedTime time.Time
 } //                                                                      Packet
 
-// IsDelivered returns true if a packet has been successfully
+// isDelivered returns true if a packet has been successfully
 // delivered (by receiving a successful confirmation packet).
-func (ob *Packet) IsDelivered() bool {
+func (ob *Packet) isDelivered() bool {
 	ret := bytes.Equal(ob.sentHash, ob.confirmedHash)
 	return ret
-} //                                                                 IsDelivered
+} //                                                                 isDelivered
 
 // send encrypts and sends this packet through connection 'conn'.
 func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {

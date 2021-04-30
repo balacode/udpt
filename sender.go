@@ -307,7 +307,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 	n := len(ob.packets)
 	for i := 0; i < n; i++ {
 		packet := &ob.packets[i]
-		if packet.IsDelivered() {
+		if packet.isDelivered() {
 			continue
 		}
 		time.Sleep(2 * time.Millisecond)
@@ -414,7 +414,7 @@ func (ob *Sender) waitForAllConfirmations() {
 		}
 	}
 	for _, packet := range ob.packets {
-		if packet.IsDelivered() {
+		if packet.isDelivered() {
 			ob.info.bytesDelivered += int64(len(packet.data))
 			ob.info.packetsDelivered++
 		} else {
@@ -544,7 +544,7 @@ func (ob *Sender) printInfo() {
 	tItem := time.Duration(0)
 	for i, pack := range ob.packets {
 		tPack, status := time.Duration(0), "✔"
-		if pack.IsDelivered() {
+		if pack.isDelivered() {
 			if !pack.confirmedTime.IsZero() {
 				tPack = pack.confirmedTime.Sub(pack.sentTime)
 			}
