@@ -15,9 +15,8 @@ import (
 	"time"
 )
 
-// Receiver _ _
+// Receiver receives data items sent by Send() or SendString()
 type Receiver struct {
-	Config ConfigSettings
 
 	// Port is the port number of the listening server.
 	// This number must be between 1 and 65535.
@@ -29,16 +28,31 @@ type Receiver struct {
 	// This is the key AES uses for symmetric encryption.
 	AESKey []byte
 
+	// Config _ _
+	Config ConfigSettings
+
+	// ReceiveData _ _
 	ReceiveData func(name string, data []byte) error
+
+	// ProvideData _ _
 	ProvideData func(name string) ([]byte, error)
-	//
-	currentDataItem DataItem
+
+	// receivingDataItem _ _
+	receivingDataItem DataItem
 } //                                                                    Receiver
 
 // -----------------------------------------------------------------------------
 // # Public Methods
 
-// Run starts a goroutine that runs the receiver in an infinite loop.
+// Run runs the receiver in a loop to process incoming packets.
+//
+// It calls ReceiveData when a data transfer is complete, after the
+// recever has received, decrypted and re-aassembled a data item.
+//
+// It calls ProvideData when it needs to calculate the hash of a
+// previously-received data item. This hash is sent to the sender
+// so it can confirm that a data transfer is successful.
+//
 func (ob *Receiver) Run() error {
 	if ob == nil {
 		return logError(0xE1C1A9, ":", ENilReceiver)
@@ -191,7 +205,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		return nil, logError(0xE8CF4D, ":",
 			"index", index, "out of range 0 -", packetCount-1)
 	}
-	it := &ob.currentDataItem
+	it := &ob.receivingDataItem
 	it.Retain(name, hash, packetCount)
 	compressedData := recv[dataOffset:]
 	if len(compressedData) < 1 {

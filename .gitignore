@@ -9,6 +9,7 @@
 *.exe
 *.exe~
 *.so
+/demo/__debug_bin
 
 # Test binary, built with `go test -c`
 *.test

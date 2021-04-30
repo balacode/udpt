@@ -64,7 +64,6 @@ var udpTotal udpInfo
 // a sequence of bytes to a listening Receiver.
 //
 type Sender struct {
-	Config ConfigSettings
 
 	// Address is the domain name or IP address of the listening receiver,
 	// excluding the port number.
@@ -80,12 +79,26 @@ type Sender struct {
 	// This is the key AES uses for symmetric encryption.
 	AESKey []byte
 
-	dataHash  []byte
+	// Config _ _
+	Config ConfigSettings
+
+	// dataHash _ _
+	dataHash []byte
+
+	// startTime _ _
 	startTime time.Time
-	packets   []Packet
-	conn      *net.UDPConn
-	wg        sync.WaitGroup
-	info      udpInfo
+
+	// packets _ _
+	packets []Packet
+
+	// conn _ _
+	conn *net.UDPConn
+
+	// wg _ _
+	wg sync.WaitGroup
+
+	// info _ _
+	info udpInfo
 } //                                                                      Sender
 
 // -----------------------------------------------------------------------------
