@@ -7,6 +7,8 @@ package udpt
 
 import (
 	"bytes"
+	"io"
+	"net"
 	"time"
 )
 
@@ -25,5 +27,28 @@ func (ob *Packet) IsDelivered() bool {
 	ret := bytes.Equal(ob.sentHash, ob.confirmedHash)
 	return ret
 } //                                                                 IsDelivered
+
+// send encrypts and sends this packet through connection 'conn'.
+func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {
+	if ob == nil {
+		return logError(0xE1D3B5, ENilReceiver)
+	}
+	if cipher == nil {
+		return logError(0xE54A9D, "nil cipher")
+	}
+	if conn == nil {
+		return logError(0xE4B1BA, ENilReceiver)
+	}
+	ciphertext, err := cipher.Encrypt(ob.data)
+	if err != nil {
+		return logError(0xEB39C3, "(Encrypt):", err)
+	}
+	ob.sentTime = time.Now()
+	_, err = io.Copy(conn, bytes.NewReader(ciphertext))
+	if err != nil {
+		return logError(0xE93D1F, "(Copy):", err)
+	}
+	return nil
+} //                                                                        send
 
 // end
