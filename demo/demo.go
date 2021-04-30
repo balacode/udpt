@@ -14,58 +14,50 @@ import (
 )
 
 func main() {
+	// the AES key shared by the sender and receiver: must be 32 bytes log
+	var aesKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
 	//
-	// Specify required configuration parameters:
-	//
-	// Address is used by the sender to connect to the Receiver.
-	//
-	// Port is the port number on which the sender
-	// sends and the receiver listens.
-	//
-	// AESKey is the secret AES encryption key shared by the
-	// Sender and the Receiver. It must be exactly 32 bytes.
-	//
-	udpt.Config.Address = "127.0.0.1"
-	udpt.Config.Port = 1234
-	udpt.Config.AESKey = []byte{
-		0xC4, 0x53, 0x67, 0xA7, 0xB7, 0x94, 0xE5, 0x30,
-		0x6C, 0x4F, 0x43, 0x6C, 0xA9, 0x33, 0x85, 0xEA,
-		0x1C, 0x37, 0xE3, 0x66, 0x7F, 0x14, 0x05, 0xE6,
-		0x2F, 0x8F, 0xC6, 0x12, 0x67, 0x04, 0x86, 0xD1,
-	}
-	// disable log caching and enable verbose messages.
-	// This should be done only during demos/prototyping/debugging.
+	// disable log buffering and enable verbose logging: for demos/debugging
 	udpt.LogBufferSize = -1
-	udpt.Config.VerboseSender = true
-	udpt.Config.VerboseReceiver = true
+	cfg := udpt.DefaultConfig()
+	cfg.VerboseSender = true
+	cfg.VerboseReceiver = true
 	//
+	// set-up and run the receiver
 	prt("Running the receiver")
-	//
-	// receiveData is the function that receives data sent to the receiver
-	receiveData := func(name string, data []byte) error {
-		div := strings.Repeat("##", 40)
-		prt(div)
-		prt("You should see a 'Hello World!' message below:")
-		prt(div)
-		prt("Receiver's receiveData()")
-		prt("Received name:", name)
-		prt("Received data:", string(data))
-		prt(div)
-		return nil
+	receiver := udpt.Receiver{
+		Port:   1234,
+		AESKey: aesKey,
+		Config: cfg,
+		//
+		// receives fully-transferred data items sent to the receiver
+		ReceiveData: func(name string, data []byte) error {
+			div := strings.Repeat("##", 40)
+			prt(div)
+			prt("You should see a 'Hello World!' message below:")
+			prt(div)
+			prt("Receiver's write received name:", name, "data:", string(data))
+			prt(div)
+			return nil
+		},
+		// provides existing data items for hashing by the Receiver. Only the
+		// hash will be sent back to the sender, to confirm the transfer.
+		ProvideData: func(name string) ([]byte, error) {
+			prt("Receiver's ProvideData()")
+			return nil, nil
+		},
 	}
-	// provideData is the function used to read back the data previously
-	// received by the receiver. This data is never sent back to the
-	// sender. It is only used to generate a hash that is sent to
-	// the sender only to confirm that a data item has been sent.
-	provideData := func(name string) ([]byte, error) {
-		prt("Receiver's provideData()")
-		return nil, nil
-	}
-	udpt.RunReceiver(receiveData, provideData)
+	go receiver.Run()
 	//
+	// send a message to the receiver
 	time.Sleep(1 * time.Second)
 	prt("Sending a message")
-	sender := udpt.Sender{Config: udpt.Config}
+	sender := udpt.Sender{
+		Address: "127.0.0.1",
+		Port:    1234,
+		AESKey:  aesKey,
+		Config:  cfg,
+	}
 	err := sender.SendString("demo_data", "Hello World!")
 	if err != nil {
 		prt("Failed sending:", err)
