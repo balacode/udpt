@@ -13,9 +13,25 @@ import (
 	"time"
 )
 
+// configurable logging settings
 var (
+	// LogFunc specifies the external logging function to
+	// use instead of the logging done in this package.
+	//
+	// Calls to LogFunc are buffered for output in a separate
+	// goroutine, so LogBufferSize setting still applies.
+	//
+	// The signature accepts multiple args, to match log.Print(), but when
+	// called it will be passed a single string with the error/info message.
+	//
+	LogFunc func(args ...interface{})
+
 	// LogFile specifies the log file for logging logError() and logInfo()
 	// output. If you don't specify it, no writing to file will be done.
+	//
+	// If you've specified LogFunc, this setting is has no effect
+	// since you're using an external logging function.
+	//
 	LogFile string
 
 	// LogBufferSize specifies the number of messages buffered in logChan.
@@ -153,6 +169,10 @@ func joinArgs(prefix string, args ...interface{}) string {
 // logOutput prints a message to the standard output
 // and writes to the log file immediately
 func logOutput(msg string) {
+	if LogFunc != nil {
+		LogFunc(msg)
+		return
+	}
 	fmt.Println(msg)
 	if LogFile == "" {
 		return
