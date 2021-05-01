@@ -40,14 +40,15 @@ var (
 	// To disable log buffering, set it to -1. This can be useful if you want
 	// to see log messages in-order with code execution, not after the fact.
 	// But this will slow it down while it waits for log messages to be written.
+	//
 	LogBufferSize int
-
-	// logChan is the channel into which messages are sent
-	logChan chan string
 )
 
-// logError outputs an error message to the standard
-// output and to a log file specified by LogFile.
+// logChan is the channel into which messages are sent.
+var logChan chan string
+
+// logError outputs an error message to the standard output
+// and optionally to a log file specified by LogFile.
 //
 // Returns an error value initialized with the message.
 //
