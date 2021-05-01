@@ -49,6 +49,7 @@ func main() {
     //
     // set-up and run the receiver
     prt("Running the receiver")
+    var received string
     receiver := udpt.Receiver{
         Port:      1234,
         CryptoKey: cryptoKey,
@@ -56,11 +57,12 @@ func main() {
         //
         // receives fully-transferred data items sent to the receiver
         ReceiveData: func(name string, data []byte) error {
+            received = string(data)
             div := strings.Repeat("##", 40)
             prt(div)
             prt("You should see a 'Hello World!' message below:")
             prt(div)
-            prt("Receiver's write received name:", name, "data:", string(data))
+            prt("Receiver's write received name:", name, "data:", received)
             prt(div)
             return nil
         },
@@ -68,7 +70,7 @@ func main() {
         // hash will be sent back to the sender, to confirm the transfer.
         ProvideData: func(name string) ([]byte, error) {
             prt("Receiver's ProvideData()")
-            return nil, nil
+            return []byte(received), nil
         },
     }
     go receiver.Run()
@@ -86,7 +88,7 @@ func main() {
     if err != nil {
         prt("Failed sending:", err)
     }
-    wait := 30 * time.Second
+    wait := 15 * time.Second
     prt("Waiting", wait, "before exiting")
     time.Sleep(wait)
 } //                                                                        main
