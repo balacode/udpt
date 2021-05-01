@@ -38,7 +38,8 @@ func main() {
 			prt(div)
 			prt("You should see a 'Hello World!' message below:")
 			prt(div)
-			prt("Receiver's write received name:", name, "data:", received)
+			prt("Receiver's ReceiveData received",
+				"name:", name, "data:", received)
 			prt(div)
 			return nil
 		},

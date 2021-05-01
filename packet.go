@@ -21,7 +21,7 @@ type Packet struct {
 	confirmedTime time.Time
 } //                                                                      Packet
 
-// isDelivered returns true if a packet has been successfully
+// isDelivered returns true if this packet has been successfully
 // delivered (by receiving a successful confirmation packet).
 func (ob *Packet) isDelivered() bool {
 	ret := bytes.Equal(ob.sentHash, ob.confirmedHash)
