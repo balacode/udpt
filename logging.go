@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	// LogFile specifies the name of the output log file.
+	// LogFile specifies the log file for logging logError() and logInfo()
+	// output. If you don't specify it, no writing to file will be done.
 	LogFile string
 
 	// LogBufferSize specifies the number of messages buffered in logChan.
@@ -41,9 +42,10 @@ func logError(id uint32, args ...interface{}) error {
 	return fmt.Errorf(msg)
 } //                                                                    logError
 
-// logInfo logs a message to the standard output and a log file
+// logInfo logs a message to the standard output and
+// optionally to the log file specified by LogFile.
 func logInfo(args ...interface{}) {
-	if LogFile == "" || LogBufferSize == 0 {
+	if LogBufferSize == 0 {
 		initLog()
 	}
 	ts := time.Now().String()[:19]
@@ -75,9 +77,6 @@ func logInfo(args ...interface{}) {
 
 // initLog initializes logging.
 func initLog() {
-	if LogFile == "" {
-		LogFile = os.Args[0] + ".log"
-	}
 	if LogBufferSize == 0 {
 		LogBufferSize = 1024
 	}
@@ -155,7 +154,9 @@ func joinArgs(prefix string, args ...interface{}) string {
 // and writes to the log file immediately
 func logOutput(msg string) {
 	fmt.Println(msg)
-	//
+	if LogFile == "" {
+		return
+	}
 	const mode = os.O_CREATE | os.O_APPEND | os.O_WRONLY
 	file, err := os.OpenFile(LogFile, mode, 0644) // -> (*os.File, error)
 	if err != nil {
