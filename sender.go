@@ -175,7 +175,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		}
 		ob.packets[i] = *packet
 	}
-	newConn, err := connect(ob.Address, ob.Port)
+	newConn, err := ob.connect()
 	if err != nil {
 		return logError(0xE8B8D0, "(connect):", err)
 	}
@@ -224,6 +224,32 @@ func (ob *Sender) SendString(name string, s string) error {
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (ob *Sender)
 
+// connect connects to the Receiver at Sender.Address and Port
+// and returns a new UDP connection and an error value.
+//
+// Note that it doesn't change the value of Sender.conn
+//
+func (ob *Sender) connect() (*net.UDPConn, error) {
+	if ob == nil {
+		return nil, logError(0xE65C26, ":", ENilReceiver)
+	}
+	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
+	udpAddr, err := net.ResolveUDPAddr("udp", addr)
+	if err != nil {
+		return nil, logError(0xEC7C6B, "(ResolveUDPAddr):", err)
+	}
+	conn, err := net.DialUDP("udp", nil, udpAddr) // (*net.UDPConn, error)
+	if err != nil {
+		return nil, logError(0xE15CE1, "(DialUDP):", err)
+	}
+	// TODO: add this to ConfigSettings
+	err = conn.SetWriteBuffer(16 * 1024 * 2014) // 16 MiB
+	if err != nil {
+		return nil, logError(0xE5F9C7, "(SetWriteBuffer):", err)
+	}
+	return conn, nil
+} //                                                                     connect
+
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by 'name'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
@@ -233,7 +259,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	tempConn, err := connect(ob.Address, ob.Port)
+	tempConn, err := ob.connect()
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
 		return nil
