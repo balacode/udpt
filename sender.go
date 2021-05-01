@@ -175,10 +175,11 @@ func (ob *Sender) Send(name string, data []byte) error {
 		}
 		ob.packets[i] = *packet
 	}
-	err = ob.connect()
+	newConn, err := connect(ob.Address, ob.Port)
 	if err != nil {
 		return logError(0xE8B8D0, "(connect):", err)
 	}
+	ob.conn = newConn
 	go ob.collectConfirmations()
 	for retries := 0; retries < ob.Config.SendRetries; retries++ {
 		err = ob.sendUndeliveredPackets()
@@ -277,20 +278,6 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	}
 	return hash
 } //                                                         requestDataItemHash
-
-// connect connects to the Receiver at Sender.Address and Port.
-func (ob *Sender) connect() error {
-	if ob == nil {
-		return logError(0xE65C26, ":", ENilReceiver)
-	}
-	conn, err := connect(ob.Address, ob.Port)
-	if err != nil {
-		ob.conn = nil
-		return logError(0xE95B4D, "(connect):", err)
-	}
-	ob.conn = conn
-	return nil
-} //                                                                     connect
 
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
