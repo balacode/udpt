@@ -6,9 +6,18 @@
 package udpt
 
 import (
+	"errors"
 	"net"
 	"strings"
 	"time"
+)
+
+var (
+	// ErrClosed error occurs when trying to read from a closed connection.
+	ErrClosed = errors.New("use of closed network connection")
+
+	// ErrTimeout error occurs when a read operation times out.
+	ErrTimeout = errors.New("i/o timeout")
 )
 
 // readFromUDPConn reads data from the UDP connection 'conn'.
@@ -27,21 +36,27 @@ func readFromUDPConn(
 	addr net.Addr,
 	err error,
 ) {
+	if conn == nil {
+		return 0, nil, logError(0xE4ED27, EInvalidArg)
+	}
 	err = conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
 		return 0, nil, logError(0xE14A90, "(SetReadDeadline):", err)
 	}
 	// contents of 'tempBuf' is overwritten after every ReadFrom
 	nRead, addr, err = conn.ReadFrom(tempBuf)
-	if err != nil &&
-		strings.Contains(err.Error(), "closed network connection") {
-		err = nil
-	}
 	if err != nil {
-		if strings.Contains(err.Error(), "i/o timeout") {
-			err = nil
-		} else {
-			err = logError(0xE0E0B1, "(ReadFrom):", err)
+		errName := err.Error()
+		switch {
+		// don't log a closed connection or i/o timeout:
+		// these are expected, so just return ErrClosed or ErrTimeout
+		case strings.Contains(errName, ErrClosed.Error()):
+			err = ErrClosed
+		case strings.Contains(errName, ErrTimeout.Error()):
+			err = ErrTimeout
+		default:
+			// log any other unexpected error here
+			err = logError(0xE0E0B1, "(readFromUDPConn):", err)
 		}
 	}
 	return nRead, addr, err
