@@ -113,7 +113,7 @@ func (ob *Receiver) Run() error {
 		logInfo("Receiver.Run() called net.ListenUDP")
 	}
 	encryptedReq := make([]byte, ob.Config.PacketSizeLimit)
-	for {
+	for conn != nil {
 		// 'encryptedReq' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
 			readFromUDPConn(conn, encryptedReq, ob.Config.ReplyTimeout)
@@ -172,6 +172,7 @@ func (ob *Receiver) Run() error {
 			logInfo("Receiver wrote", nWrit, "bytes to", addr)
 		}
 	}
+	return nil
 } //                                                                         Run
 
 // -----------------------------------------------------------------------------

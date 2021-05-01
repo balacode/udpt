@@ -521,8 +521,7 @@ func (ob *Sender) waitForAllConfirmations() {
 	ob.wg.Wait()
 	for {
 		time.Sleep(50 * time.Millisecond)
-		ok := ob.DeliveredAllParts()
-		if ok {
+		if ob.DeliveredAllParts() {
 			if ob.Config.VerboseSender {
 				logInfo("Delivered all packets")
 			}
@@ -555,8 +554,8 @@ func (ob *Sender) close() error {
 		return logError(0xE0561D, ":", ENilReceiver)
 	}
 	err := ob.conn.Close()
+	ob.conn = nil
 	if err != nil {
-		ob.conn = nil
 		return logError(0xE71AB2, "(close):", err)
 	}
 	return nil
