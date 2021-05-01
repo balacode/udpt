@@ -20,7 +20,12 @@ const (
 	FRAGMENT_CONFIRMATION = "CONF:"
 )
 
-// ENilReceiver indicates a method call on a nil object.
-const ENilReceiver = "nil receiver"
+const (
+	// EInvalidArg error indicates an invalid argument.
+	EInvalidArg = "Invalid argument"
+
+	// ENilReceiver error indicates a method call on a nil object.
+	ENilReceiver = "nil receiver"
+)
 
 // end

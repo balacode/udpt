@@ -37,7 +37,7 @@ func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {
 		return logError(0xE54A9D, "nil cipher")
 	}
 	if conn == nil {
-		return logError(0xE4B1BA, ENilReceiver)
+		return logError(0xE4B1BA, EInvalidArg, ": conn is nil")
 	}
 	ciphertext, err := cipher.Encrypt(ob.data)
 	if err != nil {
