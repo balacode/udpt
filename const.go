@@ -5,6 +5,10 @@
 
 package udpt
 
+import (
+	"fmt"
+)
+
 const (
 	// DATA_ITEM_HASH tag prefixes a UDP packet sent by the
 	// sender to request a data item's hash from the receiver.
@@ -27,5 +31,8 @@ const (
 	// ENilReceiver error indicates a method call on a nil object.
 	ENilReceiver = "nil receiver"
 )
+
+// PL is fmt.Println() but is used only for debugging.
+var PL = fmt.Println
 
 // end
