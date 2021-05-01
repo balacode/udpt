@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// Receiver receives data items sent by Send() or SendString()
+// Receiver receives data items sent by Send() or SendString().
 type Receiver struct {
 
 	// Port is the port number of the listening server.
@@ -55,7 +55,7 @@ type Receiver struct {
 // Run runs the receiver in a loop to process incoming packets.
 //
 // It calls ReceiveData when a data transfer is complete, after the
-// recever has received, decrypted and re-aassembled a data item.
+// receiver has received, decrypted and re-assembled a data item.
 //
 // It calls ProvideData when it needs to calculate the hash of a
 // previously-received data item. This hash is sent to the sender

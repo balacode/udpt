@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// github.com/balacode/udpt                                         /[config.go]
+// github.com/balacode/udpt                                          /[const.go]
 // (c) balarabe@protonmail.com                                      License: MIT
 // -----------------------------------------------------------------------------
 
@@ -11,8 +11,8 @@ const (
 	// This is needed to check if a data item needs sending.
 	DATA_ITEM_HASH = "HASH:"
 
-	// FRAGMENT tag prefixes a UDP packet sent by the sender to the
-	// receiver containing a fragment of a data item being sent.
+	// FRAGMENT tag prefixes a UDP packet sent by the sender to the receiver,
+	// containing a fragment of a data item being transferred.
 	FRAGMENT = "FRAG:"
 
 	// FRAGMENT_CONFIRMATION tag prefixes a UDP packet sent back by

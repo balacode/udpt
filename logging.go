@@ -167,8 +167,13 @@ func joinArgs(prefix string, args ...interface{}) string {
 	return retBuf.String()
 } //                                                                    joinArgs
 
-// logOutput prints a message to the standard output
-// and writes to the log file immediately
+// logOuput outputs a log message immediately.
+//
+// If LogFunc is specified, it calls LogFunc and exits.
+//
+// Otherwise it prints the message to the standard output and
+// optionally writes to the log file specified by LogFile.
+//
 func logOutput(msg string) {
 	if LogFunc != nil {
 		LogFunc(msg)

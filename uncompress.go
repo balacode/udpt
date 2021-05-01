@@ -21,7 +21,7 @@ func uncompress(compressedData []byte) ([]byte, error) {
 		return nil, logError(0xE8A8A9, "invalid compreseData")
 	}
 	// extract the uncompressed size from the end of compressedData
-	// so the size of the new buffer to allocate is known
+	// to know the exact number of bytes to allocate for the result
 	nu := int64(binary.LittleEndian.Uint32(compressedData[nc-4:]))
 	compressedData = compressedData[:nc-4]
 	//

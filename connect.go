@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-// connect connects to the Receiver specified by address
+// connect connects to the Receiver specified by 'address'.
 func connect(address string) (*net.UDPConn, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {

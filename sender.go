@@ -24,12 +24,12 @@ package udpt
 //   ) getPacketCount(length int) int
 //   ) makePacket(data []byte) (*Packet, error)
 //
-// # Information Properties
+// # Informatory Properties (ob *Sender)
 //   ) averageResponseMs() float64
 //   ) deliveredAllParts() bool
 //   ) transferSpeedKBpS() float64
 //
-// # Information Methods
+// # Informatory Methods (ob *Sender)
 //   ) printInfo()
 
 import (
@@ -65,8 +65,8 @@ var udpTotal udpInfo
 //
 type Sender struct {
 
-	// Address is the domain name or IP address of the listening receiver,
-	// excluding the port number.
+	// Address is the domain name or IP address of the
+	// listening receiver, excluding the port number.
 	Address string
 
 	// Port is the port number of the listening server.
@@ -112,8 +112,8 @@ type Sender struct {
 // -----------------------------------------------------------------------------
 // # Public Methods
 
-// Send sends (transfers) a sequence of bytes ('data') to the
-// Receiver specified by Sender.Address and Sender.Port.
+// Send transfers a sequence of bytes ('data') to the
+// Receiver specified by Sender.Address and Port.
 //
 func (ob *Sender) Send(name string, data []byte) error {
 	//
@@ -213,8 +213,8 @@ func (ob *Sender) Send(name string, data []byte) error {
 	return nil
 } //                                                                        Send
 
-// SendString sends (transfers) string 's' to the Receiver
-// specified by Sender.Address and Sender.Port.
+// SendString transfers string 's' to the Receiver
+// specified by Sender.Address and Port.
 //
 func (ob *Sender) SendString(name string, s string) error {
 	return ob.Send(name, []byte(s))
@@ -223,9 +223,9 @@ func (ob *Sender) SendString(name string, s string) error {
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (ob *Sender)
 
-// requestDataItemHash requests and waits for the listening receiver
-// to return the hash of the data item named by 'name'. If the receiver
-// can locate the data item, returns its hash, otherwise returns nil.
+// requestDataItemHash requests and waits for the listening receiver to
+// return the hash of the data item identified by 'name'. If the receiver
+// can locate the data item, it returns its hash, otherwise it returns nil.
 func (ob *Sender) requestDataItemHash(name string) []byte {
 	err := ob.Config.Validate()
 	if err != nil {
@@ -279,7 +279,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	return hash
 } //                                                         requestDataItemHash
 
-// connect connects to the Receiver at Sender.Address and Sender.Port
+// connect connects to the Receiver at Sender.Address and Port.
 func (ob *Sender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
@@ -382,7 +382,7 @@ func (ob *Sender) collectConfirmations() {
 // waitForAllConfirmations waits for all confirmation packets to
 // be received from the receiver. Since UDP packet delivery is not
 // guaranteed, some confirmations may not be received. This method
-// will only wait for the duration specified in Config.ReplyTimeout
+// will only wait for the duration specified in Config.ReplyTimeout.
 //
 func (ob *Sender) waitForAllConfirmations() {
 	if ob == nil {
@@ -445,7 +445,6 @@ func (ob *Sender) close() error {
 
 // getPacketCount calculates the number of packets needed to send 'length'
 // bytes. This depends on the setting of Config.PacketPayloadSize.
-//
 func (ob *Sender) getPacketCount(length int) int {
 	err := ob.Config.Validate()
 	if err != nil {
@@ -478,10 +477,10 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 } //                                                                  makePacket
 
 // -----------------------------------------------------------------------------
-// # Information Properties
+// # Informatory Properties (ob *Sender)
 
-// averageResponseMs is the average response time, in milliseconds,
-// between a packet being sent and a confirmation being received.
+// averageResponseMs is the average response time, in milliseconds, between
+// a packet being sent and its delivery confirmation being received.
 func (ob *Sender) averageResponseMs() float64 {
 	if ob == nil {
 		_ = logError(0xE1B78F, ":", ENilReceiver)
@@ -498,8 +497,8 @@ func (ob *Sender) averageResponseMs() float64 {
 	return ret
 } //                                                           averageResponseMs
 
-// deliveredAllParts returns true if all parts of the sent
-// data item have been delivered. I.e. all packets
+// deliveredAllParts returns true if all parts of the
+// sent data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
 //
 func (ob *Sender) deliveredAllParts() bool {
@@ -518,7 +517,7 @@ func (ob *Sender) deliveredAllParts() bool {
 } //                                                           deliveredAllParts
 
 // transferSpeedKBpS returns the transfer speed of the current Send
-// operation, in Kilobytes (more accurately, Kibibytes) per Second.
+// operation, in Kilobytes (more accurately, Kibibytes) per second.
 func (ob *Sender) transferSpeedKBpS() float64 {
 	if ob == nil {
 		_ = logError(0xE6C59B, ":", ENilReceiver)
@@ -533,7 +532,7 @@ func (ob *Sender) transferSpeedKBpS() float64 {
 } //                                                           transferSpeedKBpS
 
 // -----------------------------------------------------------------------------
-// # Information Methods
+// # Informatory Methods (ob *Sender)
 
 // printInfo prints the UDP transfer statistics to the standard output.
 func (ob *Sender) printInfo() {

@@ -43,7 +43,7 @@ func (ob *DataItem) IsLoaded() bool {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// PrintInfo prints information on the current data item
+// PrintInfo prints information on the current data item.
 func (ob *DataItem) PrintInfo(tag string) {
 	logInfo(tag+" name:", ob.Name)
 	logInfo(tag+" hash:", ob.Hash)
@@ -61,8 +61,8 @@ func (ob *DataItem) Reset() {
 	ob.UncompressedSizeInfo = 0
 } //                                                                       Reset
 
-// Retain changes the Name, Hash and empties CompressedPieces if the passed
-// name, hash, and packetCount don't match their existing values in the object.
+// Retain changes the Name, Hash, and empties CompressedPieces when the passed
+// name, hash and packetCount don't match their current values in the object.
 func (ob *DataItem) Retain(name string, hash []byte, packetCount int) {
 	if ob.Name == name &&
 		bytes.Equal(ob.Hash, hash) &&
