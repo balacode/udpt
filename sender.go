@@ -233,7 +233,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	conn, err := connect(ob.Address, ob.Port)
+	tempConn, err := connect(ob.Address, ob.Port)
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
 		return nil
@@ -243,14 +243,14 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = packet.send(ob.conn, ob.Cipher)
+	err = packet.send(tempConn, ob.Cipher)
 	if err != nil {
 		_ = logError(0xE7F316, "(packet.send):", err)
 		return nil
 	}
 	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
 	nRead, _ /*addr*/, err :=
-		readFromUDPConn(conn, encryptedReply, ob.Config.ReplyTimeout)
+		readFromUDPConn(tempConn, encryptedReply, ob.Config.ReplyTimeout)
 	if err != nil {
 		_ = logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
