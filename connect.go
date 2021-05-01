@@ -6,12 +6,14 @@
 package udpt
 
 import (
+	"fmt"
 	"net"
 )
 
-// connect connects to the Receiver specified by 'address'.
-func connect(address string) (*net.UDPConn, error) {
-	udpAddr, err := net.ResolveUDPAddr("udp", address)
+// connect connects to the Receiver at address and port.
+func connect(address string, port int) (*net.UDPConn, error) {
+	addr := fmt.Sprintf("%s:%d", address, port)
+	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, logError(0xEC7C6B, "(ResolveUDPAddr):", err)
 	}

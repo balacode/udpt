@@ -232,8 +232,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = logError(0xE5BC2E, err)
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
-	conn, err := connect(addr)
+	conn, err := connect(ob.Address, ob.Port)
 	if err != nil {
 		_ = logError(0xE7DF8B, "(connect):", err)
 		return nil
@@ -284,8 +283,7 @@ func (ob *Sender) connect() error {
 	if ob == nil {
 		return logError(0xE65C26, ":", ENilReceiver)
 	}
-	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
-	conn, err := connect(addr)
+	conn, err := connect(ob.Address, ob.Port)
 	if err != nil {
 		ob.conn = nil
 		return logError(0xE95B4D, "(connect):", err)
