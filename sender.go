@@ -213,7 +213,9 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if !bytes.Equal(hash, remoteHash) {
 		return logError(0xE1F101, ": hash mismatch")
 	}
-	ob.PrintInfo()
+	if ob.Config.VerboseSender {
+		ob.PrintInfo()
+	}
 	return nil
 } //                                                                        Send
 
