@@ -462,7 +462,7 @@ func (ob *Sender) collectConfirmations() {
 		// 'encryptedReply' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
 			readFromUDPConn(ob.conn, encryptedReply, ob.Config.ReplyTimeout)
-		if err == ErrClosed {
+		if err == errClosed {
 			break
 		}
 		if err != nil {

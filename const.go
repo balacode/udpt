@@ -32,7 +32,7 @@ const (
 	ENilReceiver = "nil receiver"
 )
 
-// PL is fmt.Println() but is used only for debugging.
-var PL = fmt.Println
+// pl is fmt.Println() but is used only for debugging.
+var pl = fmt.Println
 
 // end

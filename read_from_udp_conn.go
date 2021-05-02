@@ -13,11 +13,14 @@ import (
 )
 
 var (
-	// ErrClosed error occurs when trying to read from a closed connection.
-	ErrClosed = errors.New("use of closed network connection")
+	// errClosed error occurs when trying to read from a closed connection.
+	errClosed = errors.New("use of closed network connection")
 
-	// ErrTimeout error occurs when a read operation times out.
-	ErrTimeout = errors.New("i/o timeout")
+	// errTimeout error occurs when a read operation times out.
+	//
+	// NOTE: this error is currently not checked for.
+	//
+	errTimeout = errors.New("i/o timeout")
 )
 
 // readFromUDPConn reads data from the UDP connection 'conn'.
@@ -49,11 +52,11 @@ func readFromUDPConn(
 		errName := err.Error()
 		switch {
 		// don't log a closed connection or i/o timeout:
-		// these are expected, so just return ErrClosed or ErrTimeout
-		case strings.Contains(errName, ErrClosed.Error()):
-			err = ErrClosed
-		case strings.Contains(errName, ErrTimeout.Error()):
-			err = ErrTimeout
+		// these are expected, so just return errClosed or errTimeout
+		case strings.Contains(errName, errClosed.Error()):
+			err = errClosed
+		case strings.Contains(errName, errTimeout.Error()):
+			err = errTimeout
 		default:
 			// log any other unexpected error here
 			err = logError(0xE0E0B1, "(readFromUDPConn):", err)
