@@ -142,7 +142,10 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if err != nil {
 		return logError(0xE5D92D, err)
 	}
-	hash := getHash(data)
+	hash, err := getHash(data)
+	if err != nil {
+		return logError(0xE4B4D8, err.Error())
+	}
 	if ob.Config.VerboseSender {
 		logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
@@ -157,7 +160,10 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return logError(0xE2A7C3, "(compress):", err)
 	}
 	packetCount := ob.getPacketCount(len(compressed))
-	ob.dataHash = getHash(data)
+	ob.dataHash, err = getHash(data)
+	if err != nil {
+		return logError(0xE5E0E6, "(getHash):", err)
+	}
 	ob.startTime = time.Now()
 	ob.packets = make([]Packet, packetCount)
 	for i := range ob.packets {
@@ -588,9 +594,13 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 		return nil, logError(0xE71F9B, "len(data)", len(data),
 			"> Config.PacketSizeLimit", ob.Config.PacketSizeLimit)
 	}
+	sentHash, err := getHash(data)
+	if err != nil {
+		return nil, logError(0xE84C0B, "(getHash)", err)
+	}
 	packet := Packet{
 		data:     data,
-		sentHash: getHash(data),
+		sentHash: sentHash,
 		sentTime: time.Now(),
 		// confirmedHash, confirmedTime: zero value
 	}

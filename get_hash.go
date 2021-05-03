@@ -10,20 +10,17 @@ import (
 )
 
 // getHash returns the SHA-256 hash of data as a slice of 32 bytes.
-func getHash(data []byte) []byte {
+func getHash(data []byte) ([]byte, error) {
 	sha := sha256.New()
 	n, err := sha.Write(data)
 	if n != len(data) || err != nil {
-		_ = logError(0xE3A9B8, "(Write):", err)
-		logInfo("n:", n, "len(data):", len(data))
-		return nil
+		return nil, makeError(0xE3A9B8, "(Write):", err)
 	}
 	ret := sha.Sum(nil)
 	if len(ret) != 32 {
-		_ = logError(0xE4D3E1, "(sha.Sum)")
-		return nil
+		return nil, makeError(0xE4D3E1, "(sha.Sum)")
 	}
-	return ret
+	return ret, nil
 } //                                                                     getHash
 
 // end
