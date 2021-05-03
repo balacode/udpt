@@ -7,6 +7,7 @@ package udpt
 
 import (
 	"bytes"
+	"fmt"
 )
 
 // dataItemStruct holds a data item being received by a Receiver. A data
@@ -50,7 +51,7 @@ func (ob *dataItemStruct) PrintInfo(
 	printLine func(args ...interface{}),
 ) {
 	printLine(tag+" name:", ob.Name)
-	printLine(tag+" hash:", ob.Hash)
+	printLine(tag+" hash:", fmt.Sprintf("%X", ob.Hash))
 	printLine(tag+" pcs.:", len(ob.CompressedPieces))
 	printLine(tag+" comp:", ob.CompressedSizeInfo, "bytes")
 	printLine(tag+" size:", ob.UncompressedSizeInfo, "bytes")
