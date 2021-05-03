@@ -46,7 +46,7 @@ type Receiver struct {
 	ProvideData func(name string) ([]byte, error)
 
 	// receivingDataItem _ _
-	receivingDataItem DataItem
+	receivingDataItem dataItemStruct
 } //                                                                    Receiver
 
 // -----------------------------------------------------------------------------
