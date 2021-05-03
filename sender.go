@@ -43,7 +43,8 @@ import (
 	"time"
 )
 
-// udpInfo contains global UDP transfer statistics since startup.
+// udpInfo contains UDP transfer statistics, such as the transfer
+// speed and the number of packets delivered and lost.
 type udpInfo struct {
 	averageResponseMs float64
 	bytesDelivered    int64
@@ -55,7 +56,7 @@ type udpInfo struct {
 } //                                                                     udpInfo
 
 // udpTotal contains total UDP statistics from time of startup.
-// These statistics are accumulated after every call to Send.
+// These statistics are accumulated over all Senders after every call to Send.
 var udpTotal udpInfo
 
 // -----------------------------------------------------------------------------
@@ -75,9 +76,9 @@ type Sender struct {
 	Port int
 
 	// CryptoKey is the secret symmetric encryption key that
-	// must be shared between the sender and the receiver.
-	// The correct size of this key depends
-	// on the implementation of SymmetricCipher.
+	// must be shared between the Sender and the Receiver.
+	// The correct size of this key depends on
+	// the implementation of SymmetricCipher.
 	CryptoKey []byte
 
 	// Cipher is the object that handles enryption and decryption.
@@ -88,7 +89,8 @@ type Sender struct {
 	//
 	Cipher SymmetricCipher
 
-	// Config _ _
+	// Config contains UDP and other configuration settings.
+	// These settings normally don't need to be changed.
 	Config ConfigSettings
 
 	// LogFunc is the function used to log logError() and logInfo() messages.
@@ -97,22 +99,26 @@ type Sender struct {
 
 	// -------------------------------------------------------------------------
 
-	// conn _ _
+	// conn holds the UDP connection to a Receiver
 	conn *net.UDPConn
 
-	// dataHash _ _
+	// dataHash contains the hash of all bytes of the data item being sent
 	dataHash []byte
 
-	// info _ _
+	// info contains UDP transfer statistics, such as the transfer
+	// speed and the number of packets delivered and lost
 	info udpInfo
 
-	// packets _ _
+	// packets contains all the packets of the currently transferred data item;
+	// some of them may have been delivered, while others may need (re)sending
 	packets []Packet
 
-	// startTime _ _
+	// startTime is the time the first packet was sent, after
+	// the bytes of the data item have been compressed
 	startTime time.Time
 
-	// wg _ _
+	// wg is used by waitForAllConfirmations()
+	// to wait for sendUndeliveredPackets()
 	wg sync.WaitGroup
 } //                                                                      Sender
 
@@ -121,7 +127,6 @@ type Sender struct {
 
 // Send transfers a sequence of bytes ('data') to the
 // Receiver specified by Sender.Address and Port.
-//
 func (ob *Sender) Send(name string, data []byte) error {
 	//
 	if strings.TrimSpace(ob.Address) == "" {
@@ -260,7 +265,6 @@ func (ob *Sender) AverageResponseMs() float64 {
 // DeliveredAllParts returns true if all parts of the
 // sent data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
-//
 func (ob *Sender) DeliveredAllParts() bool {
 	if ob == nil {
 		_ = ob.logError(0xE52E72, ":", ENilReceiver)
@@ -515,7 +519,6 @@ func (ob *Sender) collectConfirmations() {
 // be received from the receiver. Since UDP packet delivery is not
 // guaranteed, some confirmations may not be received. This method
 // will only wait for the duration specified in Config.ReplyTimeout.
-//
 func (ob *Sender) waitForAllConfirmations() {
 	if ob == nil {
 		_ = ob.logError(0xE2A34E, ":", ENilReceiver)
@@ -610,7 +613,11 @@ func (ob *Sender) logInfo(args ...interface{}) {
 	}
 } //                                                                     logInfo
 
-// makePacket _ _
+// makePacket prepares a packet for immediate sending: it stores,
+// hashes data and sets the packet's sentTime to current time.
+//
+// The size of the packet must not exceed Config.PacketSizeLimit
+//
 func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 	if len(data) > ob.Config.PacketSizeLimit {
 		return nil, ob.logError(0xE71F9B, "len(data)", len(data),

@@ -11,10 +11,14 @@ import (
 )
 
 // getPart returns the substring between 'prefix' and 'suffix'.
+//
 // When the prefix is blank, returns the part from the beginning of 's'.
+//
 // When the suffix is blank, returns the part up to the end of 's'.
 // I.e. if prefix and suffix are both blank, returns 's'.
+//
 // When either prefix or suffix is not found, returns a zero-length string.
+//
 func getPart(s, prefix, suffix string) string {
 	at := strings.Index(s, prefix)
 	if at == -1 {
@@ -43,7 +47,9 @@ func joinArgs(tag string, args ...interface{}) string {
 
 // padf suffixes a string with spaces to make sure it is at least
 // 'minLength' characters wide. I.e. the string is left-aligned.
+//
 // If the string is wider than 'minLength', returns the string as it is.
+//
 func padf(minLength int, format string, args ...interface{}) string {
 	format = fmt.Sprintf(format, args...)
 	if len(format) < minLength {

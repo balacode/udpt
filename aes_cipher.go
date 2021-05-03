@@ -14,8 +14,8 @@ import (
 
 const errKeySize = "AES-256 key must be 32 bytes long"
 
-// AESCipher implements the SymmetricCipher interface that encrypts/decrypts
-// plaintext using the AES-256 symmetric cipher algorithm.
+// AESCipher implements the SymmetricCipher interface that encrypts and
+// decrypts plaintext using the AES-256 symmetric cipher algorithm.
 type AESCipher struct {
 	cryptoKey []byte
 	gcm       cipher.AEAD
@@ -24,7 +24,7 @@ type AESCipher struct {
 // ValidateKey checks if 'key' is acceptable for use with the cipher.
 // For example it must be of the right size.
 //
-// For AES-256, the cipher must be exactly 32 bytes long.
+// For AES-256, the key must be exactly 32 bytes long.
 //
 func (ob *AESCipher) ValidateKey(key []byte) error {
 	if len(key) != 32 {
@@ -58,17 +58,17 @@ func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 		return nil, makeError(0xE64A2E, errKeySize)
 	}
 	// nonce is a byte array filled with cryptographically secure random bytes
-	n := ob.gcm.NonceSize()
+	n := ob.gcm.NonceSize() // = gcmStandardNonceSize = 12 bytes
 	nonce := make([]byte, n)
 	_, err = io.ReadFull(rand.Reader, nonce)
 	if err != nil {
 		return nil, err
 	}
 	ciphertext = ob.gcm.Seal(
-		nonce,     // dst []byte,
-		nonce,     // nonce []byte,
-		plaintext, // plaintext []byte,
-		nil,       // additionalData []byte) []byte
+		nonce,     // dst
+		nonce,     // nonce
+		plaintext, // plaintext
+		nil,       // additionalData
 	)
 	return ciphertext, nil
 } //                                                                     Encrypt
@@ -86,10 +86,10 @@ func (ob *AESCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	nonce := ciphertext[:n]
 	ciphertext = ciphertext[n:]
 	plaintext, err = ob.gcm.Open(
-		nil,        // dst []byte
-		nonce,      // nonce []byte
-		ciphertext, // ciphertext []byte
-		nil,        // additionalData []byte
+		nil,        // dst
+		nonce,      // nonce
+		ciphertext, // ciphertext
+		nil,        // additionalData
 	)
 	if err != nil {
 		return nil, err

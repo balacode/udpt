@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-// ConfigSettings contains UDP configuration settings
+// Config contains UDP and other configuration settings.
+// These settings normally don't need to be changed.
 type ConfigSettings struct {
 
 	// -------------------------------------------------------------------------
@@ -89,8 +90,6 @@ func DefaultConfig() ConfigSettings {
 // Returns nil if there is no problem, or the error code of the erorr.
 //
 func (ob *ConfigSettings) Validate() error {
-	//
-	// Limits:
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
 		return fmt.Errorf("invalid PacketSizeLimit: %d", n)

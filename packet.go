@@ -12,7 +12,8 @@ import (
 	"time"
 )
 
-// Packet _ _
+// Packet contains data, hash and timing details of
+// a UDP packet (datagram) being sent by the Sender.
 type Packet struct {
 	data          []byte
 	sentHash      []byte
