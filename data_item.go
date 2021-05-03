@@ -43,13 +43,17 @@ func (ob *dataItemStruct) IsLoaded() bool {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// PrintInfo prints information on the current data item.
-func (ob *dataItemStruct) PrintInfo(tag string) {
-	logInfo(tag+" name:", ob.Name)
-	logInfo(tag+" hash:", ob.Hash)
-	logInfo(tag+" pcs.:", len(ob.CompressedPieces))
-	logInfo(tag+" comp:", ob.CompressedSizeInfo, "bytes")
-	logInfo(tag+" size:", ob.UncompressedSizeInfo, "bytes")
+// PrintInfo prints information on the current data item using the
+// supplied printLine function. Each line is prefixed with tag.
+func (ob *dataItemStruct) PrintInfo(
+	tag string,
+	printLine func(args ...interface{}),
+) {
+	printLine(tag+" name:", ob.Name)
+	printLine(tag+" hash:", ob.Hash)
+	printLine(tag+" pcs.:", len(ob.CompressedPieces))
+	printLine(tag+" comp:", ob.CompressedSizeInfo, "bytes")
+	printLine(tag+" size:", ob.UncompressedSizeInfo, "bytes")
 } //                                                                   PrintInfo
 
 // Reset discards the contents of the data item and clears its name and hash.
