@@ -31,6 +31,16 @@ func getPart(s, prefix, suffix string) string {
 	return s[:at]
 } //                                                                     getPart
 
+// joinArgs joins args into a single string, with a space between arguments.
+func joinArgs(tag string, args ...interface{}) string {
+	ar := make([]string, len(args))
+	for i, arg := range args {
+		ar[i] = fmt.Sprint(arg)
+	}
+	ret := strings.TrimSpace(tag + " " + strings.Join(ar, " "))
+	return ret
+} //                                                                    joinArgs
+
 // padf suffixes a string with spaces to make sure it is at least
 // 'minLength' characters wide. I.e. the string is left-aligned.
 // If the string is wider than 'minLength', returns the string as it is.

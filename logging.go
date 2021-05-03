@@ -6,7 +6,6 @@
 package udpt
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -108,64 +107,6 @@ func initLog() {
 		}
 	}()
 } //                                                                     initLog
-
-// joinArgs returns a string built from a list of variadic arguments 'args',
-// with some minimal formatting rules described as follows:
-//
-// Inserts a space between each argument, unless the preceding argument
-// ends with '(', or the current argument begins with ')' or ':'.
-//
-// If a string argument in 'args' begins with '^', then the '^' is removed
-// and the argument's string is quoted in single quotes without escaping it.
-//
-// If a string argument in 'args' ends with '^', then the '^' is removed
-// and the next argument is quoted in the same way.
-//
-func joinArgs(prefix string, args ...interface{}) string {
-	var (
-		quoteNext bool
-		lastChar  byte
-		retBuf    bytes.Buffer
-	)
-	ws := func(s string) {
-		_, _ = retBuf.WriteString(s)
-	}
-	ws(prefix)
-	for i, arg := range args {
-		s := fmt.Sprint(arg)
-		firstChar := byte(0)
-		if len(s) > 0 {
-			firstChar = s[0]
-		}
-		if i > 0 &&
-			lastChar != '(' &&
-			firstChar != ')' &&
-			firstChar != ':' {
-			ws(" ")
-		}
-		q := quoteNext
-		if strings.HasPrefix(s, "^") {
-			q = true
-			s = s[1:]
-		}
-		quoteNext = strings.HasSuffix(s, "^")
-		if quoteNext {
-			s = s[:len(s)-1]
-		}
-		if q {
-			ws("'")
-		}
-		ws(s)
-		if q {
-			ws("'")
-		}
-		lastChar = 0
-		if len(s) > 0 {
-			lastChar = s[len(s)-1]
-		}
-	}
-	return retBuf.String()
-} //                                                                    joinArgs
 
 // logOuput outputs a log message immediately.
 //
