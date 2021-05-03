@@ -19,16 +19,13 @@ func compress(data []byte) ([]byte, error) {
 	_, err := wr.Write(data)
 	if err != nil {
 		defer func() {
-			err2 := wr.Close()
-			if err2 != nil {
-				_ = logError(0xE0A6F2, "(Close):", err2)
-			}
+			_ = wr.Close()
 		}()
-		return nil, logError(0xE5F7D3, "(Write):", err)
+		return nil, makeError(0xE5F7D3, "(Write):", err)
 	}
 	err = wr.Close()
 	if err != nil {
-		return nil, logError(0xE39D8B, "(Close):", err)
+		return nil, makeError(0xE39D8B, "(Close):", err)
 	}
 	ret := cbuf.Bytes()
 	//

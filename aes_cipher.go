@@ -28,7 +28,7 @@ type AESCipher struct {
 //
 func (ob *AESCipher) ValidateKey(key []byte) error {
 	if len(key) != 32 {
-		return logError(0xE42FDB,
+		return makeError(0xE42FDB,
 			"AES-256 key must be 32, but it is", len(key), "bytes long")
 	}
 	return nil
@@ -37,7 +37,7 @@ func (ob *AESCipher) ValidateKey(key []byte) error {
 // InitCipher initializes a cipher with the specified secret key.
 func (ob *AESCipher) InitCipher(key []byte) error {
 	if len(key) != 32 {
-		return logError(0xE32BD3, errKeySize)
+		return makeError(0xE32BD3, errKeySize)
 	}
 	cphr, err := aes.NewCipher(key)
 	if err != nil {
@@ -55,7 +55,7 @@ func (ob *AESCipher) InitCipher(key []byte) error {
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
 func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
-		return nil, logError(0xE64A2E, errKeySize)
+		return nil, makeError(0xE64A2E, errKeySize)
 	}
 	// nonce is a byte array filled with cryptographically secure random bytes
 	n := ob.gcm.NonceSize()
@@ -77,7 +77,7 @@ func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
 func (ob *AESCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
-		return nil, logError(0xE35A87, errKeySize)
+		return nil, makeError(0xE35A87, errKeySize)
 	}
 	n := ob.gcm.NonceSize()
 	if len(ciphertext) < n {
