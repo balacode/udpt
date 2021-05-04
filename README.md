@@ -42,7 +42,7 @@ func main() {
     var cryptoKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
     //
     // disable log buffering and enable verbose logging: for demos/debugging
-    cfg := udpt.DefaultConfig()
+    cfg := udpt.NewDefaultConfig()
     cfg.VerboseSender = true
     cfg.VerboseReceiver = true
     //

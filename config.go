@@ -65,8 +65,8 @@ type ConfigSettings struct {
 	VerboseSender bool
 } //                                                              ConfigSettings
 
-// DefaultConfig returns default configuration settings.
-func DefaultConfig() ConfigSettings {
+// NewDefaultConfig returns default configuration settings.
+func NewDefaultConfig() ConfigSettings {
 	return ConfigSettings{
 		//
 		// Limits:
@@ -82,7 +82,7 @@ func DefaultConfig() ConfigSettings {
 		VerboseReceiver: false,
 		VerboseSender:   false,
 	}
-} //                                                               DefaultConfig
+} //                                                            NewDefaultConfig
 
 // Validate checks if all configuration paremeters
 // are set within acceptable limits.
