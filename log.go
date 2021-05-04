@@ -12,6 +12,11 @@ import (
 	"time"
 )
 
+// pl is like fmt.Println, but returns no values. It is only used for debugging.
+func pl(args ...interface{}) { fmt.Println(args...) }
+
+var _ = pl
+
 // LogPrint prints a logging message to the standard output.
 //
 // Prefixes each line in the message with a timestamp.
