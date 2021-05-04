@@ -61,18 +61,18 @@ func MakeLogFunc(printMsg bool, logFile string) func(args ...interface{}) {
 const logChanSize = 1024
 
 // logChan is the channel into which log messages are sent.
-var logChan chan logEntryStruct
+var logChan chan logEntry
 
-// logEntryStruct contains a message to be printed and/or written to a log file.
-type logEntryStruct struct {
+// logEntry contains a message to be printed and/or written to a log file.
+type logEntry struct {
 	printMsg bool
 	logFile  string
 	msg      string
-} //                                                              logEntryStruct
+} //                                                                    logEntry
 
 // Output immediately prints msg to standard output and if
 // logFile is not blank, appends the message to logFile.
-func (ob *logEntryStruct) Output() {
+func (ob *logEntry) Output() {
 	if ob.printMsg {
 		fmt.Println(ob.msg)
 	}
@@ -109,7 +109,7 @@ func logEnter(printMsg bool, logFile string, args ...interface{}) {
 		logInit()
 	}
 	msg := logMakeMessage(args...)
-	entry := logEntryStruct{printMsg: printMsg, logFile: logFile, msg: msg}
+	entry := logEntry{printMsg: printMsg, logFile: logFile, msg: msg}
 	if logChan == nil {
 		logInit()
 	}
@@ -127,7 +127,7 @@ func logInit() {
 	if n < 0 {
 		n = 1
 	}
-	logChan = make(chan logEntryStruct, n)
+	logChan = make(chan logEntry, n)
 	go func() {
 		for entry := range logChan {
 			entry.Output()
