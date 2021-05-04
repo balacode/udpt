@@ -81,14 +81,6 @@ type Sender struct {
 	// the implementation of SymmetricCipher.
 	CryptoKey []byte
 
-	// Cipher is the object that handles enryption and decryption.
-	//
-	// It must implement the SymmetricCipher interface which is defined in
-	// this package. If you don't specify Cipher, then encyption will
-	// be done using AESCipher, the default encryption used in this package.
-	//
-	Cipher SymmetricCipher
-
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
 	Config ConfigSettings
@@ -131,15 +123,15 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if ob.Port < 1 || ob.Port > 65535 {
 		return ob.logError(0xE7B72A, "invalid Port:", ob.Port)
 	}
-	if ob.Cipher == nil {
+	if ob.Config.Cipher == nil {
 		var aes AESCipher
 		err := aes.InitCipher(ob.CryptoKey)
 		if err != nil {
 			return ob.logError(0xE5EC36, "(aes.InitCipher):", err)
 		}
-		ob.Cipher = &aes
+		ob.Config.Cipher = &aes
 	}
-	err := ob.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
 		return ob.logError(0xE3A5FF, "invalid Sender.CryptoKey:", err)
 	}
@@ -390,7 +382,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = ob.logError(0xE1F8C5, "(makePacket):", err)
 		return nil
 	}
-	err = packet.send(tempConn, ob.Cipher)
+	err = packet.send(tempConn, ob.Config.Cipher)
 	if err != nil {
 		_ = ob.logError(0xE7F316, "(packet.send):", err)
 		return nil
@@ -402,7 +394,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = ob.logError(0xE97FC3, "(ReadFrom):", err)
 		return nil
 	}
-	reply, err := ob.Cipher.Decrypt(encryptedReply[:nRead])
+	reply, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
 	if err != nil {
 		_ = ob.logError(0xE2B5A1, "(Decrypt):", err)
 		return nil
@@ -445,7 +437,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		time.Sleep(2 * time.Millisecond)
 		ob.wg.Add(1)
 		go func() {
-			err := packet.send(ob.conn, ob.Cipher)
+			err := packet.send(ob.conn, ob.Config.Cipher)
 			if err != nil {
 				_ = ob.logError(0xE67BA4, "(packet.send):", err)
 			}
@@ -483,7 +475,7 @@ func (ob *Sender) collectConfirmations() {
 			_ = ob.logError(0xE4CB0B, ": received no data")
 			continue
 		}
-		recv, err := ob.Cipher.Decrypt(encryptedReply[:nRead])
+		recv, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
 		if err != nil {
 			_ = ob.logError(0xE5C43E, "(Decrypt):", err)
 			continue

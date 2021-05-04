@@ -28,14 +28,6 @@ type Receiver struct {
 	// on the implementation of SymmetricCipher.
 	CryptoKey []byte
 
-	// Cipher is the object that handles enryption and decryption.
-	//
-	// It must implement the SymmetricCipher interface which is defined in
-	// this package. If you don't specify Cipher, then encyption will
-	// be done using AESCipher, the default encryption used in this package.
-	//
-	Cipher SymmetricCipher
-
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
 	Config ConfigSettings
@@ -95,15 +87,15 @@ func (ob *Receiver) Run() error {
 	if ob.Port < 1 || ob.Port > 65535 {
 		return ob.logError(0xE58B2F, "invalid Port:", ob.Port)
 	}
-	if ob.Cipher == nil {
+	if ob.Config.Cipher == nil {
 		var aes AESCipher
 		err := aes.InitCipher(ob.CryptoKey)
 		if err != nil {
 			return ob.logError(0xE36A3C, "(aes.InitCipher):", err)
 		}
-		ob.Cipher = &aes
+		ob.Config.Cipher = &aes
 	}
-	err := ob.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
 		return ob.logError(0xE3A5FF, "invalid Receiver.CryptoKey:", err)
 	}
@@ -148,7 +140,7 @@ func (ob *Receiver) Run() error {
 			_ = ob.logError(0xEA288A, "(readFromUDPConn):", err)
 			continue
 		}
-		recv, err := ob.Cipher.Decrypt(encryptedReq[:nRead])
+		recv, err := ob.Config.Cipher.Decrypt(encryptedReq[:nRead])
 		if err != nil {
 			_ = ob.logError(0xE7D2C4, "(Decrypt):", err)
 			continue
@@ -179,7 +171,7 @@ func (ob *Receiver) Run() error {
 			_ = ob.logError(0xE985CC, ": Invalid packet header")
 			reply = []byte("invalid_packet_header")
 		}
-		encryptedReply, err := ob.Cipher.Encrypt(reply)
+		encryptedReply, err := ob.Config.Cipher.Encrypt(reply)
 		if err != nil {
 			_ = ob.logError(0xE6E8C7, "(Encrypt):", err)
 			continue

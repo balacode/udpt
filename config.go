@@ -14,6 +14,14 @@ import (
 // These settings normally don't need to be changed.
 type ConfigSettings struct {
 
+	// Cipher is the object that handles enryption and decryption.
+	//
+	// It must implement the SymmetricCipher interface which is defined in
+	// this package. If you don't specify Cipher, then encyption will
+	// be done using AESCipher, the default encryption used in this package.
+	//
+	Cipher SymmetricCipher
+
 	// -------------------------------------------------------------------------
 	// Limits:
 
@@ -72,6 +80,7 @@ type ConfigSettings struct {
 // NewDefaultConfig returns default configuration settings.
 func NewDefaultConfig() ConfigSettings {
 	return ConfigSettings{
+		Cipher: nil,
 		//
 		// Limits:
 		PacketSizeLimit:   1450,
@@ -95,6 +104,9 @@ func NewDefaultConfig() ConfigSettings {
 // Returns nil if there is no problem, or the error code of the erorr.
 //
 func (ob *ConfigSettings) Validate() error {
+	if ob.Cipher == nil {
+		return makeError(0xE5D4AB, "nil Cipher")
+	}
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
 		return fmt.Errorf("invalid PacketSizeLimit: %d", n)
