@@ -181,7 +181,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		if b > len(compressed) {
 			b = len(compressed)
 		}
-		header := FRAGMENT + fmt.Sprintf(
+		header := tagFragment + fmt.Sprintf(
 			"name:%s hash:%X sn:%d count:%d\n",
 			name, ob.dataHash, i+1, packetCount,
 		)
@@ -389,7 +389,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = ob.logError(0xE7DF8B, "(connect):", err)
 		return nil
 	}
-	packet, err := ob.makePacket([]byte(DATA_ITEM_HASH + name))
+	packet, err := ob.makePacket([]byte(tagDataItemHash + name))
 	if err != nil {
 		_ = ob.logError(0xE1F8C5, "(makePacket):", err)
 		return nil
@@ -413,11 +413,11 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	}
 	var hash []byte
 	if len(reply) > 0 {
-		if !bytes.HasPrefix(reply, []byte(DATA_ITEM_HASH)) {
+		if !bytes.HasPrefix(reply, []byte(tagDataItemHash)) {
 			_ = ob.logError(0xE08AD4, ": invalid reply:", reply)
 			return nil
 		}
-		hexHash := string(reply[len(DATA_ITEM_HASH):])
+		hexHash := string(reply[len(tagDataItemHash):])
 		if hexHash == "not_found" {
 			return nil
 		}
@@ -492,14 +492,14 @@ func (ob *Sender) collectConfirmations() {
 			_ = ob.logError(0xE5C43E, "(Decrypt):", err)
 			continue
 		}
-		if !bytes.HasPrefix(recv, []byte(FRAGMENT_CONFIRMATION)) {
+		if !bytes.HasPrefix(recv, []byte(tagConfirmation)) {
 			_ = ob.logError(0xE5AF24, ": bad reply header")
 			if ob.Config.VerboseSender {
 				ob.logInfo("ERROR received:", len(recv), "bytes")
 			}
 			continue
 		}
-		confirmedHash := recv[len(FRAGMENT_CONFIRMATION):]
+		confirmedHash := recv[len(tagConfirmation):]
 		if ob.Config.VerboseSender {
 			ob.logInfo("Sender received", nRead, "bytes from", addr)
 		}

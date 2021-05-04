@@ -167,13 +167,13 @@ func (ob *Receiver) Run() error {
 		case len(recv) == 0:
 			_ = ob.logError(0xE6B3BA, ": received no data")
 			continue
-		case bytes.HasPrefix(recv, []byte(DATA_ITEM_HASH)):
+		case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
 			reply, err = ob.sendDataItemHash(recv)
 			if err != nil {
 				_ = ob.logError(0xE98D72, "(sendDataItemHash):", err)
 				continue
 			}
-		case bytes.HasPrefix(recv, []byte(FRAGMENT)):
+		case bytes.HasPrefix(recv, []byte(tagFragment)):
 			reply, err = ob.receiveFragment(recv)
 			if err != nil {
 				_ = ob.logError(0xE3A46C, "(receiveFragment):", err)
@@ -209,13 +209,13 @@ func (ob *Receiver) Run() error {
 // -----------------------------------------------------------------------------
 // # Packet Handlers
 
-// receiveFragment handles a FRAGMENT packet sent by a Sender, and sends
-// back a confirmation packet (FRAGMENT_CONFIRMATION) to the Sender.
+// receiveFragment handles a tagFragment packet sent by a Sender, and
+// sends back a confirmation packet (tagConfirmation) to the Sender.
 func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	if ob == nil {
 		return nil, ob.logError(0xE6CD62, ":", ENilReceiver)
 	}
-	if !bytes.HasPrefix(recv, []byte(FRAGMENT)) {
+	if !bytes.HasPrefix(recv, []byte(tagFragment)) {
 		return nil, ob.logError(0xE4F3C5, ": missing header")
 	}
 	err := ob.Config.Validate()
@@ -228,7 +228,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	}
 	dataOffset++ // skip newline
 	var (
-		header  = string(recv[len(FRAGMENT):dataOffset])
+		header  = string(recv[len(tagFragment):dataOffset])
 		name    = getPart(header, "name:", " ")
 		hexHash = getPart(header, "hash:", " ")
 		sn      = getPart(header, "sn:", " ")
@@ -288,22 +288,22 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	if err != nil {
 		return nil, ob.logError(0xE0B57C, "(getHash):", err)
 	}
-	reply := append([]byte(FRAGMENT_CONFIRMATION), confirmedHash...)
+	reply := append([]byte(tagConfirmation), confirmedHash...)
 	return reply, nil
 } //                                                             receiveFragment
 
-// sendDataItemHash handles a DATA_ITEM_HASH sent by a Sender.
+// sendDataItemHash handles a tagDataItemHash sent by a Sender.
 func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if ob == nil {
 		return nil, ob.logError(0xE24A7B, ":", ENilReceiver)
 	}
-	if !bytes.HasPrefix(req, []byte(DATA_ITEM_HASH)) {
+	if !bytes.HasPrefix(req, []byte(tagDataItemHash)) {
 		return nil, ob.logError(0xE7B653, ": missing header")
 	}
 	if ob.ProvideData == nil {
 		return nil, ob.logError(0xE73A1C, "ProvideData is nil")
 	}
-	name := string(req[len(DATA_ITEM_HASH):])
+	name := string(req[len(tagDataItemHash):])
 	data, err := ob.ProvideData(name)
 	if err != nil {
 		return nil, ob.logError(0xE7F7C9, "(ProvideData):", err)
@@ -312,7 +312,7 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if err != nil {
 		return nil, ob.logError(0xE2F3D5, "(getHash):", err)
 	}
-	reply := []byte(DATA_ITEM_HASH + fmt.Sprintf("%X", hash))
+	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
 	return reply, nil
 } //                                                            sendDataItemHash
 
