@@ -10,27 +10,27 @@ import (
 	"fmt"
 )
 
-// dataItemStruct holds a data item being received by a Receiver. A data
-// item is just a sequence of bytes being transferred. It could be a file,
+// dataItem holds a data item being received by a Receiver. A data item
+// is just a sequence of bytes being transferred. It could be a file,
 // a JSON string or any other resource.
 //
 // Since we're using UDP, which has a limited packet size, the resource
 // is split into several smaller pieces that are sent as UDP packets.
 //
-type dataItemStruct struct {
+type dataItem struct {
 	Name                 string
 	Hash                 []byte
 	CompressedPieces     [][]byte
 	CompressedSizeInfo   int
 	UncompressedSizeInfo int
-} //                                                              dataItemStruct
+} //                                                                    dataItem
 
 // -----------------------------------------------------------------------------
 // # Property
 
 // IsLoaded returns true if the current data item has been
 // fully received (all its pieces have been collected).
-func (ob *dataItemStruct) IsLoaded() bool {
+func (ob *dataItem) IsLoaded() bool {
 	ret := true
 	for _, piece := range ob.CompressedPieces {
 		if len(piece) < 1 {
@@ -46,7 +46,7 @@ func (ob *dataItemStruct) IsLoaded() bool {
 
 // PrintInfo prints information on the current data item using the
 // supplied printLine function. Each line is prefixed with tag.
-func (ob *dataItemStruct) PrintInfo(
+func (ob *dataItem) PrintInfo(
 	tag string,
 	printLine func(args ...interface{}),
 ) {
@@ -58,7 +58,7 @@ func (ob *dataItemStruct) PrintInfo(
 } //                                                                   PrintInfo
 
 // Reset discards the contents of the data item and clears its name and hash.
-func (ob *dataItemStruct) Reset() {
+func (ob *dataItem) Reset() {
 	ob.Name = ""
 	ob.Hash = nil
 	ob.CompressedPieces = nil
@@ -68,7 +68,7 @@ func (ob *dataItemStruct) Reset() {
 
 // Retain changes the Name, Hash, and empties CompressedPieces when the passed
 // name, hash and packetCount don't match their current values in the object.
-func (ob *dataItemStruct) Retain(name string, hash []byte, packetCount int) {
+func (ob *dataItem) Retain(name string, hash []byte, packetCount int) {
 	if ob.Name == name &&
 		bytes.Equal(ob.Hash, hash) &&
 		len(ob.CompressedPieces) == packetCount {
@@ -83,7 +83,7 @@ func (ob *dataItemStruct) Retain(name string, hash []byte, packetCount int) {
 
 // UnpackBytes joins CompressedPieces and uncompresses
 // the resulting bytes to get the original data item.
-func (ob *dataItemStruct) UnpackBytes() ([]byte, error) {
+func (ob *dataItem) UnpackBytes() ([]byte, error) {
 	//
 	// join pieces (provided all have been collected) to get compressed data
 	if !ob.IsLoaded() {

@@ -77,7 +77,7 @@ type Receiver struct {
 
 	// receivingDataItem contains the data item
 	// currently being received from the Sender.
-	receivingDataItem dataItemStruct
+	receivingDataItem dataItem
 } //                                                                    Receiver
 
 // -----------------------------------------------------------------------------
