@@ -40,10 +40,6 @@ type Receiver struct {
 	// These settings normally don't need to be changed.
 	Config ConfigSettings
 
-	// LogFunc is the function used to log logError() and logInfo() messages.
-	// If you leave it nil, no logging will be done.
-	LogFunc func(args ...interface{})
-
 	// ReceiveData is a callback function you must specify. This Receiver
 	// will call it when a data item has been fully transferred.
 	//
@@ -323,17 +319,17 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 // and optionally calls Receiver.LogFunc (if not nil) to log the error.
 func (ob *Receiver) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.LogFunc != nil {
+	if ob.Config.LogFunc != nil {
 		msg := ret.Error()
-		ob.LogFunc(msg)
+		ob.Config.LogFunc(msg)
 	}
 	return ret
 } //                                                                    logError
 
 // logInfo calls Receiver.LogFunc (if not nil) to log a message.
 func (ob *Receiver) logInfo(args ...interface{}) {
-	if ob.LogFunc != nil {
-		ob.LogFunc(args...)
+	if ob.Config.LogFunc != nil {
+		ob.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo
 

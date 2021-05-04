@@ -19,6 +19,7 @@ func main() {
 	//
 	// disable log buffering and enable verbose logging: for demos/debugging
 	cfg := udpt.NewDefaultConfig()
+	cfg.LogFunc = udpt.LogPrint
 	cfg.VerboseSender = true
 	cfg.VerboseReceiver = true
 	//
@@ -49,7 +50,6 @@ func main() {
 			fmt.Println(tag, "Receiver's ProvideData()")
 			return []byte(received), nil
 		},
-		LogFunc: udpt.LogPrint,
 	}
 	go receiver.Run()
 	//
@@ -61,7 +61,6 @@ func main() {
 		Port:      1234,
 		CryptoKey: cryptoKey,
 		Config:    cfg,
-		LogFunc:   udpt.LogPrint,
 	}
 	err := sender.SendString("demo_data", "Hello World!")
 	if err != nil {

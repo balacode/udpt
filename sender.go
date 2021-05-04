@@ -93,10 +93,6 @@ type Sender struct {
 	// These settings normally don't need to be changed.
 	Config ConfigSettings
 
-	// LogFunc is the function used to log logError() and logInfo() messages.
-	// If you leave it nil, no logging will be done.
-	LogFunc func(args ...interface{})
-
 	// -------------------------------------------------------------------------
 
 	// conn holds the UDP connection to a Receiver
@@ -599,17 +595,17 @@ func (ob *Sender) getPacketCount(length int) int {
 // optionally calls Sender.LogFunc (if not nil) to log the error.
 func (ob *Sender) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.LogFunc != nil {
+	if ob.Config.LogFunc != nil {
 		msg := ret.Error()
-		ob.LogFunc(msg)
+		ob.Config.LogFunc(msg)
 	}
 	return ret
 } //                                                                    logError
 
 // logInfo calls Sender.LogFunc (if not nil) to log a message.
 func (ob *Sender) logInfo(args ...interface{}) {
-	if ob.LogFunc != nil {
-		ob.LogFunc(args...)
+	if ob.Config.LogFunc != nil {
+		ob.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo
 

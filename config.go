@@ -56,6 +56,10 @@ type ConfigSettings struct {
 	// -------------------------------------------------------------------------
 	// Logging:
 
+	// LogFunc is the function used to log logError() and logInfo() messages.
+	// If you leave it nil, no logging will be done.
+	LogFunc func(args ...interface{})
+
 	// VerboseReceiver specifies if the receiver should print
 	// informational messages to the standard output.
 	VerboseReceiver bool
@@ -79,6 +83,7 @@ func NewDefaultConfig() ConfigSettings {
 		WriteTimeout: 15 * time.Second,
 		//
 		// Logging:
+		LogFunc:         nil,
 		VerboseReceiver: false,
 		VerboseSender:   false,
 	}
