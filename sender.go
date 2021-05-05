@@ -83,7 +83,7 @@ type Sender struct {
 
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
-	Config ConfigSettings
+	Config *ConfigSettings
 
 	// -------------------------------------------------------------------------
 
@@ -118,6 +118,9 @@ type Sender struct {
 func (ob *Sender) Send(name string, data []byte) error {
 	if ob == nil {
 		return ob.logError(0xE2B7B8, ENilReceiver)
+	}
+	if ob.Config == nil {
+		ob.Config = NewDefaultConfig()
 	}
 	// setup cipher
 	if ob.Config.Cipher == nil {
@@ -590,7 +593,7 @@ func (ob *Sender) getPacketCount(length int) int {
 // and optionally calls Sender.LogFunc (if not nil) to log the error.
 func (ob *Sender) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.Config.LogFunc != nil {
+	if ob.Config != nil && ob.Config.LogFunc != nil {
 		msg := ret.Error()
 		ob.Config.LogFunc(msg)
 	}
@@ -599,7 +602,7 @@ func (ob *Sender) logError(id uint32, args ...interface{}) error {
 
 // logInfo calls Sender.LogFunc (if not nil) to log a message.
 func (ob *Sender) logInfo(args ...interface{}) {
-	if ob.Config.LogFunc != nil {
+	if ob.Config != nil && ob.Config.LogFunc != nil {
 		ob.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo

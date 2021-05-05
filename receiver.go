@@ -30,7 +30,7 @@ type Receiver struct {
 
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
-	Config ConfigSettings
+	Config *ConfigSettings
 
 	// ReceiveData is a callback function you must specify. This Receiver
 	// will call it when a data item has been fully transferred.
@@ -86,6 +86,9 @@ func (ob *Receiver) Run() error {
 	}
 	if ob.Port < 1 || ob.Port > 65535 {
 		return ob.logError(0xE58B2F, "invalid Receiver.Port:", ob.Port)
+	}
+	if ob.Config == nil {
+		ob.Config = NewDefaultConfig()
 	}
 	// setup cipher
 	if ob.Config.Cipher == nil {
@@ -314,7 +317,7 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 // and optionally calls Receiver.LogFunc (if not nil) to log the error.
 func (ob *Receiver) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.Config.LogFunc != nil {
+	if ob.Config != nil && ob.Config.LogFunc != nil {
 		msg := ret.Error()
 		ob.Config.LogFunc(msg)
 	}
@@ -323,7 +326,7 @@ func (ob *Receiver) logError(id uint32, args ...interface{}) error {
 
 // logInfo calls Receiver.LogFunc (if not nil) to log a message.
 func (ob *Receiver) logInfo(args ...interface{}) {
-	if ob.Config.LogFunc != nil {
+	if ob.Config != nil && ob.Config.LogFunc != nil {
 		ob.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo
