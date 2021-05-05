@@ -6,6 +6,7 @@
 package udpt
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -35,19 +36,26 @@ func (ob *aesCipher) ValidateKey(key []byte) error {
 } //                                                                 ValidateKey
 
 // SetKey initializes the cipher with the specified secret key.
+//
+// If the cipher is already initialized with the given key, does nothing.
 // The same key is used for encryption and decryption.
+//
 func (ob *aesCipher) SetKey(key []byte) error {
 	if len(key) != 32 {
 		return makeError(0xE32BD3, errKeySize)
+	}
+	if bytes.Equal(ob.cryptoKey, key) {
+		return nil
 	}
 	cphr, err := aes.NewCipher(key)
 	if err != nil {
 		return err
 	}
-	ob.gcm, err = cipher.NewGCM(cphr)
+	gcm, err := cipher.NewGCM(cphr)
 	if err != nil {
 		return err
 	}
+	ob.gcm = gcm
 	ob.cryptoKey = key
 	return nil
 } //                                                                      SetKey

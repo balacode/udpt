@@ -15,7 +15,10 @@ type SymmetricCipher interface {
 	ValidateKey(key []byte) error
 
 	// SetKey initializes the cipher with the specified secret key.
+	//
+	// If the cipher is already initialized with the given key, does nothing.
 	// The same key is used for encryption and decryption.
+	//
 	SetKey(key []byte) error
 
 	// Encrypt encrypts plaintext using the key given to SetKey and
