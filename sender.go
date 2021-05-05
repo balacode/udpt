@@ -132,6 +132,10 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if err != nil {
 		return ob.logError(0xE3E35C, "invalid Sender.CryptoKey:", err)
 	}
+	err = ob.Config.Cipher.SetKey(ob.CryptoKey)
+	if err != nil {
+		return ob.logError(0xE5EC36, err)
+	}
 	// check settings
 	err = ob.Config.Validate()
 	if err != nil {
