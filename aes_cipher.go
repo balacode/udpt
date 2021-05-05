@@ -14,19 +14,19 @@ import (
 
 const errKeySize = "AES-256 key must be 32 bytes long"
 
-// AESCipher implements the SymmetricCipher interface that encrypts and
+// aesCipher implements the SymmetricCipher interface that encrypts and
 // decrypts plaintext using the AES-256 symmetric cipher algorithm.
-type AESCipher struct {
+type aesCipher struct {
 	cryptoKey []byte
 	gcm       cipher.AEAD
-} //                                                                   AESCipher
+} //                                                                   aesCipher
 
 // ValidateKey checks if 'key' is acceptable for use with the cipher.
 // For example it must be of the right size.
 //
 // For AES-256, the key must be exactly 32 bytes long.
 //
-func (ob *AESCipher) ValidateKey(key []byte) error {
+func (ob *aesCipher) ValidateKey(key []byte) error {
 	if len(key) != 32 {
 		return makeError(0xE42FDB,
 			"AES-256 key must be 32, but it is", len(key), "bytes long")
@@ -35,7 +35,7 @@ func (ob *AESCipher) ValidateKey(key []byte) error {
 } //                                                                 ValidateKey
 
 // InitCipher initializes a cipher with the specified secret key.
-func (ob *AESCipher) InitCipher(key []byte) error {
+func (ob *aesCipher) InitCipher(key []byte) error {
 	if len(key) != 32 {
 		return makeError(0xE32BD3, errKeySize)
 	}
@@ -53,7 +53,7 @@ func (ob *AESCipher) InitCipher(key []byte) error {
 
 // Encrypt encrypts plaintext using the key given to InitCipher and
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
-func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
+func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
 		return nil, makeError(0xE64A2E, errKeySize)
 	}
@@ -75,7 +75,7 @@ func (ob *AESCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 
 // Decrypt decrypts ciphertext using the key given to InitCipher and
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
-func (ob *AESCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
+func (ob *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
 		return nil, makeError(0xE35A87, errKeySize)
 	}

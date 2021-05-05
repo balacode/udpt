@@ -121,7 +121,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	// setup cipher
 	if ob.Config.Cipher == nil {
-		var aes AESCipher
+		var aes aesCipher
 		err := aes.InitCipher(ob.CryptoKey)
 		if err != nil {
 			return ob.logError(0xE5EC36, err)

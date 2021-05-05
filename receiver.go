@@ -88,7 +88,7 @@ func (ob *Receiver) Run() error {
 		return ob.logError(0xE58B2F, "invalid Receiver.Port:", ob.Port)
 	}
 	if ob.Config.Cipher == nil {
-		var aes AESCipher
+		var aes aesCipher
 		err := aes.InitCipher(ob.CryptoKey)
 		if err != nil {
 			return ob.logError(0xE36A3C, err)

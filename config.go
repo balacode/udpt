@@ -17,7 +17,7 @@ type ConfigSettings struct {
 	//
 	// It must implement the SymmetricCipher interface which is defined in
 	// this package. If you don't specify Cipher, then encyption will be
-	// done using AESCipher, the default encryption used in this package.
+	// done using aesCipher, the default encryption used in this package.
 	//
 	Cipher SymmetricCipher
 
