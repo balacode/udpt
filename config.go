@@ -103,6 +103,9 @@ func NewDefaultConfig() *ConfigSettings {
 // Returns nil if there is no problem, or the error value.
 //
 func (ob *ConfigSettings) Validate() error {
+	if ob == nil {
+		return makeError(0xE8E9E5, ENilReceiver+" in ConfigSettings")
+	}
 	if ob.Cipher == nil {
 		return makeError(0xE5D4AB, "nil ConfigSettings.Cipher")
 	}
