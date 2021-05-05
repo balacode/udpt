@@ -87,7 +87,7 @@ func (ob *dataItem) UnpackBytes() ([]byte, error) {
 	//
 	// join pieces (provided all have been collected) to get compressed data
 	if !ob.IsLoaded() {
-		return nil, makeError(0xE76AF5, ": data item is incomplete")
+		return nil, makeError(0xE76AF5, "data item is incomplete")
 	}
 	compressed := bytes.Join(ob.CompressedPieces, nil)
 	ob.CompressedSizeInfo = len(compressed)
@@ -95,17 +95,17 @@ func (ob *dataItem) UnpackBytes() ([]byte, error) {
 	// uncompress data
 	ret, err := uncompress(compressed)
 	if err != nil {
-		return nil, makeError(0xE95DFB, "(uncompress):", err)
+		return nil, makeError(0xE95DFB, err)
 	}
 	ob.UncompressedSizeInfo = len(ret)
 	//
 	// hash of uncompressed data should match original hash
 	hash, err := getHash(ret)
 	if err != nil {
-		return nil, makeError(0xE8D61E, "(getHash):", err)
+		return nil, makeError(0xE8D61E, err)
 	}
 	if !bytes.Equal(hash, ob.Hash) {
-		return nil, makeError(0xE87D89, ": checksum mismatch")
+		return nil, makeError(0xE87D89, "checksum mismatch")
 	}
 	return ret, nil
 } //                                                                 UnpackBytes

@@ -51,7 +51,7 @@ func main() {
 			return []byte(received), nil
 		},
 	}
-	go receiver.Run()
+	go func() { _ = receiver.Run() }()
 	//
 	// send a message to the receiver
 	time.Sleep(1 * time.Second)

@@ -6,7 +6,6 @@
 package udpt
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -105,15 +104,17 @@ func NewDefaultConfig() ConfigSettings {
 //
 func (ob *ConfigSettings) Validate() error {
 	if ob.Cipher == nil {
-		return makeError(0xE5D4AB, "nil Cipher")
+		return makeError(0xE5D4AB, "nil ConfigSettings.Cipher")
 	}
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
-		return fmt.Errorf("invalid PacketSizeLimit: %d", n)
+		return makeError(0xE86C2A,
+			"invalid ConfigSettings.PacketSizeLimit:", n)
 	}
 	n = ob.PacketPayloadSize
 	if n < 1 || n > (ob.PacketSizeLimit-200) {
-		return fmt.Errorf("invalid PacketPayloadSize: %d", n)
+		return makeError(0xE54BF4,
+			"invalid ConfigSettings.PacketPayloadSize:", n)
 	}
 	return nil
 } //                                                                    Validate

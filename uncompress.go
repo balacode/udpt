@@ -18,7 +18,7 @@ import (
 func uncompress(compressedData []byte) ([]byte, error) {
 	nc := len(compressedData)
 	if len(compressedData) <= 4 {
-		return nil, makeError(0xE8A8A9, "invalid compreseData")
+		return nil, makeError(0xE8A8A9, "invalid compressedData")
 	}
 	// extract the uncompressed size from the end of compressedData
 	// to know the exact number of bytes to allocate for the result
@@ -27,16 +27,16 @@ func uncompress(compressedData []byte) ([]byte, error) {
 	//
 	reader, err := zlib.NewReader(bytes.NewReader(compressedData))
 	if err != nil {
-		return nil, makeError(0xE54F4B, "(NewReader):", err)
+		return nil, makeError(0xE54F4B, err)
 	}
 	buf := bytes.NewBuffer(make([]byte, 0, nu))
 	_, err = io.CopyN(buf, reader, nu)
 	if err != nil {
-		return nil, makeError(0xE6A29D, "(CopyN):", err)
+		return nil, makeError(0xE6A29D, err)
 	}
 	err = reader.Close()
 	if err != nil {
-		return nil, makeError(0xE45AF8, "(Close):", err)
+		return nil, makeError(0xE45AF8, err)
 	}
 	ret := buf.Bytes()
 	return ret, nil

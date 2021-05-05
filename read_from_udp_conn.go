@@ -44,7 +44,7 @@ func readFromUDPConn(
 	}
 	err = conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
-		return 0, nil, makeError(0xE14A90, "(SetReadDeadline):", err)
+		return 0, nil, makeError(0xE14A90, err)
 	}
 	// contents of 'tempBuf' is overwritten after every ReadFrom
 	nRead, addr, err = conn.ReadFrom(tempBuf)
@@ -59,7 +59,7 @@ func readFromUDPConn(
 			err = errTimeout
 		default:
 			// log any other unexpected error here
-			err = makeError(0xE0E0B1, "(readFromUDPConn):", err)
+			err = makeError(0xE0E0B1, err)
 		}
 	}
 	return nRead, addr, err

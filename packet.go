@@ -35,19 +35,19 @@ func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {
 		return makeError(0xE1D3B5, ENilReceiver)
 	}
 	if cipher == nil {
-		return makeError(0xE54A9D, "nil cipher")
+		return makeError(0xE54A9D, EInvalidArg, "nil cipher")
 	}
 	if conn == nil {
-		return makeError(0xE4B1BA, EInvalidArg, ": conn is nil")
+		return makeError(0xE4B1BA, EInvalidArg, "nil conn")
 	}
 	ciphertext, err := cipher.Encrypt(ob.data)
 	if err != nil {
-		return makeError(0xEB39C3, "(Encrypt):", err)
+		return makeError(0xEB39C3, err)
 	}
 	ob.sentTime = time.Now()
 	_, err = io.Copy(conn, bytes.NewReader(ciphertext))
 	if err != nil {
-		return makeError(0xE93D1F, "(Copy):", err)
+		return makeError(0xE93D1F, err)
 	}
 	return nil
 } //                                                                        send

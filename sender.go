@@ -122,16 +122,16 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE5D92D, err)
 	}
 	if strings.TrimSpace(ob.Address) == "" {
-		return ob.logError(0xE5A04A, "missing Address")
+		return ob.logError(0xE5A04A, "missing Sender.Address")
 	}
 	if ob.Port < 1 || ob.Port > 65535 {
-		return ob.logError(0xE7B72A, "invalid Port:", ob.Port)
+		return ob.logError(0xE7B72A, "invalid Sender.Port:", ob.Port)
 	}
 	if ob.Config.Cipher == nil {
 		var aes AESCipher
 		err := aes.InitCipher(ob.CryptoKey)
 		if err != nil {
-			return ob.logError(0xE5EC36, "(aes.InitCipher):", err)
+			return ob.logError(0xE5EC36, err)
 		}
 		ob.Config.Cipher = &aes
 	}
@@ -141,7 +141,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	hash, err := getHash(data)
 	if err != nil {
-		return ob.logError(0xE4B4D8, err.Error())
+		return ob.logError(0xE4B4D8, err)
 	}
 	if ob.Config.VerboseSender {
 		ob.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
@@ -154,12 +154,12 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	compressed, err := compress(data)
 	if err != nil {
-		return ob.logError(0xE2A7C3, "(compress):", err)
+		return ob.logError(0xE2A7C3, err)
 	}
 	packetCount := ob.getPacketCount(len(compressed))
 	ob.dataHash, err = getHash(data)
 	if err != nil {
-		return ob.logError(0xE5E0E6, "(getHash):", err)
+		return ob.logError(0xE5E0E6, err)
 	}
 	ob.startTime = time.Now()
 	ob.packets = make([]Packet, packetCount)
@@ -177,13 +177,13 @@ func (ob *Sender) Send(name string, data []byte) error {
 			append([]byte(header), compressed[a:b]...),
 		)
 		if err2 != nil {
-			return ob.logError(0xE567A4, "(makePacket):", err2)
+			return ob.logError(0xE567A4, err2)
 		}
 		ob.packets[i] = *packet
 	}
 	newConn, err := ob.connect()
 	if err != nil {
-		return ob.logError(0xE8B8D0, "(connect):", err)
+		return ob.logError(0xE8B8D0, err)
 	}
 	ob.conn = newConn
 	go ob.collectConfirmations()
@@ -193,10 +193,10 @@ func (ob *Sender) Send(name string, data []byte) error {
 			defer func() {
 				err2 := ob.close()
 				if err2 != nil {
-					_ = ob.logError(0xE71C7A, "(close):", err2)
+					_ = ob.logError(0xE71C7A, err2)
 				}
 			}()
-			return ob.logError(0xE23CE0, "(sendUndeliveredPackets):", err)
+			return ob.logError(0xE23CE0, err)
 		}
 		ob.waitForAllConfirmations()
 		if ob.DeliveredAllParts() {
@@ -207,14 +207,14 @@ func (ob *Sender) Send(name string, data []byte) error {
 	ob.updateInfo()
 	err = ob.close()
 	if err != nil {
-		return ob.logError(0xE40A05, "(close):", err)
+		return ob.logError(0xE40A05, err)
 	}
 	if !ob.DeliveredAllParts() {
-		return ob.logError(0xE1C3A7, ": undelivered packets")
+		return ob.logError(0xE1C3A7, "undelivered packets")
 	}
 	remoteHash = ob.requestDataItemHash(name)
 	if !bytes.Equal(hash, remoteHash) {
-		return ob.logError(0xE1F101, ": hash mismatch")
+		return ob.logError(0xE1F101, "hash mismatch")
 	}
 	if ob.Config.VerboseSender {
 		ob.PrintInfo()
@@ -236,7 +236,7 @@ func (ob *Sender) SendString(name string, s string) error {
 // a packet being sent and its delivery confirmation being received.
 func (ob *Sender) AverageResponseMs() float64 {
 	if ob == nil {
-		_ = ob.logError(0xE1B78F, ":", ENilReceiver)
+		_ = ob.logError(0xE1B78F, ENilReceiver)
 		return 0.0
 	}
 	if ob.info.packetsDelivered == 0 {
@@ -255,7 +255,7 @@ func (ob *Sender) AverageResponseMs() float64 {
 // have been sent, resent if needed, and confirmed.
 func (ob *Sender) DeliveredAllParts() bool {
 	if ob == nil {
-		_ = ob.logError(0xE52E72, ":", ENilReceiver)
+		_ = ob.logError(0xE52E72, ENilReceiver)
 		return false
 	}
 	ret := true
@@ -272,7 +272,7 @@ func (ob *Sender) DeliveredAllParts() bool {
 // operation, in Kilobytes (more accurately, Kibibytes) per second.
 func (ob *Sender) TransferSpeedKBpS() float64 {
 	if ob == nil {
-		_ = ob.logError(0xE6C59B, ":", ENilReceiver)
+		_ = ob.logError(0xE6C59B, ENilReceiver)
 		return 0.0
 	}
 	if ob.info.transferTime < 1 {
@@ -289,7 +289,7 @@ func (ob *Sender) TransferSpeedKBpS() float64 {
 // PrintInfo prints the UDP transfer statistics to the standard output.
 func (ob *Sender) PrintInfo() {
 	if ob == nil {
-		_ = ob.logError(0xE483B1, ":", ENilReceiver)
+		_ = ob.logError(0xE483B1, ENilReceiver)
 		return
 	}
 	tItem := time.Duration(0)
@@ -344,21 +344,21 @@ func (ob *Sender) PrintInfo() {
 //
 func (ob *Sender) connect() (*net.UDPConn, error) {
 	if ob == nil {
-		return nil, ob.logError(0xE65C26, ":", ENilReceiver)
+		return nil, ob.logError(0xE65C26, ENilReceiver)
 	}
 	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		return nil, ob.logError(0xEC7C6B, "(ResolveUDPAddr):", err)
+		return nil, ob.logError(0xEC7C6B, err)
 	}
 	conn, err := net.DialUDP("udp", nil, udpAddr) // (*net.UDPConn, error)
 	if err != nil {
-		return nil, ob.logError(0xE15CE1, "(DialUDP):", err)
+		return nil, ob.logError(0xE15CE1, err)
 	}
 	// TODO: add this to ConfigSettings
 	err = conn.SetWriteBuffer(16 * 1024 * 2014) // 16 MiB
 	if err != nil {
-		return nil, ob.logError(0xE5F9C7, "(SetWriteBuffer):", err)
+		return nil, ob.logError(0xE5F9C7, err)
 	}
 	return conn, nil
 } //                                                                     connect
@@ -374,35 +374,35 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	}
 	tempConn, err := ob.connect()
 	if err != nil {
-		_ = ob.logError(0xE7DF8B, "(connect):", err)
+		_ = ob.logError(0xE7DF8B, err)
 		return nil
 	}
 	packet, err := ob.makePacket([]byte(tagDataItemHash + name))
 	if err != nil {
-		_ = ob.logError(0xE1F8C5, "(makePacket):", err)
+		_ = ob.logError(0xE1F8C5, err)
 		return nil
 	}
 	err = packet.send(tempConn, ob.Config.Cipher)
 	if err != nil {
-		_ = ob.logError(0xE7F316, "(packet.send):", err)
+		_ = ob.logError(0xE7F316, err)
 		return nil
 	}
 	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
 	nRead, _, err :=
 		readFromUDPConn(tempConn, encryptedReply, ob.Config.ReplyTimeout)
 	if err != nil {
-		_ = ob.logError(0xE97FC3, "(ReadFrom):", err)
+		_ = ob.logError(0xE97FC3, err)
 		return nil
 	}
 	reply, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
 	if err != nil {
-		_ = ob.logError(0xE2B5A1, "(Decrypt):", err)
+		_ = ob.logError(0xE2B5A1, err)
 		return nil
 	}
 	var hash []byte
 	if len(reply) > 0 {
 		if !bytes.HasPrefix(reply, []byte(tagDataItemHash)) {
-			_ = ob.logError(0xE08AD4, ": invalid reply:", reply)
+			_ = ob.logError(0xE08AD4, "invalid reply:", reply)
 			return nil
 		}
 		hexHash := string(reply[len(tagDataItemHash):])
@@ -411,7 +411,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		}
 		hash, err = hex.DecodeString(hexHash)
 		if err != nil {
-			_ = ob.logError(0xE5A4E7, "(hex.DecodeString):", err)
+			_ = ob.logError(0xE5A4E7, err)
 			return nil
 		}
 	}
@@ -422,7 +422,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 // packets to the destination Receiver.
 func (ob *Sender) sendUndeliveredPackets() error {
 	if ob == nil {
-		return ob.logError(0xE8DB3F, ":", ENilReceiver)
+		return ob.logError(0xE8DB3F, ENilReceiver)
 	}
 	err := ob.Config.Validate()
 	if err != nil {
@@ -439,7 +439,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		go func() {
 			err := packet.send(ob.conn, ob.Config.Cipher)
 			if err != nil {
-				_ = ob.logError(0xE67BA4, "(packet.send):", err)
+				_ = ob.logError(0xE67BA4, err)
 			}
 			ob.wg.Done()
 		}()
@@ -451,7 +451,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 // from the sender, and marks all confirmed packets as delivered.
 func (ob *Sender) collectConfirmations() {
 	if ob == nil {
-		_ = ob.logError(0xE8EA91, ":", ENilReceiver)
+		_ = ob.logError(0xE8EA91, ENilReceiver)
 		return
 	}
 	err := ob.Config.Validate()
@@ -468,20 +468,20 @@ func (ob *Sender) collectConfirmations() {
 			break
 		}
 		if err != nil {
-			_ = ob.logError(0xE7B6B2, "(ReadFrom):", err)
+			_ = ob.logError(0xE7B6B2, err)
 			continue
 		}
 		if nRead == 0 {
-			_ = ob.logError(0xE4CB0B, ": received no data")
+			_ = ob.logError(0xE4CB0B, "received no data")
 			continue
 		}
 		recv, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
 		if err != nil {
-			_ = ob.logError(0xE5C43E, "(Decrypt):", err)
+			_ = ob.logError(0xE5C43E, err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(tagConfirmation)) {
-			_ = ob.logError(0xE5AF24, ": bad reply header")
+			_ = ob.logError(0xE5AF24, "bad reply header")
 			if ob.Config.VerboseSender {
 				ob.logInfo("ERROR received:", len(recv), "bytes")
 			}
@@ -509,7 +509,7 @@ func (ob *Sender) collectConfirmations() {
 // will only wait for the duration specified in Config.ReplyTimeout.
 func (ob *Sender) waitForAllConfirmations() {
 	if ob == nil {
-		_ = ob.logError(0xE2A34E, ":", ENilReceiver)
+		_ = ob.logError(0xE2A34E, ENilReceiver)
 		return
 	}
 	err := ob.Config.Validate()
@@ -552,12 +552,12 @@ func (ob *Sender) waitForAllConfirmations() {
 // close closes the UDP connection.
 func (ob *Sender) close() error {
 	if ob == nil {
-		return ob.logError(0xE0561D, ":", ENilReceiver)
+		return ob.logError(0xE0561D, ENilReceiver)
 	}
 	err := ob.conn.Close()
 	ob.conn = nil
 	if err != nil {
-		return ob.logError(0xE71AB2, "(close):", err)
+		return ob.logError(0xE71AB2, err)
 	}
 	return nil
 } //                                                                       close
@@ -613,7 +613,7 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 	}
 	sentHash, err := getHash(data)
 	if err != nil {
-		return nil, ob.logError(0xE84C0B, "(getHash)", err)
+		return nil, ob.logError(0xE84C0B, err)
 	}
 	packet := Packet{
 		data:     data,
@@ -628,7 +628,7 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 // with the statistics of the current Send operation.
 func (ob *Sender) updateInfo() {
 	if ob == nil {
-		_ = ob.logError(0xED48D1, ":", ENilReceiver)
+		_ = ob.logError(0xED48D1, ENilReceiver)
 		return
 	}
 	ob.info.transferTime = time.Since(ob.startTime)

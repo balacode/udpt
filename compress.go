@@ -21,11 +21,11 @@ func compress(data []byte) ([]byte, error) {
 		defer func() {
 			_ = wr.Close()
 		}()
-		return nil, makeError(0xE5F7D3, "(Write):", err)
+		return nil, makeError(0xE5F7D3, err)
 	}
 	err = wr.Close()
 	if err != nil {
-		return nil, makeError(0xE39D8B, "(Close):", err)
+		return nil, makeError(0xE39D8B, err)
 	}
 	ret := cbuf.Bytes()
 	//
