@@ -117,10 +117,6 @@ type Sender struct {
 // Receiver specified by Sender.Address and Port.
 func (ob *Sender) Send(name string, data []byte) error {
 	//
-	err := ob.Config.Validate()
-	if err != nil {
-		return ob.logError(0xE5D92D, err)
-	}
 	if strings.TrimSpace(ob.Address) == "" {
 		return ob.logError(0xE5A04A, "missing Sender.Address")
 	}
@@ -135,9 +131,13 @@ func (ob *Sender) Send(name string, data []byte) error {
 		}
 		ob.Config.Cipher = &aes
 	}
-	err = ob.Config.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
 		return ob.logError(0xE3A5FF, "invalid Sender.CryptoKey:", err)
+	}
+	err = ob.Config.Validate()
+	if err != nil {
+		return ob.logError(0xE5D92D, err)
 	}
 	hash, err := getHash(data)
 	if err != nil {

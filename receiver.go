@@ -84,10 +84,6 @@ func (ob *Receiver) Run() error {
 	if ob == nil {
 		return ob.logError(0xE1C1A9, ENilReceiver)
 	}
-	err := ob.Config.Validate()
-	if err != nil {
-		return ob.logError(0xE14BC8, err)
-	}
 	if ob.Port < 1 || ob.Port > 65535 {
 		return ob.logError(0xE58B2F, "invalid Receiver.Port:", ob.Port)
 	}
@@ -99,9 +95,13 @@ func (ob *Receiver) Run() error {
 		}
 		ob.Config.Cipher = &aes
 	}
-	err = ob.Config.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
 		return ob.logError(0xE3A5FF, "invalid Receiver.CryptoKey:", err)
+	}
+	err = ob.Config.Validate()
+	if err != nil {
+		return ob.logError(0xE14BC8, err)
 	}
 	if ob.ReceiveData == nil {
 		return ob.logError(0xE82C9E, "nil Receiver.ReceiveData")
