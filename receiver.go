@@ -89,12 +89,7 @@ func (ob *Receiver) Run() error {
 	}
 	// setup cipher
 	if ob.Config.Cipher == nil {
-		var aes aesCipher
-		err := aes.SetKey(ob.CryptoKey)
-		if err != nil {
-			return ob.logError(0xE36A3C, err)
-		}
-		ob.Config.Cipher = &aes
+		return ob.logError(0xE1F5E1, "nil Receiver.Config.Cipher")
 	}
 	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
