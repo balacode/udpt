@@ -373,11 +373,6 @@ func (ob *Sender) connect() (*net.UDPConn, error) {
 // return the hash of the data item identified by 'name'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
 func (ob *Sender) requestDataItemHash(name string) []byte {
-	err := ob.Config.Validate()
-	if err != nil {
-		_ = ob.logError(0xE5BC2E, err)
-		return nil
-	}
 	tempConn, err := ob.connect()
 	if err != nil {
 		_ = ob.logError(0xE7DF8B, err)
@@ -430,10 +425,6 @@ func (ob *Sender) sendUndeliveredPackets() error {
 	if ob == nil {
 		return ob.logError(0xE8DB3F, ENilReceiver)
 	}
-	err := ob.Config.Validate()
-	if err != nil {
-		return ob.logError(0xE86B5B, err)
-	}
 	n := len(ob.packets)
 	for i := 0; i < n; i++ {
 		packet := &ob.packets[i]
@@ -458,11 +449,6 @@ func (ob *Sender) sendUndeliveredPackets() error {
 func (ob *Sender) collectConfirmations() {
 	if ob == nil {
 		_ = ob.logError(0xE8EA91, ENilReceiver)
-		return
-	}
-	err := ob.Config.Validate()
-	if err != nil {
-		_ = ob.logError(0xE44C4A, err)
 		return
 	}
 	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
@@ -518,11 +504,6 @@ func (ob *Sender) waitForAllConfirmations() {
 		_ = ob.logError(0xE2A34E, ENilReceiver)
 		return
 	}
-	err := ob.Config.Validate()
-	if err != nil {
-		_ = ob.logError(0xE4B72B, err)
-		return
-	}
 	ob.logInfo("Waiting . . .")
 	t0 := time.Now()
 	ob.wg.Wait()
@@ -574,11 +555,6 @@ func (ob *Sender) close() error {
 // getPacketCount calculates the number of packets needed to send 'length'
 // bytes. This depends on the setting of Config.PacketPayloadSize.
 func (ob *Sender) getPacketCount(length int) int {
-	err := ob.Config.Validate()
-	if err != nil {
-		_ = ob.logError(0xEC866E, err)
-		return 0
-	}
 	if length < 1 {
 		return 0
 	}
