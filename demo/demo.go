@@ -30,7 +30,7 @@ func main() {
 	receiver := udpt.Receiver{
 		Port:      1234,
 		CryptoKey: cryptoKey,
-		Config:    cfg,
+		Config:    *cfg,
 		//
 		// receives fully-transferred data items sent to the receiver
 		ReceiveData: func(name string, data []byte) error {
@@ -60,7 +60,7 @@ func main() {
 		Address:   "127.0.0.1",
 		Port:      1234,
 		CryptoKey: cryptoKey,
-		Config:    cfg,
+		Config:    *cfg,
 	}
 	err := sender.SendString("demo_data", "Hello World!")
 	if err != nil {

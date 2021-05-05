@@ -77,9 +77,9 @@ type ConfigSettings struct {
 } //                                                              ConfigSettings
 
 // NewDefaultConfig returns default configuration settings.
-func NewDefaultConfig() ConfigSettings {
-	return ConfigSettings{
-		Cipher: nil,
+func NewDefaultConfig() *ConfigSettings {
+	return &ConfigSettings{
+		Cipher: &aesCipher{},
 		//
 		// Limits:
 		PacketSizeLimit:   1450,
