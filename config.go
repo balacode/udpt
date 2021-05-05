@@ -13,11 +13,11 @@ import (
 // These settings normally don't need to be changed.
 type ConfigSettings struct {
 
-	// Cipher is the object that handles enryption and decryption.
+	// Cipher is the object that handles encryption and decryption.
 	//
 	// It must implement the SymmetricCipher interface which is defined in
-	// this package. If you don't specify Cipher, then encyption will be
-	// done using aesCipher, the default encryption used in this package.
+	// this package. If you don't specify Cipher, then encryption will be done
+	// using the default AES-256 cipher (aesCipher) used in this package.
 	//
 	Cipher SymmetricCipher
 
@@ -97,10 +97,10 @@ func NewDefaultConfig() ConfigSettings {
 	}
 } //                                                            NewDefaultConfig
 
-// Validate checks if all configuration paremeters
+// Validate checks if all configuration parameters
 // are set within acceptable limits.
 //
-// Returns nil if there is no problem, or the error code of the erorr.
+// Returns nil if there is no problem, or the error value.
 //
 func (ob *ConfigSettings) Validate() error {
 	if ob.Cipher == nil {

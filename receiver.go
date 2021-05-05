@@ -99,6 +99,7 @@ func (ob *Receiver) Run() error {
 	if err != nil {
 		return ob.logError(0xE3A5FF, "invalid Receiver.CryptoKey:", err)
 	}
+	// check settings
 	err = ob.Config.Validate()
 	if err != nil {
 		return ob.logError(0xE14BC8, err)
@@ -109,6 +110,7 @@ func (ob *Receiver) Run() error {
 	if ob.ProvideData == nil {
 		return ob.logError(0xE4E2C1, "nil Receiver.ProvideData")
 	}
+	// prepare for reception
 	if ob.Config.VerboseReceiver {
 		ob.logInfo(strings.Repeat("-", 80))
 		ob.logInfo("UDPT started in receiver mode")
@@ -131,6 +133,7 @@ func (ob *Receiver) Run() error {
 	if ob.Config.VerboseReceiver {
 		ob.logInfo("Receiver.Run() called net.ListenUDP")
 	}
+	// receive transmissions
 	encryptedReq := make([]byte, ob.Config.PacketSizeLimit)
 	for conn != nil {
 		// 'encryptedReq' is overwritten after every readFromUDPConn

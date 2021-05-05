@@ -34,7 +34,8 @@ func (ob *aesCipher) ValidateKey(key []byte) error {
 	return nil
 } //                                                                 ValidateKey
 
-// SetKey initializes a cipher with the specified secret key.
+// SetKey initializes the cipher with the specified secret key.
+// The same key is used for encryption and decryption.
 func (ob *aesCipher) SetKey(key []byte) error {
 	if len(key) != 32 {
 		return makeError(0xE32BD3, errKeySize)
@@ -53,6 +54,9 @@ func (ob *aesCipher) SetKey(key []byte) error {
 
 // Encrypt encrypts plaintext using the key given to SetKey and
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
+//
+// You need to call SetKey at least once before you call Encrypt.
+//
 func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
 		return nil, makeError(0xE64A2E, errKeySize)
@@ -75,6 +79,9 @@ func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 
 // Decrypt decrypts ciphertext using the key given to SetKey and
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
+//
+// You need to call SetKey at least once before you call Decrypt.
+//
 func (ob *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
 		return nil, makeError(0xE35A87, errKeySize)
