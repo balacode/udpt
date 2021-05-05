@@ -14,14 +14,14 @@ type SymmetricCipher interface {
 	// For example it must be of the right size.
 	ValidateKey(key []byte) error
 
-	// InitCipher initializes a cipher with the specified secret key.
-	InitCipher(key []byte) error
+	// SetKey initializes a cipher with the specified secret key.
+	SetKey(key []byte) error
 
-	// Encrypt encrypts plaintext using the key given to InitCipher and
+	// Encrypt encrypts plaintext using the key given to SetKey and
 	// returns the encrypted ciphertext, using a symmetric-key cipher.
 	Encrypt(plaintext []byte) (ciphertext []byte, err error)
 
-	// Decrypt decrypts ciphertext using the key given to InitCipher and
+	// Decrypt decrypts ciphertext using the key given to SetKey and
 	// returns the decrypted plaintext, using a symmetric-key cipher.
 	Decrypt(ciphertext []byte) (plaintext []byte, err error)
 } //                                                             SymmetricCipher

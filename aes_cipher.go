@@ -34,8 +34,8 @@ func (ob *aesCipher) ValidateKey(key []byte) error {
 	return nil
 } //                                                                 ValidateKey
 
-// InitCipher initializes a cipher with the specified secret key.
-func (ob *aesCipher) InitCipher(key []byte) error {
+// SetKey initializes a cipher with the specified secret key.
+func (ob *aesCipher) SetKey(key []byte) error {
 	if len(key) != 32 {
 		return makeError(0xE32BD3, errKeySize)
 	}
@@ -49,9 +49,9 @@ func (ob *aesCipher) InitCipher(key []byte) error {
 	}
 	ob.cryptoKey = key
 	return nil
-} //                                                                  InitCipher
+} //                                                                      SetKey
 
-// Encrypt encrypts plaintext using the key given to InitCipher and
+// Encrypt encrypts plaintext using the key given to SetKey and
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
 func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
@@ -73,7 +73,7 @@ func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	return ciphertext, nil
 } //                                                                     Encrypt
 
-// Decrypt decrypts ciphertext using the key given to InitCipher and
+// Decrypt decrypts ciphertext using the key given to SetKey and
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
 func (ob *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ob.cryptoKey) != 32 {
