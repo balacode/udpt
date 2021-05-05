@@ -22,7 +22,7 @@ var _ = pl
 // Prefixes each line in the message with a timestamp.
 //
 // This is a convenience function that provides default logging
-// ouput for this package while developing or debugging.
+// output for this package while developing or debugging.
 //
 // You can assign it to Sender.LogFunc and Receiver.LogFunc.
 //

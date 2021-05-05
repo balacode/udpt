@@ -10,15 +10,15 @@ import (
 	"time"
 )
 
-// Config contains UDP and other configuration settings.
+// Config contains UDP and other default configuration settings.
 // These settings normally don't need to be changed.
 type ConfigSettings struct {
 
 	// Cipher is the object that handles enryption and decryption.
 	//
 	// It must implement the SymmetricCipher interface which is defined in
-	// this package. If you don't specify Cipher, then encyption will
-	// be done using AESCipher, the default encryption used in this package.
+	// this package. If you don't specify Cipher, then encyption will be
+	// done using AESCipher, the default encryption used in this package.
 	//
 	Cipher SymmetricCipher
 
