@@ -116,13 +116,10 @@ type Sender struct {
 // Send transfers a sequence of bytes ('data') to the
 // Receiver specified by Sender.Address and Port.
 func (ob *Sender) Send(name string, data []byte) error {
-	//
-	if strings.TrimSpace(ob.Address) == "" {
-		return ob.logError(0xE5A04A, "missing Sender.Address")
+	if ob == nil {
+		return ob.logError(0xE2B7B8, ENilReceiver)
 	}
-	if ob.Port < 1 || ob.Port > 65535 {
-		return ob.logError(0xE7B72A, "invalid Sender.Port:", ob.Port)
-	}
+	// setup cipher
 	if ob.Config.Cipher == nil {
 		var aes AESCipher
 		err := aes.InitCipher(ob.CryptoKey)
@@ -133,12 +130,20 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE3A5FF, "invalid Sender.CryptoKey:", err)
+		return ob.logError(0xE3E35C, "invalid Sender.CryptoKey:", err)
 	}
+	// check settings
 	err = ob.Config.Validate()
 	if err != nil {
 		return ob.logError(0xE5D92D, err)
 	}
+	if strings.TrimSpace(ob.Address) == "" {
+		return ob.logError(0xE5A04A, "missing Sender.Address")
+	}
+	if ob.Port < 1 || ob.Port > 65535 {
+		return ob.logError(0xE7B72A, "invalid Sender.Port:", ob.Port)
+	}
+	// prepare for transfer
 	hash, err := getHash(data)
 	if err != nil {
 		return ob.logError(0xE4B4D8, err)
@@ -157,12 +162,11 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE2A7C3, err)
 	}
 	packetCount := ob.getPacketCount(len(compressed))
-	ob.dataHash, err = getHash(data)
-	if err != nil {
-		return ob.logError(0xE5E0E6, err)
-	}
+	ob.dataHash = hash
 	ob.startTime = time.Now()
 	ob.packets = make([]Packet, packetCount)
+	//
+	// begin transfer
 	for i := range ob.packets {
 		a := i * ob.Config.PacketPayloadSize
 		b := a + ob.Config.PacketPayloadSize
@@ -186,7 +190,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE8B8D0, err)
 	}
 	ob.conn = newConn
-	go ob.collectConfirmations()
+	go ob.collectConfirmations() // exits when conn becomes nil
 	for retries := 0; retries < ob.Config.SendRetries; retries++ {
 		err = ob.sendUndeliveredPackets()
 		if err != nil {
