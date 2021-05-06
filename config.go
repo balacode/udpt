@@ -13,6 +13,9 @@ import (
 // These settings normally don't need to be changed.
 type Configuration struct {
 
+	// -------------------------------------------------------------------------
+	// Components:
+
 	// Cipher is the object that handles encryption and decryption.
 	//
 	// It must implement the SymmetricCipher interface which is defined in
@@ -122,6 +125,8 @@ func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
 // NewDefaultConfig returns default configuration settings.
 func NewDefaultConfig() *Configuration {
 	return &Configuration{
+		//
+		// Components:
 		Cipher:     &aesCipher{},
 		Compressor: &zlibCompressor{},
 		//
@@ -138,10 +143,7 @@ func NewDefaultConfig() *Configuration {
 		SendWaitInterval:   50 * time.Millisecond,
 		WriteTimeout:       15 * time.Second,
 		//
-		// Logging:
-		LogFunc:         nil,
-		VerboseReceiver: false,
-		VerboseSender:   false,
+		// Logging: (default nil/zero values)
 	}
 } //                                                            NewDefaultConfig
 
@@ -154,12 +156,14 @@ func (ob *Configuration) Validate() error {
 	if ob == nil {
 		return makeError(0xE8E9E5, ENilReceiver+" in Configuration")
 	}
+	// Components:
 	if ob.Cipher == nil {
 		return makeError(0xE5D4AB, "nil Configuration.Cipher")
 	}
 	if ob.Compressor == nil {
 		return makeError(0xE5B3C1, "nil Configuration.Compressor")
 	}
+	// Limits:
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
 		return makeError(0xE86C2A,
