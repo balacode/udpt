@@ -21,6 +21,9 @@ type Configuration struct {
 	//
 	Cipher SymmetricCipher
 
+	// Compressor handles compression and uncompression.
+	Compressor Compression
+
 	// -------------------------------------------------------------------------
 	// Limits:
 
@@ -119,7 +122,8 @@ func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
 // NewDefaultConfig returns default configuration settings.
 func NewDefaultConfig() *Configuration {
 	return &Configuration{
-		Cipher: &aesCipher{},
+		Cipher:     &aesCipher{},
+		Compressor: &zlibCompressor{},
 		//
 		// Limits:
 		PacketSizeLimit:   1450,
@@ -152,6 +156,9 @@ func (ob *Configuration) Validate() error {
 	}
 	if ob.Cipher == nil {
 		return makeError(0xE5D4AB, "nil Configuration.Cipher")
+	}
+	if ob.Compressor == nil {
+		return makeError(0xE5B3C1, "nil Configuration.Compressor")
 	}
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {

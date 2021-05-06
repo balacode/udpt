@@ -155,7 +155,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
-	compressed, err := compress(data)
+	compressed, err := ob.Config.Compressor.Compress(data)
 	if err != nil {
 		return ob.logError(0xE2A7C3, err)
 	}

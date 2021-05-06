@@ -264,7 +264,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		if ob.ReceiveData == nil {
 			return nil, ob.logError(0xE49E2A, "nil Receiver.ReceiveData")
 		}
-		data, err := it.UnpackBytes()
+		data, err := it.UnpackBytes(ob.Config.Compressor)
 		if err != nil {
 			return nil, ob.logError(0xE3DB1D, err)
 		}

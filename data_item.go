@@ -83,7 +83,7 @@ func (ob *dataItem) Retain(name string, hash []byte, packetCount int) {
 
 // UnpackBytes joins CompressedPieces and uncompresses
 // the resulting bytes to get the original data item.
-func (ob *dataItem) UnpackBytes() ([]byte, error) {
+func (ob *dataItem) UnpackBytes(compressor Compression) ([]byte, error) {
 	//
 	// join pieces (provided all have been collected) to get compressed data
 	if !ob.IsLoaded() {
@@ -93,7 +93,7 @@ func (ob *dataItem) UnpackBytes() ([]byte, error) {
 	ob.CompressedSizeInfo = len(compressed)
 	//
 	// uncompress data
-	ret, err := uncompress(compressed)
+	ret, err := compressor.Uncompress(compressed)
 	if err != nil {
 		return nil, makeError(0xE95DFB, err)
 	}

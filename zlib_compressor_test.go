@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// github.com/balacode/udpt                                  /[compress_test.go]
+// github.com/balacode/udpt                           /[zlib_compressor_test.go]
 // (c) balarabe@protonmail.com                                      License: MIT
 // -----------------------------------------------------------------------------
 
@@ -11,22 +11,23 @@ import (
 	"testing"
 )
 
-// go test --run Test_compress_uncompress_
-func Test_compress_uncompress_(t *testing.T) {
+// go test --run ZLib
+func Test_ZLibCompressor_(t *testing.T) {
+	zc := zlibCompressor{}
 	input := []byte(strings.Repeat(
 		"The quick brown fox jumps over the lazy dog!", 7,
 	))
-	comp, err := compress(input)
+	comp, err := zc.Compress(input)
 	if err != nil {
-		t.Error("0xE26CD5 compress() failed:", err)
+		t.Error("0xE26CD5 Compress() failed:", err)
 	}
-	uncomp, err := uncompress(comp)
+	uncomp, err := zc.Uncompress(comp)
 	if err != nil {
-		t.Error("0xE38FD2 uncompress() failed:", err)
+		t.Error("0xE38FD2 Uncompress() failed:", err)
 	}
 	if !bytes.Equal(input, uncomp) {
-		t.Error("0xE58D5D compress()/uncompress() failed")
+		t.Error("0xE58D5D Compress()/Uncompress() failed")
 	}
-} //                                                   Test_compress_uncompress_
+} //                                                        Test_ZLibCompressor_
 
 // end
