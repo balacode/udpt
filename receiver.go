@@ -204,6 +204,16 @@ func (ob *Receiver) Run() error {
 	return nil
 } //                                                                         Run
 
+// Stop stops the Receiver from listening and
+// receiving data by closing its connection.
+func (ob *Receiver) Stop() {
+	err := ob.conn.Close()
+	if err != nil {
+		_ = ob.logError(0xE1B4B9, err)
+	}
+	ob.conn = nil
+} //                                                                        Stop
+
 // -----------------------------------------------------------------------------
 // # Packet Handlers
 
