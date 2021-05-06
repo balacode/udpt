@@ -170,6 +170,16 @@ func (ob *Configuration) Validate() error {
 		return makeError(0xE54BF4,
 			"invalid Configuration.PacketPayloadSize:", n)
 	}
+	n = ob.SendBufferSize
+	if n < 0 {
+		return makeError(0xE27C2B,
+			"invalid Configuration.SendBufferSize:", n)
+	}
+	n = ob.SendRetries
+	if n < 0 {
+		return makeError(0xE1C8A6,
+			"invalid Configuration.SendRetries:", n)
+	}
 	return nil
 } //                                                                    Validate
 
