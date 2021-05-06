@@ -55,10 +55,6 @@ type udpInfo struct {
 	transferTime      time.Duration
 } //                                                                     udpInfo
 
-// udpTotal contains total UDP statistics from time of startup.
-// These statistics are accumulated over all Senders after every call to Send.
-var udpTotal udpInfo
-
 // -----------------------------------------------------------------------------
 // # Sender Class
 
@@ -210,7 +206,6 @@ func (ob *Sender) Send(name string, data []byte) error {
 		}
 		time.Sleep(ob.Config.SendRetryInterval)
 	}
-	ob.updateInfo()
 	err = ob.close()
 	if err != nil {
 		return ob.logError(0xE40A05, err)
@@ -322,22 +317,20 @@ func (ob *Sender) PrintInfo() {
 		tItem += tPack
 	}
 	var (
-		sec          = ob.info.transferTime.Seconds()
-		totalSeconds = udpTotal.transferTime.Seconds()
-		avg          = ob.AverageResponseMs()
-		speed        = ob.TransferSpeedKBpS()
-		prt          = func(tag, format string, v1, v2 interface{}) {
-			ob.logInfo(tag, padf(12, format, v1), fmt.Sprintf(format, v2))
+		sec   = ob.info.transferTime.Seconds()
+		avg   = ob.AverageResponseMs()
+		speed = ob.TransferSpeedKBpS()
+		prt   = func(tag, format string, v1 interface{}) {
+			ob.logInfo(tag, padf(12, format, v1))
 		}
 	)
-	prt("B. delivered:", "%d", ob.info.bytesDelivered, udpTotal.bytesDelivered)
-	prt("Bytes lost  :", "%d", ob.info.bytesLost, udpTotal.bytesLost)
-	prt("P. delivered:", "%d", ob.info.packetsDelivered,
-		udpTotal.packetsDelivered)
-	prt("Packets lost:", "%d", ob.info.packsLost, udpTotal.packsLost)
-	prt("Time in item:", "%0.1f s", sec, totalSeconds)
-	prt("Avg./ Packet:", "%0.1f ms", avg, udpTotal.averageResponseMs)
-	prt("Trans. speed:", "%0.1f KiB/s", speed, udpTotal.transferSpeedKBpS)
+	prt("B. delivered:", "%d", ob.info.bytesDelivered)
+	prt("Bytes lost  :", "%d", ob.info.bytesLost)
+	prt("P. delivered:", "%d", ob.info.packetsDelivered)
+	prt("Packets lost:", "%d", ob.info.packsLost)
+	prt("Time in item:", "%0.1f s", sec)
+	prt("Avg./ Packet:", "%0.1f ms", avg)
+	prt("Trans. speed:", "%0.1f KiB/s", speed)
 } //                                                                   PrintInfo
 
 // -----------------------------------------------------------------------------
@@ -604,34 +597,5 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 	}
 	return &packet, nil
 } //                                                                  makePacket
-
-// updateInfo updates the global UDP transfer statistics
-// with the statistics of the current Send operation.
-func (ob *Sender) updateInfo() {
-	if ob == nil {
-		_ = ob.logError(0xED48D1, ENilReceiver)
-		return
-	}
-	ob.info.transferTime = time.Since(ob.startTime)
-	//
-	// update global statistics
-	udpTotal.bytesDelivered += ob.info.bytesDelivered
-	udpTotal.bytesLost += ob.info.bytesLost
-	udpTotal.packetsDelivered += ob.info.packetsDelivered
-	udpTotal.packsLost += ob.info.packsLost
-	udpTotal.transferTime += ob.info.transferTime
-	n := 0.0
-	if udpTotal.packetsDelivered > 0 {
-		ms := float64(udpTotal.transferTime) / float64(time.Millisecond)
-		n = ms / float64(udpTotal.packetsDelivered)
-	}
-	udpTotal.averageResponseMs = n
-	n = 0.0
-	if udpTotal.transferTime > 0 {
-		sec := float64(udpTotal.transferTime) / float64(time.Second)
-		n = float64(udpTotal.bytesDelivered/1024) / sec
-	}
-	udpTotal.transferSpeedKBpS = n
-} //                                                                  updateInfo
 
 // end
