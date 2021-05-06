@@ -63,6 +63,10 @@ type Receiver struct {
 
 	// -------------------------------------------------------------------------
 
+	// conn is the UDP connection on which Receiver listens;
+	// setting this to nil allows Run() to stop listening
+	conn *net.UDPConn
+
 	// receivingDataItem contains the data item
 	// currently being received from the Sender.
 	receivingDataItem dataItem
@@ -123,12 +127,12 @@ func (ob *Receiver) Run() error {
 	if err != nil {
 		return ob.logError(0xE1D68C, err)
 	}
-	conn, err := net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
+	ob.conn, err = net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
 	if err != nil {
 		return ob.logError(0xEBF95F, err)
 	}
 	defer func() {
-		err := conn.Close()
+		err := ob.conn.Close()
 		if err != nil {
 			_ = ob.logError(0xE15F3A, err)
 		}
@@ -138,10 +142,10 @@ func (ob *Receiver) Run() error {
 	}
 	// receive transmissions
 	encryptedReq := make([]byte, ob.Config.PacketSizeLimit)
-	for conn != nil {
+	for ob.conn != nil {
 		// 'encryptedReq' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(conn, encryptedReq, ob.Config.ReplyTimeout)
+			readFromUDPConn(ob.conn, encryptedReq, ob.Config.ReplyTimeout)
 		if err != nil {
 			_ = ob.logError(0xEA288A, err)
 			continue
@@ -183,12 +187,12 @@ func (ob *Receiver) Run() error {
 			continue
 		}
 		deadline := time.Now().Add(ob.Config.WriteTimeout)
-		err = conn.SetWriteDeadline(deadline)
+		err = ob.conn.SetWriteDeadline(deadline)
 		if err != nil {
 			_ = ob.logError(0xE1F2C4, err)
 			continue
 		}
-		nWrit, err := conn.WriteTo(encryptedReply, addr)
+		nWrit, err := ob.conn.WriteTo(encryptedReply, addr)
 		if err != nil {
 			_ = ob.logError(0xEA63C4, err)
 			continue
