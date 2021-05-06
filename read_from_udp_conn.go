@@ -44,25 +44,38 @@ func readFromUDPConn(
 	}
 	err = conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
-		return 0, nil, makeError(0xE14A90, err)
+		return 0, nil, netError(err, 0xE14A90)
 	}
 	// contents of 'tempBuf' is overwritten after every ReadFrom
 	nRead, addr, err = conn.ReadFrom(tempBuf)
 	if err != nil {
-		errName := err.Error()
-		switch {
-		// don't log a closed connection or i/o timeout:
-		// these are expected, so just return errClosed or errTimeout
-		case strings.Contains(errName, errClosed.Error()):
-			err = errClosed
-		case strings.Contains(errName, errTimeout.Error()):
-			err = errTimeout
-		default:
-			// log any other unexpected error here
-			err = makeError(0xE0E0B1, err)
-		}
+		netError(err, 0xE0E0B1)
 	}
 	return nRead, addr, err
 } //                                                             readFromUDPConn
+
+// netError filters out network errors for readFromUDPConn() and returns
+// them as distinct error values like errClosed and errTimeout.
+//
+// For other errors, it just calls makeError().
+//
+func netError(err error, otherErrorID uint32) error {
+	if err == nil {
+		return nil
+	}
+	errName := err.Error()
+	switch {
+	// don't log a closed connection or i/o timeout:
+	// these are expected, so just return errClosed or errTimeout
+	case strings.Contains(errName, errClosed.Error()):
+		err = errClosed
+	case strings.Contains(errName, errTimeout.Error()):
+		err = errTimeout
+	default:
+		// log any other unexpected error here
+		err = makeError(otherErrorID, err)
+	}
+	return err
+} //                                                                    netError
 
 // end
