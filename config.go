@@ -76,6 +76,32 @@ type Configuration struct {
 	VerboseSender bool
 } //                                                               Configuration
 
+// NewDebugConfig returns configuration settings for debugging.
+//
+// You can specify an optional log function for logging.
+// If you omit it, logError() and logInfo() output will
+// use LogPrint, which just prints to standard output.
+//
+// Tip: to log output to specific file in addition to standard output, use:
+//
+// udpt.NewDebugConfig(udpt.MakeLogFunc(true, "your_file_name"))
+//
+// If you pass multiple arguments, only the first will be used.
+//
+func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
+	cfg := NewDefaultConfig()
+	cfg.VerboseSender = true
+	cfg.VerboseReceiver = true
+	//
+	if len(logFunc) > 0 {
+		const printMsg = true
+		cfg.LogFunc = logFunc[0]
+	} else {
+		cfg.LogFunc = LogPrint
+	}
+	return cfg
+} //                                                              NewDebugConfig
+
 // NewDefaultConfig returns default configuration settings.
 func NewDefaultConfig() *Configuration {
 	return &Configuration{
