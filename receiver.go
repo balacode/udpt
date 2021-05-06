@@ -146,6 +146,9 @@ func (ob *Receiver) Run() error {
 		// 'encryptedReq' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
 			readFromUDPConn(ob.conn, encryptedReq, ob.Config.ReplyTimeout)
+		if err == errClosed {
+			break
+		}
 		if err != nil {
 			_ = ob.logError(0xEA288A, err)
 			continue
