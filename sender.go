@@ -208,7 +208,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		if ob.DeliveredAllParts() {
 			break
 		}
-		time.Sleep(250 * time.Millisecond)
+		time.Sleep(ob.Config.SendRetryInterval)
 	}
 	ob.updateInfo()
 	err = ob.close()
@@ -361,8 +361,7 @@ func (ob *Sender) connect() (*net.UDPConn, error) {
 	if err != nil {
 		return nil, ob.logError(0xE15CE1, err)
 	}
-	// TODO: add this to Configuration
-	err = conn.SetWriteBuffer(16 * 1024 * 2014) // 16 MiB
+	err = conn.SetWriteBuffer(ob.Config.SendBufferSize)
 	if err != nil {
 		return nil, ob.logError(0xE5F9C7, err)
 	}
@@ -431,7 +430,7 @@ func (ob *Sender) sendUndeliveredPackets() error {
 		if packet.isDelivered() {
 			continue
 		}
-		time.Sleep(2 * time.Millisecond)
+		time.Sleep(ob.Config.SendPacketInterval)
 		ob.wg.Add(1)
 		go func() {
 			err := packet.send(ob.conn, ob.Config.Cipher)
@@ -508,7 +507,7 @@ func (ob *Sender) waitForAllConfirmations() {
 	t0 := time.Now()
 	ob.wg.Wait()
 	for {
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(ob.Config.SendWaitInterval)
 		if ob.DeliveredAllParts() {
 			if ob.Config.VerboseSender {
 				ob.logInfo("Delivered all packets")

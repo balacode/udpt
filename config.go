@@ -45,16 +45,30 @@ type Configuration struct {
 	// PacketPayloadSize must always be smaller that PacketSizeLimit.
 	PacketPayloadSize int
 
+	// SendBufferSize is size of the write buffer used by Send(), in bytes.
+	SendBufferSize int
+
+	// SendRetries is the number of times for
+	// Send() to retry sending lost packets.
+	SendRetries int
+
 	// -------------------------------------------------------------------------
-	// Timeouts:
+	// Timeouts and Intervals:
 
 	// ReplyTimeout is the maximum time to wait for reply
 	// datagram(s) to arrive in a UDP connection.
 	ReplyTimeout time.Duration
 
-	// SendRetries is the number of times for
-	// Send() to retry sending lost packets.
-	SendRetries int
+	// SendPacketInterval is the time to wait between sending packets.
+	SendPacketInterval time.Duration
+
+	// SendRetryInterval is the time for Sender.Send() to
+	// wait before retrying to send undelivered packets.
+	SendRetryInterval time.Duration
+
+	// SendWaitInterval is the amount of time Sender() should sleep
+	// in the loop, before checking if a confirmation has arrived.
+	SendWaitInterval time.Duration
 
 	// WriteTimeout is the maximum time to
 	// wait for writing to a UDP connection.
@@ -110,11 +124,15 @@ func NewDefaultConfig() *Configuration {
 		// Limits:
 		PacketSizeLimit:   1450,
 		PacketPayloadSize: 1024,
+		SendBufferSize:    16 * 1024 * 2014, // 16 MiB
+		SendRetries:       10,
 		//
-		// Timeouts:
-		ReplyTimeout: 15 * time.Second,
-		SendRetries:  10,
-		WriteTimeout: 15 * time.Second,
+		// Timeouts and Intervals:
+		ReplyTimeout:       15 * time.Second,
+		SendPacketInterval: 2 * time.Millisecond,
+		SendRetryInterval:  250 * time.Millisecond,
+		SendWaitInterval:   50 * time.Millisecond,
+		WriteTimeout:       15 * time.Second,
 		//
 		// Logging:
 		LogFunc:         nil,
