@@ -30,7 +30,7 @@ type Receiver struct {
 
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
-	Config *ConfigSettings
+	Config *Configuration
 
 	// ReceiveData is a callback function you must specify. This Receiver
 	// will call it when a data item has been fully transferred.

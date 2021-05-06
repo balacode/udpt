@@ -11,7 +11,7 @@ import (
 
 // Config contains UDP and other default configuration settings.
 // These settings normally don't need to be changed.
-type ConfigSettings struct {
+type Configuration struct {
 
 	// Cipher is the object that handles encryption and decryption.
 	//
@@ -74,11 +74,11 @@ type ConfigSettings struct {
 	// VerboseSender specifies if Send() should print
 	// informational messages to the standard output.
 	VerboseSender bool
-} //                                                              ConfigSettings
+} //                                                               Configuration
 
 // NewDefaultConfig returns default configuration settings.
-func NewDefaultConfig() *ConfigSettings {
-	return &ConfigSettings{
+func NewDefaultConfig() *Configuration {
+	return &Configuration{
 		Cipher: &aesCipher{},
 		//
 		// Limits:
@@ -102,22 +102,22 @@ func NewDefaultConfig() *ConfigSettings {
 //
 // Returns nil if there is no problem, or the error value.
 //
-func (ob *ConfigSettings) Validate() error {
+func (ob *Configuration) Validate() error {
 	if ob == nil {
-		return makeError(0xE8E9E5, ENilReceiver+" in ConfigSettings")
+		return makeError(0xE8E9E5, ENilReceiver+" in Configuration")
 	}
 	if ob.Cipher == nil {
-		return makeError(0xE5D4AB, "nil ConfigSettings.Cipher")
+		return makeError(0xE5D4AB, "nil Configuration.Cipher")
 	}
 	n := ob.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
 		return makeError(0xE86C2A,
-			"invalid ConfigSettings.PacketSizeLimit:", n)
+			"invalid Configuration.PacketSizeLimit:", n)
 	}
 	n = ob.PacketPayloadSize
 	if n < 1 || n > (ob.PacketSizeLimit-200) {
 		return makeError(0xE54BF4,
-			"invalid ConfigSettings.PacketPayloadSize:", n)
+			"invalid Configuration.PacketPayloadSize:", n)
 	}
 	return nil
 } //                                                                    Validate

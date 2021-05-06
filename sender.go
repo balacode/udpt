@@ -83,7 +83,7 @@ type Sender struct {
 
 	// Config contains UDP and other configuration settings.
 	// These settings normally don't need to be changed.
-	Config *ConfigSettings
+	Config *Configuration
 
 	// -------------------------------------------------------------------------
 
@@ -361,7 +361,7 @@ func (ob *Sender) connect() (*net.UDPConn, error) {
 	if err != nil {
 		return nil, ob.logError(0xE15CE1, err)
 	}
-	// TODO: add this to ConfigSettings
+	// TODO: add this to Configuration
 	err = conn.SetWriteBuffer(16 * 1024 * 2014) // 16 MiB
 	if err != nil {
 		return nil, ob.logError(0xE5F9C7, err)
