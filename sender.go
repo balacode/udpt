@@ -533,6 +533,9 @@ func (ob *Sender) close() error {
 	if ob == nil {
 		return ob.logError(0xE0561D, ENilReceiver)
 	}
+	if ob.conn == nil {
+		return nil
+	}
 	err := ob.conn.Close()
 	ob.conn = nil
 	if err != nil {

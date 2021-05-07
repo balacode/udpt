@@ -132,9 +132,11 @@ func (ob *Receiver) Run() error {
 		return ob.logError(0xEBF95F, err)
 	}
 	defer func() {
-		err := ob.conn.Close()
-		if err != nil {
-			_ = ob.logError(0xE15F3A, err)
+		if ob.conn != nil {
+			err := ob.conn.Close()
+			if err != nil {
+				_ = ob.logError(0xE15F3A, err)
+			}
 		}
 	}()
 	if ob.Config.VerboseReceiver {
@@ -210,6 +212,9 @@ func (ob *Receiver) Run() error {
 // Stop stops the Receiver from listening and
 // receiving data by closing its connection.
 func (ob *Receiver) Stop() {
+	if ob.conn == nil {
+		return
+	}
 	err := ob.conn.Close()
 	if err != nil {
 		_ = ob.logError(0xE1B4B9, err)
