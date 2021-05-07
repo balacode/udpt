@@ -30,7 +30,7 @@ package udpt
 //
 // # Internal Helper Methods (ob *Sender)
 //   ) getPacketCount(length int) int
-//   ) makePacket(data []byte) (*Packet, error)
+//   ) makePacket(data []byte) (*senderPacket, error)
 //   ) updateInfo()
 
 import (
@@ -95,7 +95,7 @@ type Sender struct {
 
 	// packets contains all the packets of the currently transferred data item;
 	// some of them may have been delivered, while others may need (re)sending
-	packets []Packet
+	packets []senderPacket
 
 	// startTime is the time the first packet was sent, after
 	// the bytes of the data item have been compressed
@@ -162,7 +162,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	packetCount := ob.getPacketCount(len(compressed))
 	ob.dataHash = hash
 	ob.startTime = time.Now()
-	ob.packets = make([]Packet, packetCount)
+	ob.packets = make([]senderPacket, packetCount)
 	//
 	// begin transfer
 	for i := range ob.packets {
@@ -296,7 +296,7 @@ func (ob *Sender) PrintInfo() {
 	tItem := time.Duration(0)
 	for i, pack := range ob.packets {
 		tPack, status := time.Duration(0), "✔"
-		if pack.isDelivered() {
+		if pack.IsDelivered() {
 			if !pack.confirmedTime.IsZero() {
 				tPack = pack.confirmedTime.Sub(pack.sentTime)
 			}
@@ -375,7 +375,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		_ = ob.logError(0xE1F8C5, err)
 		return nil
 	}
-	err = packet.send(tempConn, ob.Config.Cipher)
+	err = packet.Send(tempConn, ob.Config.Cipher)
 	if err != nil {
 		_ = ob.logError(0xE7F316, err)
 		return nil
@@ -420,13 +420,13 @@ func (ob *Sender) sendUndeliveredPackets() error {
 	n := len(ob.packets)
 	for i := 0; i < n; i++ {
 		packet := &ob.packets[i]
-		if packet.isDelivered() {
+		if packet.IsDelivered() {
 			continue
 		}
 		time.Sleep(ob.Config.SendPacketInterval)
 		ob.wg.Add(1)
 		go func() {
-			err := packet.send(ob.conn, ob.Config.Cipher)
+			err := packet.Send(ob.conn, ob.Config.Cipher)
 			if err != nil {
 				_ = ob.logError(0xE67BA4, err)
 			}
@@ -515,7 +515,7 @@ func (ob *Sender) waitForAllConfirmations() {
 		}
 	}
 	for _, packet := range ob.packets {
-		if packet.isDelivered() {
+		if packet.IsDelivered() {
 			ob.info.bytesDelivered += int64(len(packet.data))
 			ob.info.packetsDelivered++
 		} else {
@@ -583,7 +583,7 @@ func (ob *Sender) logInfo(args ...interface{}) {
 //
 // The size of the packet must not exceed Config.PacketSizeLimit
 //
-func (ob *Sender) makePacket(data []byte) (*Packet, error) {
+func (ob *Sender) makePacket(data []byte) (*senderPacket, error) {
 	if len(data) > ob.Config.PacketSizeLimit {
 		return nil, ob.logError(0xE71F9B, "len(data)", len(data),
 			"> Config.PacketSizeLimit", ob.Config.PacketSizeLimit)
@@ -592,7 +592,7 @@ func (ob *Sender) makePacket(data []byte) (*Packet, error) {
 	if err != nil {
 		return nil, ob.logError(0xE84C0B, err)
 	}
-	packet := Packet{
+	packet := senderPacket{
 		data:     data,
 		sentHash: sentHash,
 		sentTime: time.Now(),

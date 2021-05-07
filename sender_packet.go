@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// github.com/balacode/udpt                                         /[packet.go]
+// github.com/balacode/udpt                                  /[sender_packet.go]
 // (c) balarabe@protonmail.com                                      License: MIT
 // -----------------------------------------------------------------------------
 
@@ -12,25 +12,25 @@ import (
 	"time"
 )
 
-// Packet contains data, hash and timing details of
+// senderPacket contains data, hash and timing details of
 // a UDP packet (datagram) being sent by the Sender.
-type Packet struct {
+type senderPacket struct {
 	data          []byte
 	sentHash      []byte
 	sentTime      time.Time
 	confirmedHash []byte
 	confirmedTime time.Time
-} //                                                                      Packet
+} //                                                                senderPacket
 
-// isDelivered returns true if this packet has been successfully
+// IsDelivered returns true if this packet has been successfully
 // delivered (by receiving a successful confirmation packet).
-func (ob *Packet) isDelivered() bool {
+func (ob *senderPacket) IsDelivered() bool {
 	ret := bytes.Equal(ob.sentHash, ob.confirmedHash)
 	return ret
-} //                                                                 isDelivered
+} //                                                                 IsDelivered
 
-// send encrypts and sends this packet through connection 'conn'.
-func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {
+// Send encrypts and sends this packet through connection 'conn'.
+func (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
 	if ob == nil {
 		return makeError(0xE1D3B5, ENilReceiver)
 	}
@@ -50,6 +50,6 @@ func (ob *Packet) send(conn *net.UDPConn, cipher SymmetricCipher) error {
 		return makeError(0xE93D1F, err)
 	}
 	return nil
-} //                                                                        send
+} //                                                                        Send
 
 // end
