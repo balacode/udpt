@@ -10,10 +10,10 @@ import (
 )
 
 //
-// go test --run TestTemp
+// go test --run Test_Temp_
 //
-func TestTemp(t *testing.T) {
-	pl("TestTemp")
-} //                                                                    TestTemp
+func Test_Temp_(t *testing.T) {
+	pl("Test_Temp_")
+} //                                                                  Test_Temp_
 
 // end
