@@ -290,7 +290,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		}
 		ob.logInfo("received:", it.Name)
 		if ob.Config.VerboseReceiver {
-			it.PrintInfo("receiveFragment", ob.logInfo)
+			it.LogStats("receiveFragment", ob.logInfo)
 		}
 		it.Reset()
 	}

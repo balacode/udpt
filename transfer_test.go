@@ -121,7 +121,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		cfg.LogFunc = LogPrint
 		cfg.VerboseSender = true
 		cfg.VerboseReceiver = true
-		sender.PrintInfo()
+		sender.LogStats()
 	}
 	time.Sleep(time.Second)
 } //                                                                testTransfer

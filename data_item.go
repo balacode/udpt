@@ -47,9 +47,9 @@ func (ob *dataItem) IsLoaded() bool {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// PrintInfo prints information on the current data item using the
+// LogStats prints information on the current data item using the
 // supplied printLine function. Each line is prefixed with tag.
-func (ob *dataItem) PrintInfo(
+func (ob *dataItem) LogStats(
 	tag string,
 	printLine func(args ...interface{}),
 ) {
@@ -58,7 +58,7 @@ func (ob *dataItem) PrintInfo(
 	printLine(tag+" pcs.:", len(ob.CompressedPieces))
 	printLine(tag+" comp:", ob.CompressedSizeInfo, "bytes")
 	printLine(tag+" size:", ob.UncompressedSizeInfo, "bytes")
-} //                                                                   PrintInfo
+} //                                                                    LogStats
 
 // Reset discards the contents of the data item and clears its name and hash.
 func (ob *dataItem) Reset() {

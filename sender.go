@@ -18,7 +18,7 @@ package udpt
 //   ) TransferSpeedKBpS() float64
 //
 // # Informatory Methods (ob *Sender)
-//   ) PrintInfo()
+//   ) LogStats()
 //
 // # Internal Lifecycle Methods (ob *Sender)
 //   ) requestDataItemHash(name string) []byte
@@ -212,7 +212,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE1F101, "hash mismatch")
 	}
 	if ob.Config.VerboseSender {
-		ob.PrintInfo()
+		ob.LogStats()
 	}
 	return nil
 } //                                                                        Send
@@ -269,8 +269,8 @@ func (ob *Sender) TransferSpeedKBpS() float64 {
 // -----------------------------------------------------------------------------
 // # Informatory Methods (ob *Sender)
 
-// PrintInfo prints the UDP transfer statistics to the standard output.
-func (ob *Sender) PrintInfo() {
+// LogStats prints the UDP transfer statistics to the standard output.
+func (ob *Sender) LogStats() {
 	tItem := time.Duration(0)
 	for i, pack := range ob.packets {
 		tPack, status := time.Duration(0), "✔"
@@ -309,7 +309,7 @@ func (ob *Sender) PrintInfo() {
 	prt("Time in item:", "%0.1f s", sec)
 	prt("Avg./ Packet:", "%0.1f ms", avg)
 	prt("Trans. speed:", "%0.1f KiB/s", speed)
-} //                                                                   PrintInfo
+} //                                                                    LogStats
 
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (ob *Sender)
