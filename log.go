@@ -17,6 +17,10 @@ func pl(args ...interface{}) { fmt.Println(args...) }
 
 var _ = pl
 
+// logTimeNow should always be set to time.Now,
+// except when mocking during testing.
+var logTimeNow = time.Now
+
 // LogPrint prints a logging message to the standard output.
 //
 // Prefixes each line in the message with a timestamp.
@@ -108,7 +112,7 @@ func logEnter(printMsg bool, logFile string, args ...interface{}) {
 	if logChanSize == 0 {
 		logInit()
 	}
-	msg := logMakeMessage(time.Now(), args...)
+	msg := logMakeMessage(logTimeNow(), args...)
 	entry := logEntry{printMsg: printMsg, logFile: logFile, msg: msg}
 	if logChan == nil {
 		logInit()
