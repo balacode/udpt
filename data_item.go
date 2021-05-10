@@ -47,17 +47,31 @@ func (ob *dataItem) IsLoaded() bool {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// LogStats prints information on the current data item using the
-// supplied printLine function. Each line is prefixed with tag.
-func (ob *dataItem) LogStats(
-	tag string,
-	printLine func(args ...interface{}),
-) {
-	printLine(tag+" name:", ob.Name)
-	printLine(tag+" hash:", fmt.Sprintf("%X", ob.Hash))
-	printLine(tag+" pcs.:", len(ob.CompressedPieces))
-	printLine(tag+" comp:", ob.CompressedSizeInfo, "bytes")
-	printLine(tag+" size:", ob.UncompressedSizeInfo, "bytes")
+// LogStats prints details of the current data item using the
+// passed logFunc function. Each line is prefixed with tag.
+//
+// logFunc should have a signature matching log.Println or fmt.Println.
+// It is optional. If you omit it, uses fmt.Println for output.
+//
+// like log.Println: func(...interface{})
+//
+// like fmt.Println: func(...interface{}) (int, error)
+//
+func (ob *dataItem) LogStats(tag string, logFunc ...interface{}) {
+	log := func(v ...interface{}) { _, _ = fmt.Println(v...) }
+	if len(logFunc) > 0 {
+		switch fn := logFunc[0].(type) {
+		case func(...interface{}): // like log.Println
+			log = fn
+		case func(...interface{}) (int, error): // like fmt.Println
+			log = func(v ...interface{}) { _, _ = fn(v...) }
+		}
+	}
+	log(tag+" name:", ob.Name)
+	log(tag+" hash:", fmt.Sprintf("%X", ob.Hash))
+	log(tag+" pcs.:", len(ob.CompressedPieces))
+	log(tag+" comp:", ob.CompressedSizeInfo, "bytes")
+	log(tag+" size:", ob.UncompressedSizeInfo, "bytes")
 } //                                                                    LogStats
 
 // Reset discards the contents of the data item and clears its name and hash.

@@ -285,7 +285,7 @@ func (ob *Sender) LogStats() {
 			sn = padf(4, "%d", i)
 			t0 = pack.sentTime.String()[:24]
 			t1 = pack.confirmedTime.String()[:24]
-			ms = padf(9, "%0.1f ms",
+			ms = fmt.Sprintf("%0.1f ms",
 				float64(tPack)/float64(time.Millisecond))
 		)
 		if pack.confirmedTime.IsZero() {
