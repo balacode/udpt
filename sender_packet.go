@@ -31,11 +31,11 @@ func (ob *senderPacket) IsDelivered() bool {
 
 // Send encrypts and sends this packet through connection 'conn'.
 func (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
-	if cipher == nil {
-		return makeError(0xE54A9D, EInvalidArg, "nil cipher")
-	}
 	if conn == nil {
 		return makeError(0xE4B1BA, EInvalidArg, "nil conn")
+	}
+	if cipher == nil {
+		return makeError(0xE54A9D, EInvalidArg, "nil cipher")
 	}
 	ciphertext, err := cipher.Encrypt(ob.data)
 	if err != nil {

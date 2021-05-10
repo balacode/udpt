@@ -114,7 +114,6 @@ func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
 	cfg.VerboseReceiver = true
 	//
 	if len(logFunc) > 0 {
-		const printMsg = true
 		cfg.LogFunc = logFunc[0]
 	} else {
 		cfg.LogFunc = LogPrint

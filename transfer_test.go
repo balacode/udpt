@@ -13,7 +13,8 @@ import (
 	"time"
 )
 
-// go test --run Transfer1
+// go test -run _Transfer1_
+//
 func Test_Transfer1_(t *testing.T) {
 	fmt.Println("Test_Transfer1_")
 	const itemCount = 50
@@ -21,7 +22,8 @@ func Test_Transfer1_(t *testing.T) {
 	testTransfer(itemCount, itemSize, t)
 } //                                                             Test_Transfer1_
 
-// go test --run Transfer2
+// go test -run _Transfer2_
+//
 func Test_Transfer2_(t *testing.T) {
 	fmt.Println("Test_Transfer2_")
 	const itemCount = 10
@@ -29,7 +31,8 @@ func Test_Transfer2_(t *testing.T) {
 	testTransfer(itemCount, itemSize, t)
 } //                                                             Test_Transfer2_
 
-// go test --run Transfer3
+// go test -run _Transfer3_
+//
 func Test_Transfer3_(t *testing.T) {
 	fmt.Println("Test_Transfer3_")
 	const itemCount = 1
@@ -42,8 +45,9 @@ func Test_Transfer3_(t *testing.T) {
 // This test sends several packets from a Sender to a Receiver.
 // After sending, it checks if all the packets have been delivered.
 //
-// itemCount specifies the number of b
+// itemCount specifies the number of data items to send
 //
+// itemSize specifies the size of each message in bytes
 //
 func testTransfer(itemCount, itemSize int, t *testing.T) {
 	var N = itemCount

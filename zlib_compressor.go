@@ -18,7 +18,7 @@ type zlibCompressor struct{}
 
 // Compress compresses 'data' using zlib and returns the compressed bytes.
 // If there was an error, returns nil and the error value.
-func (_ *zlibCompressor) Compress(data []byte) ([]byte, error) {
+func (*zlibCompressor) Compress(data []byte) ([]byte, error) {
 	var cbuf bytes.Buffer
 	wr := zlib.NewWriter(&cbuf)
 	_, err := wr.Write(data)
@@ -44,7 +44,7 @@ func (_ *zlibCompressor) Compress(data []byte) ([]byte, error) {
 
 // Uncompress uncompresses 'compressed' bytes using zlib and returns the
 // uncompressed bytes. If there was an error, returns nil and the error value.
-func (_ *zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
+func (*zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
 	nc := len(compressed)
 	if len(compressed) <= 4 {
 		return nil, makeError(0xE8A8A9, "invalid compressed")

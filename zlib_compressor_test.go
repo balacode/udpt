@@ -11,7 +11,8 @@ import (
 	"testing"
 )
 
-// go test --run ZLib
+// go test -run _ZLibCompressor_
+//
 func Test_ZLibCompressor_(t *testing.T) {
 	zc := zlibCompressor{}
 	input := []byte(strings.Repeat(

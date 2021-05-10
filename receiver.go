@@ -154,7 +154,7 @@ func (ob *Receiver) Run() error {
 		}
 		recv, err := ob.Config.Cipher.Decrypt(encryptedReq[:nRead])
 		if err != nil {
-			_ = ob.logError(0xE7D2C4, err)
+			_ = ob.logError(0xE9AF2F, err)
 			continue
 		}
 		if ob.Config.VerboseReceiver {

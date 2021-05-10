@@ -30,6 +30,9 @@ type dataItem struct {
 
 // IsLoaded returns true if the current data item has been
 // fully received (all its pieces have been collected).
+//
+// If the item has no pieces, returns false.
+//
 func (ob *dataItem) IsLoaded() bool {
 	ret := true
 	for _, piece := range ob.CompressedPieces {

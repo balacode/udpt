@@ -31,7 +31,6 @@ package udpt
 // # Internal Helper Methods (ob *Sender)
 //   ) getPacketCount(length int) int
 //   ) makePacket(data []byte) (*senderPacket, error)
-//   ) updateInfo()
 
 import (
 	"bytes"
@@ -46,13 +45,11 @@ import (
 // udpInfo contains UDP transfer statistics, such as the transfer
 // speed and the number of packets delivered and lost.
 type udpInfo struct {
-	averageResponseMs float64
-	bytesDelivered    int64
-	bytesLost         int64
-	packetsDelivered  int64
-	packsLost         int64
-	transferSpeedKBpS float64
-	transferTime      time.Duration
+	bytesDelivered   int64
+	bytesLost        int64
+	packetsDelivered int64
+	packsLost        int64
+	transferTime     time.Duration
 } //                                                                     udpInfo
 
 // -----------------------------------------------------------------------------

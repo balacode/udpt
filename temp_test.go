@@ -9,8 +9,7 @@ import (
 	"testing"
 )
 
-//
-// go test --run Test_Temp_
+// go test -run _Temp_
 //
 func Test_Temp_(t *testing.T) {
 	pl("Test_Temp_")

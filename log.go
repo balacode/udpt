@@ -141,13 +141,13 @@ func logInit() {
 //
 func logMakeMessage(args ...interface{}) string {
 	var (
-		ts  = time.Now().String()[:19]
+		tms = time.Now().String()[:19]
 		msg = joinArgs("", args...)
 	)
 	// prefix each line with a timestamp
 	var lines = strings.Split(msg, "\n")
 	for i, line := range lines {
-		lines[i] = ts + " " + line
+		lines[i] = tms + " " + line
 	}
 	msg = strings.Join(lines, "\n")
 	return msg
