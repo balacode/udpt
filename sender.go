@@ -42,15 +42,15 @@ import (
 	"time"
 )
 
-// udpInfo contains UDP transfer statistics, such as the transfer
+// udpStats contains UDP transfer statistics, such as the transfer
 // speed and the number of packets delivered and lost.
-type udpInfo struct {
+type udpStats struct {
 	bytesDelivered   int64
 	bytesLost        int64
 	packetsDelivered int64
 	packsLost        int64
 	transferTime     time.Duration
-} //                                                                     udpInfo
+} //                                                                    udpStats
 
 // -----------------------------------------------------------------------------
 // # Sender Class
@@ -86,9 +86,9 @@ type Sender struct {
 	// dataHash contains the hash of all bytes of the data item being sent
 	dataHash []byte
 
-	// info contains UDP transfer statistics, such as the transfer
+	// stats contains UDP transfer statistics, such as the transfer
 	// speed and the number of packets delivered and lost
-	info udpInfo
+	stats udpStats
 
 	// packets contains all the packets of the currently transferred data item;
 	// some of them may have been delivered, while others may need (re)sending
@@ -230,14 +230,14 @@ func (ob *Sender) SendString(name string, s string) error {
 // AverageResponseMs is the average response time, in milliseconds, between
 // a packet being sent and its delivery confirmation being received.
 func (ob *Sender) AverageResponseMs() float64 {
-	if ob.info.packetsDelivered == 0 {
+	if ob.stats.packetsDelivered == 0 {
 		return 0.0
 	}
 	// instead of using transferTime.Milliseconds(),
 	// cast to float64 to get sub-millisecond timing
-	ret := float64(ob.info.transferTime) /
+	ret := float64(ob.stats.transferTime) /
 		float64(time.Millisecond) /
-		float64(ob.info.packetsDelivered)
+		float64(ob.stats.packetsDelivered)
 	return ret
 } //                                                           AverageResponseMs
 
@@ -258,11 +258,11 @@ func (ob *Sender) DeliveredAllParts() bool {
 // TransferSpeedKBpS returns the transfer speed of the current Send
 // operation, in Kilobytes (more accurately, Kibibytes) per second.
 func (ob *Sender) TransferSpeedKBpS() float64 {
-	if ob.info.transferTime < 1 {
+	if ob.stats.transferTime < 1 {
 		return 0.0
 	}
-	sec := float64(ob.info.transferTime) / float64(time.Second)
-	ret := float64(ob.info.bytesDelivered/1024) / sec
+	sec := float64(ob.stats.transferTime) / float64(time.Second)
+	ret := float64(ob.stats.bytesDelivered/1024) / sec
 	return ret
 } //                                                           TransferSpeedKBpS
 
@@ -295,17 +295,17 @@ func (ob *Sender) PrintInfo() {
 		tItem += tPack
 	}
 	var (
-		sec   = ob.info.transferTime.Seconds()
+		sec   = ob.stats.transferTime.Seconds()
 		avg   = ob.AverageResponseMs()
 		speed = ob.TransferSpeedKBpS()
 		prt   = func(tag, format string, v1 interface{}) {
 			ob.logInfo(tag, padf(12, format, v1))
 		}
 	)
-	prt("B. delivered:", "%d", ob.info.bytesDelivered)
-	prt("Bytes lost  :", "%d", ob.info.bytesLost)
-	prt("P. delivered:", "%d", ob.info.packetsDelivered)
-	prt("Packets lost:", "%d", ob.info.packsLost)
+	prt("B. delivered:", "%d", ob.stats.bytesDelivered)
+	prt("Bytes lost  :", "%d", ob.stats.bytesLost)
+	prt("P. delivered:", "%d", ob.stats.packetsDelivered)
+	prt("Packets lost:", "%d", ob.stats.packsLost)
 	prt("Time in item:", "%0.1f s", sec)
 	prt("Avg./ Packet:", "%0.1f ms", avg)
 	prt("Trans. speed:", "%0.1f KiB/s", speed)
@@ -480,11 +480,11 @@ func (ob *Sender) waitForAllConfirmations() {
 	}
 	for _, packet := range ob.packets {
 		if packet.IsDelivered() {
-			ob.info.bytesDelivered += int64(len(packet.data))
-			ob.info.packetsDelivered++
+			ob.stats.bytesDelivered += int64(len(packet.data))
+			ob.stats.packetsDelivered++
 		} else {
-			ob.info.bytesLost += int64(len(packet.data))
-			ob.info.packsLost++
+			ob.stats.bytesLost += int64(len(packet.data))
+			ob.stats.packsLost++
 		}
 	}
 	if ob.Config.VerboseSender {
