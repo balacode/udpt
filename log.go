@@ -108,7 +108,7 @@ func logEnter(printMsg bool, logFile string, args ...interface{}) {
 	if logChanSize == 0 {
 		logInit()
 	}
-	msg := logMakeMessage(args...)
+	msg := logMakeMessage(time.Now(), args...)
 	entry := logEntry{printMsg: printMsg, logFile: logFile, msg: msg}
 	if logChan == nil {
 		logInit()
@@ -137,11 +137,11 @@ func logInit() {
 
 // logMakeMessage creates a log message by joining args.
 //
-// Prefixes each line with the current date/time.
+// Prefixes each line with the date/time specified in 'tm'.
 //
-func logMakeMessage(args ...interface{}) string {
+func logMakeMessage(tm time.Time, args ...interface{}) string {
 	var (
-		tms = time.Now().String()[:19]
+		tms = tm.String()[:19]
 		msg = joinArgs("", args...)
 	)
 	// prefix each line with a timestamp
