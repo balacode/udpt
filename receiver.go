@@ -85,9 +85,6 @@ type Receiver struct {
 // so it can confirm that a data transfer is successful.
 //
 func (ob *Receiver) Run() error {
-	if ob == nil {
-		return ob.logError(0xE1C1A9, ENilReceiver)
-	}
 	if ob.Config == nil {
 		ob.Config = NewDefaultConfig()
 	}
@@ -228,9 +225,6 @@ func (ob *Receiver) Stop() {
 // receiveFragment handles a tagFragment packet sent by a Sender, and
 // sends back a confirmation packet (tagConfirmation) to the Sender.
 func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
-	if ob == nil {
-		return nil, ob.logError(0xE6CD62, ENilReceiver)
-	}
 	if !bytes.HasPrefix(recv, []byte(tagFragment)) {
 		return nil, ob.logError(0xE4F3C5, "missing header")
 	}
@@ -310,9 +304,6 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 
 // sendDataItemHash handles a tagDataItemHash sent by a Sender.
 func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
-	if ob == nil {
-		return nil, ob.logError(0xE24A7B, ENilReceiver)
-	}
 	if !bytes.HasPrefix(req, []byte(tagDataItemHash)) {
 		return nil, ob.logError(0xE7B653, "missing header")
 	}

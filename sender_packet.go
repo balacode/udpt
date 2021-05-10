@@ -31,9 +31,6 @@ func (ob *senderPacket) IsDelivered() bool {
 
 // Send encrypts and sends this packet through connection 'conn'.
 func (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
-	if ob == nil {
-		return makeError(0xE1D3B5, ENilReceiver)
-	}
 	if cipher == nil {
 		return makeError(0xE54A9D, EInvalidArg, "nil cipher")
 	}

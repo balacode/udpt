@@ -23,9 +23,6 @@ const (
 const (
 	// EInvalidArg error indicates an invalid argument.
 	EInvalidArg = "Invalid argument"
-
-	// ENilReceiver error indicates a method call on a nil object.
-	ENilReceiver = "nil receiver"
 )
 
 // end

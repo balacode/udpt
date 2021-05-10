@@ -112,9 +112,6 @@ type Sender struct {
 // Send transfers a sequence of bytes ('data') to the
 // Receiver specified by Sender.Address and Port.
 func (ob *Sender) Send(name string, data []byte) error {
-	if ob == nil {
-		return ob.logError(0xE2B7B8, ENilReceiver)
-	}
 	if ob.Config == nil {
 		ob.Config = NewDefaultConfig()
 	}
@@ -236,10 +233,6 @@ func (ob *Sender) SendString(name string, s string) error {
 // AverageResponseMs is the average response time, in milliseconds, between
 // a packet being sent and its delivery confirmation being received.
 func (ob *Sender) AverageResponseMs() float64 {
-	if ob == nil {
-		_ = ob.logError(0xE1B78F, ENilReceiver)
-		return 0.0
-	}
 	if ob.info.packetsDelivered == 0 {
 		return 0.0
 	}
@@ -255,10 +248,6 @@ func (ob *Sender) AverageResponseMs() float64 {
 // sent data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
 func (ob *Sender) DeliveredAllParts() bool {
-	if ob == nil {
-		_ = ob.logError(0xE52E72, ENilReceiver)
-		return false
-	}
 	ret := true
 	for _, packet := range ob.packets {
 		if !bytes.Equal(packet.sentHash, packet.confirmedHash) {
@@ -272,10 +261,6 @@ func (ob *Sender) DeliveredAllParts() bool {
 // TransferSpeedKBpS returns the transfer speed of the current Send
 // operation, in Kilobytes (more accurately, Kibibytes) per second.
 func (ob *Sender) TransferSpeedKBpS() float64 {
-	if ob == nil {
-		_ = ob.logError(0xE6C59B, ENilReceiver)
-		return 0.0
-	}
 	if ob.info.transferTime < 1 {
 		return 0.0
 	}
@@ -289,10 +274,6 @@ func (ob *Sender) TransferSpeedKBpS() float64 {
 
 // PrintInfo prints the UDP transfer statistics to the standard output.
 func (ob *Sender) PrintInfo() {
-	if ob == nil {
-		_ = ob.logError(0xE483B1, ENilReceiver)
-		return
-	}
 	tItem := time.Duration(0)
 	for i, pack := range ob.packets {
 		tPack, status := time.Duration(0), "✔"
@@ -342,9 +323,6 @@ func (ob *Sender) PrintInfo() {
 // Note that it doesn't change the value of Sender.conn
 //
 func (ob *Sender) connect() (*net.UDPConn, error) {
-	if ob == nil {
-		return nil, ob.logError(0xE65C26, ENilReceiver)
-	}
 	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
@@ -414,9 +392,6 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
 func (ob *Sender) sendUndeliveredPackets() error {
-	if ob == nil {
-		return ob.logError(0xE8DB3F, ENilReceiver)
-	}
 	n := len(ob.packets)
 	for i := 0; i < n; i++ {
 		packet := &ob.packets[i]
@@ -439,10 +414,6 @@ func (ob *Sender) sendUndeliveredPackets() error {
 // collectConfirmations enters a loop that receives confirmation packets
 // from the sender, and marks all confirmed packets as delivered.
 func (ob *Sender) collectConfirmations() {
-	if ob == nil {
-		_ = ob.logError(0xE8EA91, ENilReceiver)
-		return
-	}
 	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
 	for ob.conn != nil {
 		// 'encryptedReply' is overwritten after every readFromUDPConn
@@ -492,10 +463,6 @@ func (ob *Sender) collectConfirmations() {
 // guaranteed, some confirmations may not be received. This method
 // will only wait for the duration specified in Config.ReplyTimeout.
 func (ob *Sender) waitForAllConfirmations() {
-	if ob == nil {
-		_ = ob.logError(0xE2A34E, ENilReceiver)
-		return
-	}
 	ob.logInfo("Waiting . . .")
 	t0 := time.Now()
 	ob.wg.Wait()
@@ -530,9 +497,6 @@ func (ob *Sender) waitForAllConfirmations() {
 
 // close closes the UDP connection.
 func (ob *Sender) close() error {
-	if ob == nil {
-		return ob.logError(0xE0561D, ENilReceiver)
-	}
 	if ob.conn == nil {
 		return nil
 	}
