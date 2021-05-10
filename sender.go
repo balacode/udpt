@@ -269,8 +269,26 @@ func (ob *Sender) TransferSpeedKBpS() float64 {
 // -----------------------------------------------------------------------------
 // # Informatory Methods (ob *Sender)
 
-// LogStats prints the UDP transfer statistics to the standard output.
-func (ob *Sender) LogStats() {
+// LogStats prints UDP transfer statistics using the passed logFunc function.
+//
+// logFunc should have a signature matching log.Println or fmt.Println.
+// It is optional. If you omit it, uses Sender.Config.LogFunc for output.
+//
+// like log.Println: func(...interface{})
+//
+// like fmt.Println: func(...interface{}) (int, error)
+//
+func (ob *Sender) LogStats(logFunc ...interface{}) {
+	//
+	log := ob.logInfo // func(v ...interface{})
+	if len(logFunc) > 0 {
+		switch fn := logFunc[0].(type) {
+		case func(...interface{}): // like log.Println
+			log = fn
+		case func(...interface{}) (int, error): // like fmt.Println
+			log = func(v ...interface{}) { _, _ = fn(v...) }
+		}
+	}
 	tItem := time.Duration(0)
 	for i, pack := range ob.packets {
 		tPack, status := time.Duration(0), "✔"
@@ -291,15 +309,15 @@ func (ob *Sender) LogStats() {
 		if pack.confirmedTime.IsZero() {
 			t1 = "NONE"
 		}
-		ob.logInfo("SN:", sn, "T0:", t0, "T1:", t1, status, ms)
+		log("SN:", sn, "T0:", t0, "T1:", t1, status, ms)
 		tItem += tPack
 	}
 	var (
 		sec   = ob.stats.transferTime.Seconds()
 		avg   = ob.AverageResponseMs()
 		speed = ob.TransferSpeedKBpS()
-		prt   = func(tag, format string, v1 interface{}) {
-			ob.logInfo(tag, padf(12, format, v1))
+		prt   = func(tag, format string, v interface{}) {
+			log(tag, fmt.Sprintf(format, v))
 		}
 	)
 	prt("B. delivered:", "%d", ob.stats.bytesDelivered)
