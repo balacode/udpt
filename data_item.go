@@ -34,7 +34,7 @@ type dataItem struct {
 // If the item has no pieces, returns false.
 //
 func (ob *dataItem) IsLoaded() bool {
-	ret := true
+	ret := len(ob.CompressedPieces) > 0
 	for _, piece := range ob.CompressedPieces {
 		if len(piece) < 1 {
 			ret = false
