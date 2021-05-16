@@ -1,0 +1,117 @@
+// -----------------------------------------------------------------------------
+// github.com/balacode/udpt                              /[string_funcs_test.go]
+// (c) balarabe@protonmail.com                                      License: MIT
+// -----------------------------------------------------------------------------
+
+package udpt
+
+import (
+	"testing"
+)
+
+// to run all tests in this file:
+// go test -v -run _string_
+
+// -----------------------------------------------------------------------------
+
+// getPart(s, prefix, suffix string) string
+//
+// go test -run _string_getPart_
+//
+func Test_string_getPart_(t *testing.T) {
+	for _, it := range []struct {
+		s      string
+		prefix string
+		suffix string
+		//
+		expect string
+	}{
+		{"", "", "", ""},
+		//
+		// both prefix and suffix are blank: return 's' as it is
+		{"name:cat;", "", "", "name:cat;"},
+		//
+		// prefix is blank, suffix given: return everything before the suffix
+		{"name:cat;", "", ";", "name:cat"},
+		//
+		// prefix given, suffix is blank: return everything after the prefix
+		{"name:cat;", "name:", "", "cat;"},
+		//
+		// both prefix and suffix specified: return the substring between them
+		{"name:cat;", "name:", ";", "cat"},
+		//
+		// non-existent prefix: return a blank string
+		{"name:cat;", "age:", "", ""},
+		//
+		// non-existent suffix: return a blank string
+		{"name:cat;", "name:", ".", ""},
+		//
+		// additional test
+		{"xyz class::sum; 123", "class::", ";", "sum"},
+	} {
+		got := getPart(it.s, it.prefix, it.suffix)
+		if got != it.expect {
+			t.Errorf("getPart(%#v, %#v, %#v)"+
+				"\n expect: %#v"+
+				"\n    got: %#v",
+				it.s, it.prefix, it.suffix, it.expect, got)
+		}
+	}
+} //                                                        Test_string_getPart_
+
+// joinArgs(tag string, args ...interface{}) string
+//
+// go test -run _string_joinArgs_
+//
+func Test_string_joinArgs_(t *testing.T) {
+	for _, it := range []struct {
+		tag  string
+		args []interface{}
+		//
+		expect string
+	}{
+		{"", nil, ""},
+		{" ", nil, ""},
+		{" tag ", nil, "tag"},
+		{"tag", nil, "tag"},
+		{"tag ", nil, "tag"},
+		{"tag", []interface{}{"a", 1, "b", 2, 3, "c"}, "tag a 1 b 2 3 c"},
+		{"", []interface{}{"abc", 123, "de", 34}, "abc 123 de 34"},
+	} {
+		got := joinArgs(it.tag, it.args...)
+		if got != it.expect {
+			t.Errorf("padf(%#v, %#v)"+
+				"\n expect: %#v"+
+				"\n    got: %#v",
+				it.tag, it.args, it.expect, got)
+		}
+	}
+} //                                                       Test_string_joinArgs_
+
+// padf(minLength int, format string, args ...interface{}) string
+//
+// go test -run _string_padf_
+//
+func Test_string_padf_(t *testing.T) {
+	for _, it := range []struct {
+		minLength int
+		format    string
+		args      []interface{}
+		//
+		expect string
+	}{
+		{0, "", nil, ""},
+		{0, "%s", []interface{}{"abc"}, "abc"},
+		{6, "%s", []interface{}{"abc"}, "abc   "},
+	} {
+		got := padf(it.minLength, it.format, it.args...)
+		if got != it.expect {
+			t.Errorf("padf(%#v, %#v, %#v)"+
+				"\n expect: %#v"+
+				"\n    got: %#v",
+				it.minLength, it.format, it.args, it.expect, got)
+		}
+	}
+} //                                                           Test_string_padf_
+
+// end
