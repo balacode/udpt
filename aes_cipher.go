@@ -41,8 +41,9 @@ func (ob *aesCipher) ValidateKey(key []byte) error {
 // The same key is used for encryption and decryption.
 //
 func (ob *aesCipher) SetKey(key []byte) error {
-	if len(key) != 32 {
-		return makeError(0xE32BD3, errAESKeySize)
+	err := ob.ValidateKey(key)
+	if err != nil {
+		return makeError(0xE32BD3, err)
 	}
 	if bytes.Equal(ob.cryptoKey, key) {
 		return nil
@@ -66,8 +67,9 @@ func (ob *aesCipher) SetKey(key []byte) error {
 // You need to call SetKey at least once before you call Encrypt.
 //
 func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
-	if len(ob.cryptoKey) != 32 {
-		return nil, makeError(0xE64A2E, errAESKeySize)
+	err = ob.ValidateKey(ob.cryptoKey)
+	if err != nil {
+		return nil, makeError(0xE64A2E, err)
 	}
 	// nonce is a byte array filled with cryptographically secure random bytes
 	n := ob.gcm.NonceSize() // = gcmStandardNonceSize = 12 bytes
@@ -91,8 +93,9 @@ func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 // You need to call SetKey at least once before you call Decrypt.
 //
 func (ob *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
-	if len(ob.cryptoKey) != 32 {
-		return nil, makeError(0xE35A87, errAESKeySize)
+	err = ob.ValidateKey(ob.cryptoKey)
+	if err != nil {
+		return nil, makeError(0xE35A87, err)
 	}
 	n := ob.gcm.NonceSize()
 	if len(ciphertext) < n {
