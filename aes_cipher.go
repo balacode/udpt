@@ -29,8 +29,7 @@ type aesCipher struct {
 //
 func (ob *aesCipher) ValidateKey(key []byte) error {
 	if len(key) != 32 {
-		return makeError(0xE42FDB,
-			"AES-256 key must be 32, but it is", len(key), "bytes long")
+		return makeError(0xE42FDB, errAESKeySize)
 	}
 	return nil
 } //                                                                 ValidateKey
