@@ -92,13 +92,9 @@ func (ob *Receiver) Run() error {
 	if ob.Config.Cipher == nil {
 		return ob.logError(0xE62F4F, "nil Receiver.Config.Cipher")
 	}
-	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.SetKey(ob.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE43B57, "invalid Receiver.CryptoKey:", err)
-	}
-	err = ob.Config.Cipher.SetKey(ob.CryptoKey)
-	if err != nil {
-		return ob.logError(0xE8A5C6, err)
+		return ob.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
 	}
 	// check settings
 	err = ob.Config.Validate()
