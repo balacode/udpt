@@ -28,12 +28,12 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 	var dataItem1 dataItem
 	dataItem1.CompressedPieces = [][]byte{{}, {1}}
 	if dataItem1.IsLoaded() != false {
-		t.Error("0xEF2BD9 dataItem1.IsLoaded() expect:false got:true")
+		t.Error("0xE60B69 dataItem1.IsLoaded() expect:false got:true")
 	}
 	var dataItem2 dataItem
 	dataItem2.CompressedPieces = [][]byte{{1}, {23}}
 	if dataItem2.IsLoaded() != true {
-		t.Error("0xEF2BD9 dataItem2.IsLoaded() expect:true got:false")
+		t.Error("0xE25AC1 dataItem2.IsLoaded() expect:true got:false")
 	}
 } //                                                     Test_dataItem_IsLoaded_
 
@@ -108,7 +108,7 @@ func Test_dataItem_Reset_(t *testing.T) {
 		t.Error("0xE04C47 CompressedSizeInfo not reset")
 	}
 	if di.UncompressedSizeInfo != 0 {
-		t.Error("0xECE8BE UncompressedSizeInfo not reset")
+		t.Error("0xE22CD6 UncompressedSizeInfo not reset")
 	}
 } //                                                        Test_dataItem_Reset_
 
@@ -201,11 +201,11 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 		var dataItem0 dataItem
 		data, err := dataItem0.UnpackBytes(zc)
 		if data != nil {
-			t.Error("0xE1B18E dataItem0.UnpackBytes()",
+			t.Error("0xED52E6 dataItem0.UnpackBytes()",
 				"returned: data != nil, expect: data == nil")
 		}
 		if err == nil {
-			t.Error("0xE95A8D dataItem0.UnpackBytes()",
+			t.Error("0xEE0C63 dataItem0.UnpackBytes()",
 				"returned: error == nil, expect: error != nil")
 		}
 	}
@@ -215,7 +215,7 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 		))
 		hash, err := getHash(source)
 		if err != nil {
-			t.Error("0xE8A7ED getHash failed")
+			t.Error("0xE01F7B getHash failed")
 		}
 		compressed, err := zc.Compress(source)
 		if err != nil {
@@ -239,21 +239,21 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 		}
 		uncompressed, err := dataItem1.UnpackBytes(zc)
 		if err != nil {
-			t.Error("0xE08F26 UnpackBytes:", err)
+			t.Error("0xEF6D12 UnpackBytes:", err)
 		}
 		if !bytes.Equal(source, uncompressed) {
-			t.Error("0xE08F26 UnpackBytes: corrupted data")
+			t.Error("0xE91A65 UnpackBytes: corrupted data")
 		}
 		if !bytes.Equal(hash, dataItem1.Hash) {
-			t.Error("0xE08F26 UnpackBytes: corrupted hash")
+			t.Error("0xEC4E68 UnpackBytes: corrupted hash")
 		}
 		if dataItem1.CompressedSizeInfo != len(compressed) {
-			t.Error("0xE7ECFD",
+			t.Error("0xEB4A34",
 				"CompressedSizeInfo", dataItem1.CompressedSizeInfo,
 				"!= len(compressed)", len(compressed))
 		}
 		if dataItem1.UncompressedSizeInfo != len(source) {
-			t.Error("0xE7ECFD",
+			t.Error("0xEC1E61",
 				"UncompressedSizeInfo", dataItem1.UncompressedSizeInfo,
 				"!= len(source)", len(source))
 		}

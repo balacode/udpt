@@ -118,7 +118,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE3E35C, "invalid Sender.CryptoKey:", err)
+		return ob.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
 	}
 	err = ob.Config.Cipher.SetKey(ob.CryptoKey)
 	if err != nil {
@@ -133,12 +133,12 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE5A04A, "missing Sender.Address")
 	}
 	if ob.Port < 1 || ob.Port > 65535 {
-		return ob.logError(0xE7B72A, "invalid Sender.Port:", ob.Port)
+		return ob.logError(0xE20BB9, "invalid Sender.Port:", ob.Port)
 	}
 	// prepare for transfer
 	hash, err := getHash(data)
 	if err != nil {
-		return ob.logError(0xE4B4D8, err)
+		return ob.logError(0xE78D31, err)
 	}
 	if ob.Config.VerboseSender {
 		ob.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
@@ -151,7 +151,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	}
 	compressed, err := ob.Config.Compressor.Compress(data)
 	if err != nil {
-		return ob.logError(0xE2A7C3, err)
+		return ob.logError(0xE2EB59, err)
 	}
 	packetCount := ob.getPacketCount(len(compressed))
 	ob.dataHash = hash
@@ -189,7 +189,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 			defer func() {
 				err2 := ob.close()
 				if err2 != nil {
-					_ = ob.logError(0xE71C7A, err2)
+					_ = ob.logError(0xED94C5, err2)
 				}
 			}()
 			return ob.logError(0xE23CE0, err)
@@ -365,12 +365,12 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 	}
 	packet, err := ob.makePacket([]byte(tagDataItemHash + name))
 	if err != nil {
-		_ = ob.logError(0xE1F8C5, err)
+		_ = ob.logError(0xE34A8E, err)
 		return nil
 	}
 	err = packet.Send(tempConn, ob.Config.Cipher)
 	if err != nil {
-		_ = ob.logError(0xE7F316, err)
+		_ = ob.logError(0xE89B11, err)
 		return nil
 	}
 	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
@@ -397,7 +397,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		}
 		hash, err = hex.DecodeString(hexHash)
 		if err != nil {
-			_ = ob.logError(0xE5A4E7, err)
+			_ = ob.logError(0xE6E7A9, err)
 			return nil
 		}
 	}
@@ -438,7 +438,7 @@ func (ob *Sender) collectConfirmations() {
 			break
 		}
 		if err != nil {
-			_ = ob.logError(0xE7B6B2, err)
+			_ = ob.logError(0xE9D1CC, err)
 			continue
 		}
 		if nRead == 0 {
@@ -447,11 +447,11 @@ func (ob *Sender) collectConfirmations() {
 		}
 		recv, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
 		if err != nil {
-			_ = ob.logError(0xE5C43E, err)
+			_ = ob.logError(0xE4AD67, err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(tagConfirmation)) {
-			_ = ob.logError(0xE5AF24, "bad reply header")
+			_ = ob.logError(0xE96D3B, "bad reply header")
 			if ob.Config.VerboseSender {
 				ob.logInfo("ERROR received:", len(recv), "bytes")
 			}
@@ -518,7 +518,7 @@ func (ob *Sender) close() error {
 	err := ob.conn.Close()
 	ob.conn = nil
 	if err != nil {
-		return ob.logError(0xE71AB2, err)
+		return ob.logError(0xEA7D7E, err)
 	}
 	return nil
 } //                                                                       close

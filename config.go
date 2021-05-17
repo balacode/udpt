@@ -155,7 +155,7 @@ func (ob *Configuration) Validate() error {
 	//
 	// Components:
 	if ob.Cipher == nil {
-		return makeError(0xE5D4AB, "nil Configuration.Cipher")
+		return makeError(0xE16FB9, "nil Configuration.Cipher")
 	}
 	if ob.Compressor == nil {
 		return makeError(0xE5B3C1, "nil Configuration.Compressor")
@@ -178,7 +178,7 @@ func (ob *Configuration) Validate() error {
 	}
 	n = ob.SendRetries
 	if n < 0 {
-		return makeError(0xE1C8A6,
+		return makeError(0xE47C83,
 			"invalid Configuration.SendRetries:", n)
 	}
 	return nil

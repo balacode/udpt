@@ -87,7 +87,7 @@ func (ob *logEntry) Output() {
 	const mode = os.O_CREATE | os.O_APPEND | os.O_WRONLY
 	file, err := os.OpenFile(path, mode, 0644) // -> (*os.File, error)
 	if err != nil {
-		fmt.Println("ERROR 0xE5CB4B: opening "+path+":", err)
+		fmt.Println("ERROR 0xE2DA59: opening "+path+":", err)
 		return
 	}
 	n, err := file.WriteString(ob.msg + "\n")
@@ -96,7 +96,7 @@ func (ob *logEntry) Output() {
 	}
 	err = file.Close()
 	if err != nil {
-		fmt.Println("ERROR 0xE2EC72: closing "+path+":", err)
+		fmt.Println("ERROR 0xE50F96: closing "+path+":", err)
 	}
 } //                                                                      Output
 

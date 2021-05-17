@@ -90,11 +90,11 @@ func (ob *Receiver) Run() error {
 	}
 	// setup cipher
 	if ob.Config.Cipher == nil {
-		return ob.logError(0xE1F5E1, "nil Receiver.Config.Cipher")
+		return ob.logError(0xE62F4F, "nil Receiver.Config.Cipher")
 	}
 	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE3A5FF, "invalid Receiver.CryptoKey:", err)
+		return ob.logError(0xE43B57, "invalid Receiver.CryptoKey:", err)
 	}
 	err = ob.Config.Cipher.SetKey(ob.CryptoKey)
 	if err != nil {
@@ -112,7 +112,7 @@ func (ob *Receiver) Run() error {
 		return ob.logError(0xE82C9E, "nil Receiver.ReceiveData")
 	}
 	if ob.ProvideData == nil {
-		return ob.logError(0xE4E2C1, "nil Receiver.ProvideData")
+		return ob.logError(0xE48CC6, "nil Receiver.ProvideData")
 	}
 	// prepare for reception
 	if ob.Config.VerboseReceiver {
@@ -132,7 +132,7 @@ func (ob *Receiver) Run() error {
 		if ob.conn != nil {
 			err := ob.conn.Close()
 			if err != nil {
-				_ = ob.logError(0xE15F3A, err)
+				_ = ob.logError(0xEC82DB, err)
 			}
 		}
 	}()
@@ -170,7 +170,7 @@ func (ob *Receiver) Run() error {
 		case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
 			reply, err = ob.sendDataItemHash(recv)
 			if err != nil {
-				_ = ob.logError(0xE98D72, err)
+				_ = ob.logError(0xE69C60, err)
 				continue
 			}
 		case bytes.HasPrefix(recv, []byte(tagFragment)):
@@ -185,13 +185,13 @@ func (ob *Receiver) Run() error {
 		}
 		encryptedReply, err := ob.Config.Cipher.Encrypt(reply)
 		if err != nil {
-			_ = ob.logError(0xE6E8C7, err)
+			_ = ob.logError(0xE06B58, err)
 			continue
 		}
 		deadline := time.Now().Add(ob.Config.WriteTimeout)
 		err = ob.conn.SetWriteDeadline(deadline)
 		if err != nil {
-			_ = ob.logError(0xE1F2C4, err)
+			_ = ob.logError(0xE0AD06, err)
 			continue
 		}
 		nWrit, err := ob.conn.WriteTo(encryptedReply, addr)
@@ -214,7 +214,7 @@ func (ob *Receiver) Stop() {
 	}
 	err := ob.conn.Close()
 	if err != nil {
-		_ = ob.logError(0xE1B4B9, err)
+		_ = ob.logError(0xE9C2D1, err)
 	}
 	ob.conn = nil
 } //                                                                        Stop
@@ -246,12 +246,12 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	)
 	index, err := strconv.Atoi(sn)
 	if err != nil {
-		return nil, ob.logError(0xE14D6A, "bad 'sn':", sn)
+		return nil, ob.logError(0xEF27F8, "bad 'sn':", sn)
 	}
 	index--
 	packetCount, err := strconv.Atoi(count)
 	if err != nil {
-		return nil, ob.logError(0xE76D48, "bad 'count'")
+		return nil, ob.logError(0xE18A95, "bad 'count'")
 	}
 	hash, err := hex.DecodeString(hexHash)
 	if err != nil {
@@ -274,7 +274,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	if len(it.CompressedPieces[index]) == 0 {
 		it.CompressedPieces[index] = compressedData
 	} else if !bytes.Equal(compressedData, it.CompressedPieces[index]) {
-		return nil, ob.logError(0xE981DA, "unknown packet alteration")
+		return nil, ob.logError(0xE1A99A, "unknown packet alteration")
 	}
 	if it.IsLoaded() {
 		if ob.ReceiveData == nil {
@@ -286,7 +286,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		}
 		err = ob.ReceiveData(it.Name, data)
 		if err != nil {
-			return nil, ob.logError(0xE9BD1B, err)
+			return nil, ob.logError(0xE77B4D, err)
 		}
 		ob.logInfo("received:", it.Name)
 		if ob.Config.VerboseReceiver {
@@ -296,7 +296,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	}
 	confirmedHash, err := getHash(recv)
 	if err != nil {
-		return nil, ob.logError(0xE0B57C, err)
+		return nil, ob.logError(0xE66AB1, err)
 	}
 	reply := append([]byte(tagConfirmation), confirmedHash...)
 	return reply, nil
@@ -317,7 +317,7 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	}
 	hash, err := getHash(data)
 	if err != nil {
-		return nil, ob.logError(0xE2F3D5, err)
+		return nil, ob.logError(0xE59F12, err)
 	}
 	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
 	return reply, nil

@@ -35,7 +35,7 @@ func (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
 		return makeError(0xE4B1BA, EInvalidArg, "nil conn")
 	}
 	if cipher == nil {
-		return makeError(0xE54A9D, EInvalidArg, "nil cipher")
+		return makeError(0xE44F2A, EInvalidArg, "nil cipher")
 	}
 	ciphertext, err := cipher.Encrypt(ob.data)
 	if err != nil {

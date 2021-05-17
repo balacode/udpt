@@ -27,7 +27,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		t.Error("0xE38FD2 Uncompress() failed:", err)
 	}
 	if !bytes.Equal(input, uncomp) {
-		t.Error("0xE58D5D Compress()/Uncompress() failed")
+		t.Error("0xEB0E80 Compress()/Uncompress() failed")
 	}
 } //                                                        Test_ZLibCompressor_
 

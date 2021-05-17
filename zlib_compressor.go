@@ -26,7 +26,7 @@ func (*zlibCompressor) Compress(data []byte) ([]byte, error) {
 		defer func() {
 			_ = wr.Close()
 		}()
-		return nil, makeError(0xE5F7D3, err)
+		return nil, makeError(0xE00FF9, err)
 	}
 	err = wr.Close()
 	if err != nil {
@@ -47,7 +47,7 @@ func (*zlibCompressor) Compress(data []byte) ([]byte, error) {
 func (*zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
 	nc := len(compressed)
 	if len(compressed) <= 4 {
-		return nil, makeError(0xE8A8A9, "invalid compressed")
+		return nil, makeError(0xE41C29, "invalid compressed")
 	}
 	// read the uncompressed data size (stored at the end of compressed bytes)
 	// to know the number of bytes to allocate for the result
@@ -56,7 +56,7 @@ func (*zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
 	//
 	reader, err := zlib.NewReader(bytes.NewReader(compressed))
 	if err != nil {
-		return nil, makeError(0xE54F4B, err)
+		return nil, makeError(0xE07EE6, err)
 	}
 	buf := bytes.NewBuffer(make([]byte, 0, nu))
 	_, err = io.CopyN(buf, reader, nu)

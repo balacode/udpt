@@ -14,7 +14,7 @@ func getHash(data []byte) ([]byte, error) {
 	sha := sha256.New()
 	n, err := sha.Write(data)
 	if n != len(data) || err != nil {
-		return nil, makeError(0xE3A9B8, err)
+		return nil, makeError(0xE51EC0, err)
 	}
 	ret := sha.Sum(nil)
 	if len(ret) != 32 {
