@@ -16,7 +16,6 @@ import (
 // go test -run _Transfer1_
 //
 func Test_Transfer1_(t *testing.T) {
-	fmt.Println("Test_Transfer1_")
 	const itemCount = 50
 	const itemSize = 100
 	testTransfer(itemCount, itemSize, t)
@@ -25,7 +24,6 @@ func Test_Transfer1_(t *testing.T) {
 // go test -run _Transfer2_
 //
 func Test_Transfer2_(t *testing.T) {
-	fmt.Println("Test_Transfer2_")
 	const itemCount = 10
 	const itemSize = 10 * 1024 * 1024 // 10 MiB
 	testTransfer(itemCount, itemSize, t)
@@ -34,7 +32,6 @@ func Test_Transfer2_(t *testing.T) {
 // go test -run _Transfer3_
 //
 func Test_Transfer3_(t *testing.T) {
-	fmt.Println("Test_Transfer3_")
 	const itemCount = 1
 	const itemSize = 100 * 1024 * 1024 // 100 MiB
 	testTransfer(itemCount, itemSize, t)
