@@ -35,8 +35,10 @@ func Test_Sender_LogStats_(t *testing.T) {
 		var snd Sender
 		snd.Config = NewDefaultConfig()
 		snd.Config.LogFunc = logPrintln
-		snd.packets = []senderPacket{{}}
-		//
+		snd.packets = []senderPacket{{
+			sentHash:      []byte{0},
+			confirmedHash: []byte{0},
+		}}
 		snd.LogStats(logFunc)
 		//
 		got := sb.String()

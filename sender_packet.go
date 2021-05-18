@@ -25,7 +25,8 @@ type senderPacket struct {
 // IsDelivered returns true if this packet has been successfully
 // delivered (by receiving a successful confirmation packet).
 func (ob *senderPacket) IsDelivered() bool {
-	ret := bytes.Equal(ob.sentHash, ob.confirmedHash)
+	ret := ob.confirmedHash != nil &&
+		bytes.Equal(ob.sentHash, ob.confirmedHash)
 	return ret
 } //                                                                 IsDelivered
 
