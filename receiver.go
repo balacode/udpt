@@ -286,7 +286,9 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		}
 		ob.logInfo("received:", it.Name)
 		if ob.Config.VerboseReceiver {
-			it.LogStats("receiveFragment", ob.logInfo)
+			var sb strings.Builder
+			it.LogStats("receiveFragment", &sb)
+			ob.logInfo(sb.String())
 		}
 		it.Reset()
 	}

@@ -40,7 +40,7 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// LogStats(tag string, logFunc ...interface{})
+// (ob *dataItem) LogStats(tag string, w io.Writer)
 //
 // go test -run _dataItem_LogStats_
 //
@@ -54,7 +54,6 @@ func Test_dataItem_LogStats_(t *testing.T) {
 		sb.WriteString(fmt.Sprintln(v...))
 	}
 	test := func(logFunc interface{}) {
-		sb.Reset()
 		var di = dataItem{
 			Name:                 "ItemName",
 			Hash:                 []byte{1, 2, 3, 4, 5},
@@ -62,9 +61,10 @@ func Test_dataItem_LogStats_(t *testing.T) {
 			CompressedSizeInfo:   20,
 			UncompressedSizeInfo: 50,
 		}
-		di.LogStats("xyz", logFunc)
-		//
+		sb.Reset()
+		di.LogStats("xyz", &sb)
 		got := sb.String()
+		//
 		expect := "" +
 			"xyz name: ItemName\n" +
 			"xyz hash: 0102030405\n" +
