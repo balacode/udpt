@@ -136,10 +136,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 		return ob.logError(0xE20BB9, "invalid Sender.Port:", ob.Port)
 	}
 	// prepare for transfer
-	hash, err := getHash(data)
-	if err != nil {
-		return ob.logError(0xE78D31, err)
-	}
+	hash := getHash(data)
 	if ob.Config.VerboseSender {
 		ob.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
@@ -567,10 +564,7 @@ func (ob *Sender) makePacket(data []byte) (*senderPacket, error) {
 		return nil, ob.logError(0xE71F9B, "len(data)", len(data),
 			"> Config.PacketSizeLimit", ob.Config.PacketSizeLimit)
 	}
-	sentHash, err := getHash(data)
-	if err != nil {
-		return nil, ob.logError(0xE84C0B, err)
-	}
+	sentHash := getHash(data)
 	packet := senderPacket{
 		data:     data,
 		sentHash: sentHash,

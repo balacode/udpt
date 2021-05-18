@@ -213,10 +213,7 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 		source := []byte(strings.Repeat(
 			"The quick brown fox jumps over the lazy dog. ", 300,
 		))
-		hash, err := getHash(source)
-		if err != nil {
-			t.Error("0xE01F7B getHash failed")
-		}
+		hash := getHash(source)
 		compressed, err := zc.Compress(source)
 		if err != nil {
 			t.Error("0xE70C74 Compress failed")

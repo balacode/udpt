@@ -290,10 +290,7 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		}
 		it.Reset()
 	}
-	confirmedHash, err := getHash(recv)
-	if err != nil {
-		return nil, ob.logError(0xE66AB1, err)
-	}
+	confirmedHash := getHash(recv)
 	reply := append([]byte(tagConfirmation), confirmedHash...)
 	return reply, nil
 } //                                                             receiveFragment
@@ -311,10 +308,7 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if err != nil {
 		return nil, ob.logError(0xE7F7C9, err)
 	}
-	hash, err := getHash(data)
-	if err != nil {
-		return nil, ob.logError(0xE59F12, err)
-	}
+	hash := getHash(data)
 	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
 	return reply, nil
 } //                                                            sendDataItemHash

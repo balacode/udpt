@@ -117,10 +117,7 @@ func (ob *dataItem) UnpackBytes(compressor Compression) ([]byte, error) {
 	ob.UncompressedSizeInfo = len(ret)
 	//
 	// hash of uncompressed data should match original hash
-	hash, err := getHash(ret)
-	if err != nil {
-		return nil, makeError(0xE8D61E, err)
-	}
+	hash := getHash(ret)
 	if !bytes.Equal(hash, ob.Hash) {
 		return nil, makeError(0xE87D89, "checksum mismatch")
 	}
