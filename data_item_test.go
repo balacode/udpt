@@ -16,7 +16,7 @@ import (
 // -----------------------------------------------------------------------------
 // # Property
 
-// IsLoaded() bool
+// (ob *dataItem) IsLoaded() bool
 //
 // go test -run _dataItem_IsLoaded_
 //
@@ -40,7 +40,7 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// (ob *dataItem) LogStats(tag string, w io.Writer)
+// (ob *dataItem) LogStats(tag string, logFunc ...interface{})
 //
 // go test -run _dataItem_LogStats_
 //
@@ -253,6 +253,37 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 			t.Error("0xEC1E61",
 				"UncompressedSizeInfo", dataItem1.UncompressedSizeInfo,
 				"!= len(source)", len(source))
+		}
+		{
+			dataItem1.Hash = []byte{0}
+			uncompressed, err := dataItem1.UnpackBytes(zc)
+			if uncompressed != nil {
+				t.Error("0xED14FA")
+			}
+			if err == nil {
+				t.Error("0xEB1C4F")
+			} else if !strings.Contains(err.Error(), "hash mismatch") {
+				t.Error("0xEA19E1")
+			}
+		}
+	}
+	{
+		// try to uncompress an item containing garbage bytes
+		var dataItem3 = dataItem{
+			Hash: []byte{0xA1, 0x96, 0x9E, 0xBF, 0x93, 0xE5},
+			CompressedPieces: [][]byte{{
+				0xC6, 0x44, 0x0D, 0xAC, 0xA9, 0x55, 0x4D, 0xEF,
+				0xA1, 0x93, 0x8D, 0x41, 0x80, 0x61, 0x29, 0xC2,
+			}},
+		}
+		uncompressed, err := dataItem3.UnpackBytes(zc)
+		if err == nil {
+			t.Error("0xE84D1D")
+		} else if !strings.Contains(err.Error(), "zlib") {
+			t.Error("0xEF8DE2")
+		}
+		if uncompressed != nil {
+			t.Error("0xE59B01")
 		}
 	}
 } //                                                  Test_dataItem_UnpackBytes_
