@@ -240,25 +240,25 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		sn      = getPart(header, "sn:", " ")
 		count   = getPart(header, "count:", "\n")
 	)
+	packetCount, err := strconv.Atoi(count)
+	if err != nil || packetCount < 1 {
+		return nil, ob.logError(0xE18A95, "bad 'count'")
+	}
 	index, err := strconv.Atoi(sn)
 	if err != nil {
 		return nil, ob.logError(0xEF27F8, "bad 'sn':", sn)
 	}
-	index--
-	packetCount, err := strconv.Atoi(count)
-	if err != nil {
-		return nil, ob.logError(0xE18A95, "bad 'count'")
+	if index < 1 || index > packetCount {
+		return nil, ob.logError(0xE8CF4D,
+			"'sn'", index, "out of range 1 -", packetCount)
 	}
+	index--
 	hash, err := hex.DecodeString(hexHash)
 	if err != nil {
 		return nil, ob.logError(0xE5CA62, err)
 	}
-	if packetCount < 1 {
-		return nil, ob.logError(0xE29C5B, "invalid packetCount:", packetCount)
-	}
-	if index < 0 || index >= packetCount {
-		return nil, ob.logError(0xE8CF4D,
-			"index", index, "out of range 0 -", packetCount-1)
+	if len(hash) != 32 {
+		return nil, ob.logError(0xEB6CB7, "bad hash size")
 	}
 	it := &ob.receivingDataItem
 	it.Retain(name, hash, packetCount)
