@@ -18,14 +18,21 @@ type zlibCompressor struct{}
 
 // Compress compresses 'data' using zlib and returns the compressed bytes.
 // If there was an error, returns nil and the error value.
-func (*zlibCompressor) Compress(data []byte) ([]byte, error) {
+func (t *zlibCompressor) Compress(data []byte) ([]byte, error) {
 	var cbuf bytes.Buffer
-	wr := zlib.NewWriter(&cbuf)
+	var wr io.WriteCloser = zlib.NewWriter(&cbuf)
+	return t.compressDI(data, wr, &cbuf)
+} //                                                                    Compress
+
+// compressDI _ _
+func (*zlibCompressor) compressDI(
+	data []byte,
+	wr io.WriteCloser,
+	cbuf *bytes.Buffer,
+) ([]byte, error) {
 	_, err := wr.Write(data)
 	if err != nil {
-		defer func() {
-			_ = wr.Close()
-		}()
+		defer func() { _ = wr.Close() }()
 		return nil, makeError(0xE00FF9, err)
 	}
 	err = wr.Close()
@@ -40,21 +47,29 @@ func (*zlibCompressor) Compress(data []byte) ([]byte, error) {
 	ret = append(ret, nc...)
 	//
 	return ret, nil
-} //                                                                    Compress
+} //                                                                  compressDI
 
 // Uncompress uncompresses 'compressed' bytes using zlib and returns the
 // uncompressed bytes. If there was an error, returns nil and the error value.
-func (*zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
+func (t *zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
+	return t.uncompressDI(compressed, zlib.NewReader)
+} //                                                                  Uncompress
+
+// uncompressDI _ _
+func (*zlibCompressor) uncompressDI(
+	compressed []byte,
+	newReadCloser func(io.Reader) (io.ReadCloser, error),
+) ([]byte, error) {
 	nc := len(compressed)
 	if len(compressed) <= 4 {
-		return nil, makeError(0xE41C29, "invalid compressed")
+		return nil, makeError(0xE41C29, "invalid 'compressed'")
 	}
 	// read the uncompressed data size (stored at the end of compressed bytes)
 	// to know the number of bytes to allocate for the result
 	nu := int64(binary.LittleEndian.Uint32(compressed[nc-4:]))
 	compressed = compressed[:nc-4]
 	//
-	reader, err := zlib.NewReader(bytes.NewReader(compressed))
+	reader, err := newReadCloser(bytes.NewReader(compressed))
 	if err != nil {
 		return nil, makeError(0xE07EE6, err)
 	}
@@ -69,6 +84,6 @@ func (*zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
 	}
 	ret := buf.Bytes()
 	return ret, nil
-} //                                                                  Uncompress
+} //                                                                uncompressDI
 
 // end
