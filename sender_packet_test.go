@@ -7,7 +7,6 @@ package udpt
 
 import (
 	"net"
-	"strings"
 	"testing"
 )
 
@@ -43,9 +42,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 	{
 		var pk senderPacket
 		err := pk.Send(nil, nil)
-		if err == nil {
-			t.Error("0xE66F44")
-		} else if !strings.Contains(err.Error(), "nil conn") {
+		if !matchError(err, "nil conn") {
 			t.Error("0xE31FF5")
 		}
 	}
@@ -53,9 +50,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 		var pk senderPacket
 		conn := makeTestConn()
 		err := pk.Send(conn, nil)
-		if err == nil {
-			t.Error("0xEE28A6")
-		} else if !strings.Contains(err.Error(), "nil cipher") {
+		if !matchError(err, "nil cipher") {
 			t.Error("0xE03CD3")
 		}
 	}
@@ -64,9 +59,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 		conn := makeTestConn()
 		cipher := &aesCipher{}
 		err := pk.Send(conn, cipher)
-		if err == nil {
-			t.Error("0xE55D1A")
-		} else if !strings.Contains(err.Error(), "key must be 32 bytes long") {
+		if !matchError(err, "key must be 32 bytes long") {
 			t.Error("0xE12AB8")
 		}
 	}
@@ -75,9 +68,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 		conn := makeTestConn()
 		cipher := &aesCipher{cryptoKey: []byte{1, 2, 3}}
 		err := pk.Send(conn, cipher)
-		if err == nil {
-			t.Error("0xE33D78")
-		} else if !strings.Contains(err.Error(), "key must be 32 bytes long") {
+		if !matchError(err, "key must be 32 bytes long") {
 			t.Error("0xE53A3B")
 		}
 	}
@@ -87,9 +78,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 		cipher := &aesCipher{}
 		cipher.SetKey([]byte("12345678901234567890123456789012"))
 		err := pk.Send(conn, cipher)
-		if err == nil {
-			t.Error("0xEF5B42")
-		} else if !strings.Contains(err.Error(), "invalid argument") {
+		if !matchError(err, "invalid argument") {
 			t.Error("0xE65B73")
 		}
 	}

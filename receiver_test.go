@@ -27,43 +27,43 @@ func Test_Receiver_Run_(t *testing.T) {
 	//
 	// expecting startup error: CryptoKey is not specfied
 	err := rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.CryptoKey") {
+	if !matchError(err, "Receiver.CryptoKey") {
 		t.Error("0xE57F1E")
 	}
 	// expecting startup error: CryptoKey is wrong size
 	rc.CryptoKey = []byte{1, 2, 3}
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "AES-256 key") {
+	if !matchError(err, "AES-256 key") {
 		t.Error("0xE19A88")
 	}
 	// expecting startup error: Port is not set
 	rc.CryptoKey = []byte("0123456789abcdefghijklmnopqrst12")
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.Port") {
+	if !matchError(err, "Receiver.Port") {
 		t.Error("0xE21D17")
 	}
 	// expecting startup error: Port number is wrong
 	rc.Port = 65535 + 1
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.Port") {
+	if !matchError(err, "Receiver.Port") {
 		t.Error("0xE8E6D5")
 	}
 	// expecting startup error: Port number is wrong
 	rc.Port = 0
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.Port") {
+	if !matchError(err, "Receiver.Port") {
 		t.Error("0xED3AE1")
 	}
 	// expecting startup error: ReceiveData not specified
 	rc.Port = 9874
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.ReceiveData") {
+	if !matchError(err, "Receiver.ReceiveData") {
 		t.Error("0xE7C0AC")
 	}
 	// expecting startup error: ProvideData not specified
 	rc.ReceiveData = func(name string, data []byte) error { return nil }
 	err = rc.Run()
-	if err == nil || !strings.Contains(err.Error(), "Receiver.ProvideData") {
+	if !matchError(err, "Receiver.ProvideData") {
 		t.Error("0xEF5FF2")
 	}
 	// expecting no startup error
@@ -89,9 +89,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE36A92")
 		}
-		if err == nil {
-			t.Error("0xE1B19C")
-		} else if !strings.Contains(err.Error(), "missing header") {
+		if !matchError(err, "missing header") {
 			t.Error("0xEF7AE2")
 		}
 	}
@@ -103,9 +101,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE6F51D")
 		}
-		if err == nil {
-			t.Error("0xE2F8AB")
-		} else if !strings.Contains(err.Error(), "nil Configuration.Cipher") {
+		if !matchError(err, "nil Configuration.Cipher") {
 			t.Error("0xE90F36")
 		}
 	}
@@ -116,9 +112,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE9F5CF")
 		}
-		if err == nil {
-			t.Error("0xE79A36")
-		} else if !strings.Contains(err.Error(), "newline not found") {
+		if !matchError(err, "newline not found") {
 			t.Error("0xE8DC8E")
 		}
 	}
@@ -130,9 +124,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xEA0B81")
 		}
-		if err == nil {
-			t.Error("0xE2C26D")
-		} else if !strings.Contains(err.Error(), "bad 'sn'") {
+		if !matchError(err, "bad 'sn'") {
 			t.Error("0xEC2C48")
 		}
 	}
@@ -144,9 +136,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xEA9D01")
 		}
-		if err == nil {
-			t.Error("0xEC58A0")
-		} else if !strings.Contains(err.Error(), "bad 'count'") {
+		if !matchError(err, "bad 'count'") {
 			t.Error("0xEA33B6")
 		}
 	}
@@ -158,9 +148,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xEB21B0")
 		}
-		if err == nil {
-			t.Error("0xEB70DA")
-		} else if !strings.Contains(err.Error(), "out of range") {
+		if !matchError(err, "out of range") {
 			t.Error("0xEB9A96")
 		}
 	}
@@ -172,9 +160,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE11DF3")
 		}
-		if err == nil {
-			t.Error("0xE75B26")
-		} else if !strings.Contains(err.Error(), "hex") {
+		if !matchError(err, "hex") {
 			t.Error("0xE43F0E")
 		}
 	}
@@ -186,9 +172,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xEF09EC")
 		}
-		if err == nil {
-			t.Error("0xE10F03")
-		} else if !strings.Contains(err.Error(), "hex") {
+		if !matchError(err, "hex") {
 			t.Error("0xEF4C9B")
 		}
 	}
@@ -200,9 +184,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE24F86")
 		}
-		if err == nil {
-			t.Error("0xEC68B5")
-		} else if !strings.Contains(err.Error(), "bad hash size") {
+		if !matchError(err, "bad hash size") {
 			t.Error("0xEB87BE")
 		}
 	}
@@ -216,9 +198,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE85E88")
 		}
-		if err == nil {
-			t.Error("0xE78FF4")
-		} else if !strings.Contains(err.Error(), "received no data") {
+		if !matchError(err, "received no data") {
 			t.Error("0xE13A6F")
 		}
 	}
@@ -235,9 +215,7 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 		if data != nil {
 			t.Error("0xE30A2F")
 		}
-		if err == nil {
-			t.Error("0xE63A8C")
-		} else if !strings.Contains(err.Error(), "missing header") {
+		if !matchError(err, "missing header") {
 			t.Error("0xED4B27")
 		}
 	}
@@ -247,9 +225,7 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 		if data != nil {
 			t.Error("0xED8A3E")
 		}
-		if err == nil {
-			t.Error("0xED65FA")
-		} else if !strings.Contains(err.Error(), "nil ProvideData") {
+		if !matchError(err, "nil ProvideData") {
 			t.Error("0xE65C25")
 		}
 	}
@@ -262,9 +238,7 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 		if data != nil {
 			t.Error("0xEA5B15")
 		}
-		if err == nil {
-			t.Error("0xEC9A56")
-		} else if !strings.Contains(err.Error(), "test error") {
+		if !matchError(err, "test error") {
 			t.Error("0xEE3C84")
 		}
 	}

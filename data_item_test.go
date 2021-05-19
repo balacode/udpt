@@ -260,9 +260,7 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 			if uncompressed != nil {
 				t.Error("0xED14FA")
 			}
-			if err == nil {
-				t.Error("0xEB1C4F")
-			} else if !strings.Contains(err.Error(), "hash mismatch") {
+			if !matchError(err, "hash mismatch") {
 				t.Error("0xEA19E1")
 			}
 		}
@@ -277,9 +275,7 @@ func Test_dataItem_UnpackBytes_(t *testing.T) {
 			}},
 		}
 		uncompressed, err := dataItem3.UnpackBytes(zc)
-		if err == nil {
-			t.Error("0xE84D1D")
-		} else if !strings.Contains(err.Error(), "zlib") {
+		if !matchError(err, "zlib") {
 			t.Error("0xEF8DE2")
 		}
 		if uncompressed != nil {

@@ -248,9 +248,7 @@ func Test_Sender_makePacket_(t *testing.T) {
 		if packet != nil {
 			t.Error("0xE0FE30")
 		}
-		if err == nil {
-			t.Error("0xEE76D9")
-		} else if !strings.Contains(err.Error(), "PacketSizeLimit") {
+		if !matchError(err, "PacketSizeLimit") {
 			t.Error("0xE69EA5")
 		}
 	}
