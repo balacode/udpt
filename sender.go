@@ -123,7 +123,7 @@ func (ob *Sender) Send(name string, data []byte) error {
 	// check settings
 	err = ob.Config.Validate()
 	if err != nil {
-		return ob.logError(0xE5D92D, err)
+		return ob.logError(0xE5D92D, "Invalid Sender.Config:", err)
 	}
 	if strings.TrimSpace(ob.Address) == "" {
 		return ob.logError(0xE5A04A, "missing Sender.Address")
