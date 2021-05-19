@@ -17,6 +17,67 @@ import (
 // go test -v -run _Sender_
 
 // -----------------------------------------------------------------------------
+// # Main Methods (ob *Sender)
+
+// (ob *Sender) Send(name string, data []byte) error
+//
+// go test -run _Sender_Send_
+//
+func Test_Sender_Send_(t *testing.T) {
+	{
+		var snd Sender
+		err := snd.Send("", nil)
+		if snd.Config == nil {
+			t.Error("0xE22B60")
+		}
+		if snd.Config.Cipher == nil {
+			t.Error("0xEB62B4")
+		}
+		if !matchError(err, "invalid Sender.CryptoKey") {
+			t.Error("0xE5BB36")
+		}
+		snd.CryptoKey = []byte("12345678901234567890123456789012")
+		//
+		snd.Config.Cipher = nil
+		err = snd.Send("", nil)
+		if !matchError(err, "nil Sender.Config.Cipher") {
+			t.Error("0xE32EC6")
+		}
+		snd.Config.Cipher = &aesCipher{}
+		//
+		snd.Config.PacketSizeLimit = 65536
+		err = snd.Send("", nil)
+		if !matchError(err, "Sender.Config") {
+			t.Error("0xE08E7C")
+		}
+		snd.Config.PacketSizeLimit = 65535 - 8
+		//
+		snd.Address = ""
+		err = snd.Send("", nil)
+		if !matchError(err, "Sender.Address") {
+			t.Error("0xEC20C3")
+		}
+		snd.Address = "127.0.0.0"
+		//
+		snd.Port = 0
+		err = snd.Send("", nil)
+		if !matchError(err, "Sender.Port") {
+			t.Error("0xE24E74")
+		}
+		snd.Port = 9876
+		//
+		snd.Config.VerboseSender = true
+		snd.Config.SendRetries = 2
+		snd.Config.ReplyTimeout = 1 * time.Second
+		snd.Config.WriteTimeout = 1 * time.Second
+		err = snd.Send("", nil)
+		if !matchError(err, "undelivered packets") {
+			t.Error("0xEB8B96")
+		}
+	}
+} //                                                           Test_Sender_Send_
+
+// -----------------------------------------------------------------------------
 // # Informatory Properties (ob *Sender)
 
 // (ob *Sender) AverageResponseMs() float64
@@ -127,6 +188,52 @@ func Test_Sender_close_(t *testing.T) {
 
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (ob *Sender)
+
+// getPacketCount
+//
+// go test -run _Sender_getPacketCount_
+//
+func Test_Sender_getPacketCount_(t *testing.T) {
+	var ob Sender
+	ob.Config = NewDefaultConfig()
+	ob.Config.PacketPayloadSize = 1000
+	//
+	if ob.getPacketCount(0) != 0 {
+		t.Error("0xE6C4D4")
+	}
+	if ob.getPacketCount(-100000) != 0 {
+		t.Error("0xE81D08")
+	}
+	if ob.getPacketCount(1) != 1 {
+		t.Error("0xE55EB9")
+	}
+	if ob.getPacketCount(1000) != 1 {
+		t.Error("0xE87CB1")
+	}
+	if ob.getPacketCount(1001) != 2 {
+		t.Error("0xE25DD0")
+	}
+	if ob.getPacketCount(10000) != 10 {
+		t.Error("0xEE5EF4")
+	}
+} //                                                 Test_Sender_getPacketCount_
+
+// logError
+//
+// go test -run _Sender_logError_
+//
+func Test_Sender_logError_(t *testing.T) {
+	var msg string
+	var ob Sender
+	ob.Config = NewDefaultConfig()
+	ob.Config.LogFunc = func(args ...interface{}) {
+		msg = fmt.Sprintln(args...)
+	}
+	ob.logError(0xE12345, "abc", 123)
+	if msg != "ERROR 0xE12345: abc 123\n" {
+		t.Error("0xE5CB5D")
+	}
+} //                                                       Test_Sender_logError_
 
 // (ob *Sender) makePacket(data []byte) (*senderPacket, error)
 //
