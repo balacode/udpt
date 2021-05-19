@@ -54,13 +54,12 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	// this map collects received keys and values
 	received := make(map[string][]byte, N)
 	//
-	// disable log buffering and enable verbose logging: for demos/debugging
+	// enable verbose logging but don't print the output
 	cfg := NewDefaultConfig()
-	if false {
-		cfg.LogFunc = LogPrint
-		cfg.VerboseSender = true
-		cfg.VerboseReceiver = true
-	}
+	cfg.LogFunc = func(args ...interface{}) {}
+	cfg.VerboseSender = true
+	cfg.VerboseReceiver = true
+	//
 	// set-up and run the receiver
 	receiver := Receiver{
 		Port: 1234, CryptoKey: cryptoKey, Config: cfg,
