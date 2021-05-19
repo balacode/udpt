@@ -7,6 +7,7 @@ package udpt
 
 import (
 	"net"
+	"strings"
 )
 
 // makeTestConn creates a UDP connection for testing.
@@ -21,4 +22,13 @@ func makeTestConn() *net.UDPConn {
 	}
 	return conn
 } //                                                                makeTestConn
+
+// matchError retruns true if err contains the specified error message.
+func matchError(err error, msg string) bool {
+	if err == nil && (msg == "" || msg == "nil" || msg == "<nil>") {
+		return true
+	}
+	return err != nil && strings.Contains(err.Error(), msg)
+} //                                                                  matchError
+
 // end
