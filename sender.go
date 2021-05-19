@@ -116,13 +116,9 @@ func (ob *Sender) Send(name string, data []byte) error {
 	if ob.Config.Cipher == nil {
 		return ob.logError(0xE83D07, "nil Sender.Config.Cipher")
 	}
-	err := ob.Config.Cipher.ValidateKey(ob.CryptoKey)
+	err := ob.Config.Cipher.SetKey(ob.CryptoKey)
 	if err != nil {
 		return ob.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
-	}
-	err = ob.Config.Cipher.SetKey(ob.CryptoKey)
-	if err != nil {
-		return ob.logError(0xE5EC36, err)
 	}
 	// check settings
 	err = ob.Config.Validate()
