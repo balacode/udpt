@@ -31,4 +31,34 @@ func matchError(err error, msg string) bool {
 	return err != nil && strings.Contains(err.Error(), msg)
 } //                                                                  matchError
 
+// -----------------------------------------------------------------------------
+
+// mockWriteCloser is a mock io.WriteCloser with methods you can make fail.
+type mockWriteCloser struct {
+	failWrite bool
+	failClose bool
+} //                                                             mockWriteCloser
+
+// Write is a method of mockWriteCloser implementing io.WriteCloser.
+//
+// You can make it return an error by setting mockWriteCloser.failWrite.
+//
+func (ob *mockWriteCloser) Write(p []byte) (n int, err error) {
+	if ob.failWrite {
+		return 0, makeError(0xE12345, "from mockWriteCloser.Write")
+	}
+	return len(p), nil
+} //                                                                       Write
+
+// Close is a method of mockWriteCloser implementing io.WriteCloser.
+//
+// You can make it return an error by setting mockWriteCloser.failClose.
+//
+func (ob *mockWriteCloser) Close() error {
+	if ob.failClose {
+		return makeError(0xE12345, "from mockWriteCloser.Close")
+	}
+	return nil
+} //                                                                       Close
+
 // end
