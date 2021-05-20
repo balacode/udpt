@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// pl is like fmt.Println, but returns no values. It is only used for debugging.
+// pl is like fmt.Println but returns no values. It is only used for debugging.
 func pl(args ...interface{}) { fmt.Println(args...) }
 
 var _ = pl
@@ -58,7 +58,7 @@ func MakeLogFunc(printMsg bool, logFile string) func(args ...interface{}) {
 
 // logChanSize specifies the number of messages buffered in logChan.
 //
-// To disable log buffering, set it to -1. This can be useful if you want
+// To disable log buffering, set it to 1. This can be useful if you want
 // to see log messages in-order with code execution, not after the fact.
 // But this will slow it down while it waits for log messages to be written.
 //
@@ -102,36 +102,25 @@ func (ob *logEntry) Output() {
 
 // logEnter enters a log message (built from args) in the log queue (logChan).
 //
-// If logChanSize is negative, outputs the message immediately.
+// If logChanSize is 1, outputs the message immediately.
 //
 // printMsg: determines if the message should be printed to standard output.
 //
 // logFile: specifies the log file into which to append.
 //
 func logEnter(printMsg bool, logFile string, args ...interface{}) {
-	if logChanSize == 0 {
-		logInit()
-	}
 	msg := logMakeMessage(logTimeNow(), args...)
 	entry := logEntry{printMsg: printMsg, logFile: logFile, msg: msg}
 	if logChan == nil {
 		logInit()
 	}
-	if logChanSize > 0 {
-		logChan <- entry
-	} else {
-		entry.Output()
-	}
+	logChan <- entry
 } //                                                                    logEnter
 
 // logInit initializes the logging queue (logChan) and launches
 // a goroutine that receives and outputs log messages.
 func logInit() {
-	n := logChanSize
-	if n < 0 {
-		n = 1
-	}
-	logChan = make(chan logEntry, n)
+	logChan = make(chan logEntry, logChanSize)
 	go func() {
 		for entry := range logChan {
 			entry.Output()
