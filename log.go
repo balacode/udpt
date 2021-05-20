@@ -7,6 +7,7 @@ package udpt
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -77,28 +78,47 @@ type logEntry struct {
 // Output immediately prints msg to standard output and if
 // logFile is not blank, appends the message to logFile.
 func (ob *logEntry) Output() {
+	ob.outputDI(os.Stdout, openLogFile)
+} //                                                                      Output
+
+// outputDI does the work for Output(), with dependency injection.
+func (ob *logEntry) outputDI(
+	con io.Writer,
+	openLogFile func(filename string, con io.Writer) io.WriteCloser,
+) {
 	if ob.printMsg {
-		fmt.Println(ob.msg)
+		fmt.Fprintln(con, ob.msg)
 	}
 	path := ob.logFile
 	if path == "" {
 		return
 	}
-	const mode = os.O_CREATE | os.O_APPEND | os.O_WRONLY
-	file, err := os.OpenFile(path, mode, 0644) // -> (*os.File, error)
-	if err != nil {
-		fmt.Println("ERROR 0xE2DA59: opening "+path+":", err)
+	wr := openLogFile(path, con)
+	if wr == nil {
 		return
 	}
-	n, err := file.WriteString(ob.msg + "\n")
+	n, err := wr.Write([]byte(ob.msg + "\n"))
 	if n == 0 || err != nil {
-		fmt.Println("ERROR 0xE81F3D: writing "+path+":", err)
+		fmt.Fprintln(con, "ERROR 0xE81F3D:", err)
 	}
-	err = file.Close()
+	err = wr.Close()
 	if err != nil {
-		fmt.Println("ERROR 0xE50F96: closing "+path+":", err)
+		fmt.Fprintln(con, "ERROR 0xE50F96:", err)
 	}
-} //                                                                      Output
+} //                                                                    outputDI
+
+// openLogFile opens a file for outputDI().
+func openLogFile(filename string, con io.Writer) io.WriteCloser {
+	file, err := os.OpenFile(filename,
+		os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Fprintln(con, "ERROR 0xE2DA59:", err)
+		return nil
+	}
+	return file
+} //                                                                 openLogFile
+
+// -----------------------------------------------------------------------------
 
 // logEnter enters a log message (built from args) in the log queue (logChan).
 //
