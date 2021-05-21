@@ -76,6 +76,16 @@ func (ob *aesCipher) setKeyDI(
 // You need to call SetKey at least once before you call Encrypt.
 //
 func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
+	return ob.encryptDI(plaintext, io.ReadFull)
+} //                                                                     Encrypt
+
+// encryptDI is only used by Encrypt() and provides parameters
+// for dependency injection, to enable mocking during testing.
+func (ob *aesCipher) encryptDI(
+	plaintext []byte,
+	ioReadFull func(io.Reader, []byte) (int, error),
+) (ciphertext []byte, err error) {
+	//
 	err = ob.ValidateKey(ob.cryptoKey)
 	if err != nil {
 		return nil, makeError(0xE64A2E, err)
@@ -83,7 +93,7 @@ func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 	// nonce is a byte array filled with cryptographically secure random bytes
 	n := ob.gcm.NonceSize() // = gcmStandardNonceSize = 12 bytes
 	nonce := make([]byte, n)
-	_, err = io.ReadFull(rand.Reader, nonce)
+	_, err = ioReadFull(rand.Reader, nonce)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +104,7 @@ func (ob *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error) {
 		nil,       // additionalData
 	)
 	return ciphertext, nil
-} //                                                                     Encrypt
+} //                                                                   encryptDI
 
 // Decrypt decrypts ciphertext using the key given to SetKey and
 // returns the decrypted plaintext, using AES-256 symmetric cipher.
