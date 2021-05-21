@@ -30,7 +30,7 @@ var (
 // avoid unnecessary memory allocations and de-allocations.
 // The size of 'tempBuf' must be Config.PacketSizeLimit or greater.
 //
-func readFromUDPConn(conn *net.UDPConn, tempBuf []byte, timeout time.Duration) (
+func readFromUDPConn(conn netUDPConn, tempBuf []byte, timeout time.Duration) (
 	nRead int,
 	addr net.Addr,
 	err error,

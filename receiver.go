@@ -65,7 +65,7 @@ type Receiver struct {
 
 	// conn is the UDP connection on which Receiver listens;
 	// setting this to nil allows Run() to stop listening
-	conn *net.UDPConn
+	conn netUDPConn
 
 	// receivingDataItem contains the data item
 	// currently being received from the Sender.
