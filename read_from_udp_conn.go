@@ -30,11 +30,7 @@ var (
 // avoid unnecessary memory allocations and de-allocations.
 // The size of 'tempBuf' must be Config.PacketSizeLimit or greater.
 //
-func readFromUDPConn(
-	conn *net.UDPConn,
-	tempBuf []byte,
-	timeout time.Duration,
-) (
+func readFromUDPConn(conn *net.UDPConn, tempBuf []byte, timeout time.Duration) (
 	nRead int,
 	addr net.Addr,
 	err error,
@@ -42,7 +38,8 @@ func readFromUDPConn(
 	if conn == nil {
 		return 0, nil, makeError(0xE4ED27, EInvalidArg)
 	}
-	err = conn.SetReadDeadline(time.Now().Add(timeout))
+	dl := time.Now().Add(timeout)
+	err = conn.SetReadDeadline(dl)
 	if err != nil {
 		return 0, nil, netError(err, 0xE09B6A)
 	}

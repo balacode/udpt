@@ -81,7 +81,8 @@ func (ob *logEntry) Output() {
 	ob.outputDI(os.Stdout, openLogFile)
 } //                                                                      Output
 
-// outputDI does the work for Output(), with dependency injection.
+// outputDI is only used by Output() and provides parameters
+// for dependency injection, to enable mocking during testing.
 func (ob *logEntry) outputDI(
 	con io.Writer,
 	openLogFile func(filename string, con io.Writer) io.WriteCloser,

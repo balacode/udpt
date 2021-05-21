@@ -98,7 +98,7 @@ func (ob *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error) {
 	}
 	n := ob.gcm.NonceSize()
 	if len(ciphertext) < n {
-		return nil, err
+		return nil, makeError(0xE5F7E2, "invalid ciphertext")
 	}
 	nonce := ciphertext[:n]
 	ciphertext = ciphertext[n:]

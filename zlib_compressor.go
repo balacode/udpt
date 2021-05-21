@@ -24,7 +24,8 @@ func (t *zlibCompressor) Compress(data []byte) ([]byte, error) {
 	return t.compressDI(data, wr, &cbuf)
 } //                                                                    Compress
 
-// compressDI _ _
+// compressDI is only used by Compress() and provides parameters
+// for dependency injection, to enable mocking during testing.
 func (*zlibCompressor) compressDI(
 	data []byte,
 	wr io.WriteCloser,
@@ -55,7 +56,8 @@ func (t *zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
 	return t.uncompressDI(compressed, zlib.NewReader)
 } //                                                                  Uncompress
 
-// uncompressDI _ _
+// uncompressDI is only used by Uncompress() and provides parameters
+// for dependency injection, to enable mocking during testing.
 func (*zlibCompressor) uncompressDI(
 	compressed []byte,
 	newReadCloser func(io.Reader) (io.ReadCloser, error),
