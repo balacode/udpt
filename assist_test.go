@@ -8,6 +8,7 @@ package udpt
 import (
 	"net"
 	"strings"
+	"testing"
 )
 
 // makeTestConn creates a UDP connection for testing.
@@ -60,5 +61,12 @@ func (ob *mockWriteCloser) Close() error {
 	}
 	return nil
 } //                                                                       Close
+
+// -----------------------------------------------------------------------------
+
+// go test -run Test_Temp_
+//
+func Test_Temp_(t *testing.T) {
+} //                                                                  Test_Temp_
 
 // end
