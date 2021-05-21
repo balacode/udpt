@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-// go test -run _ZLibCompressor_
+// go test -run Test_ZLibCompressor_
 //
 func Test_ZLibCompressor_(t *testing.T) {
 	input := []byte(

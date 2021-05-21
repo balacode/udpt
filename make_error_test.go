@@ -9,7 +9,9 @@ import (
 	"testing"
 )
 
-// go test -run _makeError_
+// makeError(id uint32, args ...interface{}) error
+//
+// go test -run Test_makeError_
 //
 func Test_makeError_(t *testing.T) {
 	for _, it := range []struct {

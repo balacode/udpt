@@ -14,14 +14,14 @@ import (
 )
 
 // to run all tests in this file:
-// go test -v -run _Sender_
+// go test -v -run Test_Sender_*
 
 // -----------------------------------------------------------------------------
 // # Main Methods (ob *Sender)
 
 // (ob *Sender) Send(name string, data []byte) error
 //
-// go test -run _Sender_Send_
+// go test -run Test_Sender_Send_
 //
 func Test_Sender_Send_(t *testing.T) {
 	{
@@ -82,7 +82,7 @@ func Test_Sender_Send_(t *testing.T) {
 
 // (ob *Sender) AverageResponseMs() float64
 //
-// go test -run _Sender_AverageResponseMs_
+// go test -run Test_Sender_AverageResponseMs_
 //
 func Test_Sender_AverageResponseMs_(t *testing.T) {
 	var snd Sender
@@ -98,7 +98,7 @@ func Test_Sender_AverageResponseMs_(t *testing.T) {
 
 // (ob *Sender) TransferSpeedKBpS() float64
 //
-// go test -run _Sender_TransferSpeedKBpS_
+// go test -run Test_Sender_TransferSpeedKBpS_
 //
 func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
 	var snd Sender
@@ -117,7 +117,7 @@ func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
 
 // (ob *Sender) LogStats(logFunc ...interface{})
 //
-// go test -run _Sender_LogStats_
+// go test -run Test_Sender_LogStats_
 //
 func Test_Sender_LogStats_(t *testing.T) {
 	var sb strings.Builder
@@ -167,7 +167,7 @@ func Test_Sender_LogStats_(t *testing.T) {
 
 // (ob *Sender) close() error
 //
-// go test -run _Sender_closes_
+// go test -run Test_Sender_close_
 //
 func Test_Sender_close_(t *testing.T) {
 	var snd Sender
@@ -189,9 +189,9 @@ func Test_Sender_close_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (ob *Sender)
 
-// getPacketCount
+// (ob *Sender) getPacketCount(length int) int
 //
-// go test -run _Sender_getPacketCount_
+// go test -run Test_Sender_getPacketCount_
 //
 func Test_Sender_getPacketCount_(t *testing.T) {
 	var ob Sender
@@ -218,9 +218,9 @@ func Test_Sender_getPacketCount_(t *testing.T) {
 	}
 } //                                                 Test_Sender_getPacketCount_
 
-// logError
+// (ob *Sender) logError(id uint32, args ...interface{}) error
 //
-// go test -run _Sender_logError_
+// go test -run Test_Sender_logError_
 //
 func Test_Sender_logError_(t *testing.T) {
 	var msg string
@@ -237,7 +237,7 @@ func Test_Sender_logError_(t *testing.T) {
 
 // (ob *Sender) makePacket(data []byte) (*senderPacket, error)
 //
-// go test -run _Sender_makePacket_
+// go test -run Test_Sender_makePacket_
 //
 func Test_Sender_makePacket_(t *testing.T) {
 	{

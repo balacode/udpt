@@ -13,13 +13,13 @@ import (
 )
 
 // to run all tests in this file:
-// go test -v -run _config_
+// go test -v -run Test_config_*
 
 // -----------------------------------------------------------------------------
 
 // NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration
 //
-// go test -run _config_NewDebugConfig_
+// go test -run Test_config_NewDebugConfig_
 //
 func Test_config_NewDebugConfig_(t *testing.T) {
 	//
@@ -66,7 +66,7 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 
 // (ob *Configuration) Validate() error
 //
-// go test -run _config_Configuration_Validate_
+// go test -run Test_config_Configuration_Validate_
 //
 func Test_config_Configuration_Validate_(t *testing.T) {
 	makeValidConfig := func() *Configuration {

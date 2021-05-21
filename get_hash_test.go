@@ -13,9 +13,9 @@ import (
 
 // getHash(data []byte) []byte
 //
-// go test -run _getHash_
+// go test -run Test_getHash_
 //
-func Test_getHash_getHash_(t *testing.T) {
+func Test_getHash_(t *testing.T) {
 	{
 		got := fmt.Sprintf("%X", getHash(nil))
 		if got != "E3B0C44298FC1C149AFBF4C8996FB924"+
@@ -43,7 +43,7 @@ func Test_getHash_getHash_(t *testing.T) {
 		_ = getHashDI([]byte{1, 2, 3}, &badHash{})
 		t.Error("0xEE2EE8") // previous line should panic and never reach here
 	}()
-} //                                                       Test_getHash_getHash_
+} //                                                               Test_getHash_
 
 // -----------------------------------------------------------------------------
 

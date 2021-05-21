@@ -14,13 +14,13 @@ import (
 )
 
 // to run all tests in this file:
-// go test -v -run _Receiver_
+// go test -v -run Test_Receiver_*
 
 // -----------------------------------------------------------------------------
 
 // (ob *Receiver) Run() error
 //
-// go test -run _Receiver_Run_
+// go test -run Test_Receiver_Run_
 //
 func Test_Receiver_Run_(t *testing.T) {
 	var rc Receiver
@@ -277,7 +277,7 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Logging Methods
 
-// (ob *Receiver) logError(args ...interface{})
+// (ob *Receiver) logError(id uint32, args ...interface{}) error
 //
 // go test -run Test_Receiver_logError_
 //

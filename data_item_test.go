@@ -18,7 +18,7 @@ import (
 
 // (ob *dataItem) IsLoaded() bool
 //
-// go test -run _dataItem_IsLoaded_
+// go test -run Test_dataItem_IsLoaded_
 //
 func Test_dataItem_IsLoaded_(t *testing.T) {
 	var dataItem0 dataItem
@@ -40,9 +40,9 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// (ob *dataItem) LogStats(tag string, logFunc ...interface{})
+// (ob *dataItem) LogStats(tag string, w io.Writer)
 //
-// go test -run _dataItem_LogStats_
+// go test -run Test_dataItem_LogStats_
 //
 func Test_dataItem_LogStats_(t *testing.T) {
 	var sb strings.Builder
@@ -82,9 +82,9 @@ func Test_dataItem_LogStats_(t *testing.T) {
 	test(logPrintln)
 } //                                                     Test_dataItem_LogStats_
 
-// Reset()
+// (ob *dataItem) Reset()
 //
-// go test -run _dataItem_Reset_
+// go test -run Test_dataItem_Reset_
 //
 func Test_dataItem_Reset_(t *testing.T) {
 	var di = dataItem{
@@ -112,9 +112,9 @@ func Test_dataItem_Reset_(t *testing.T) {
 	}
 } //                                                        Test_dataItem_Reset_
 
-// Retain(name string, hash []byte, packetCount int)
+// (ob *dataItem) Retain(name string, hash []byte, packetCount int)
 //
-// go test -run _dataItem_Retain_
+// go test -run Test_dataItem_Retain_
 //
 func Test_dataItem_Retain_(t *testing.T) {
 	initDataItem := func() dataItem {
@@ -191,9 +191,9 @@ func Test_dataItem_Retain_(t *testing.T) {
 	}
 } //                                                       Test_dataItem_Retain_
 
-// UnpackBytes(compressor Compression) ([]byte, error)
+// (ob *dataItem) UnpackBytes(compressor Compression) ([]byte, error)
 //
-// go test -run _dataItem_UnpackBytes_
+// go test -run Test_dataItem_UnpackBytes_
 //
 func Test_dataItem_UnpackBytes_(t *testing.T) {
 	zc := &zlibCompressor{}

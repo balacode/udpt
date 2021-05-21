@@ -14,14 +14,14 @@ import (
 	"time"
 )
 
-// -----------------------------------------------------------------------------
-
 // to run all tests in this file:
-// go test -v -run _log_
+// go test -v -run Test_log_*
+
+// -----------------------------------------------------------------------------
 
 // pl(args ...interface{})
 //
-// go test -run _log_pl_
+// go test -run Test_log_pl_
 //
 func Test_log_pl_(t *testing.T) {
 	pl()
@@ -29,17 +29,18 @@ func Test_log_pl_(t *testing.T) {
 
 // LogPrint(args ...interface{})
 //
-// go test -run _log_LogPrint_
+// go test -run Test_log_LogPrint_
 //
 func Test_log_LogPrint_(t *testing.T) {
 	LogPrint()
 } //                                                          Test_log_LogPrint_
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // MakeLogFunc(printMsg bool, logFile string) func(args ...interface{})
 //
-// go test -run _log_MakeLogFunc_1_
-//
-func Test_log_MakeLogFunc_1_(t *testing.T) {
+// go test -run Test_log_MakeLogFunc_*
+
+func Test_log_MakeLogFunc_1(t *testing.T) {
 	//
 	// prepare: delete log file and mock time.Now()
 	logFile := "udpt.Test_log_MakeLogFunc_.tmp"
@@ -75,36 +76,28 @@ func Test_log_MakeLogFunc_1_(t *testing.T) {
 	// cleanup
 	_ = os.Remove(logFile)
 	logTimeNow = time.Now
-} //                                                     Test_log_MakeLogFunc_1_
+} //                                                      Test_log_MakeLogFunc_1
 
-// MakeLogFunc(printMsg bool, logFile string) func(args ...interface{})
-//
-// go test -run _log_MakeLogFunc_2_
-//
-func Test_log_MakeLogFunc_2_(t *testing.T) {
-	const filename = "udpt.Test_log_MakeLogFunc_.tmp"
+func Test_log_MakeLogFunc_2(t *testing.T) {
+	const testFile = "udpt.Test_log_MakeLogFunc_.tmp"
 	const msg = "test message #5067124389"
-	_ = os.Remove(filename)
-	fn := MakeLogFunc(false, filename)
+	_ = os.Remove(testFile)
+	fn := MakeLogFunc(false, testFile)
 	fn(msg)
 	time.Sleep(time.Second)
-	data, err := ioutil.ReadFile(filename)
+	data, err := ioutil.ReadFile(testFile)
 	if !strings.Contains(string(data), msg) || err != nil {
 		t.Error("0xEC7ED0")
 	}
-	_ = os.Remove(filename)
-} //                                                     Test_log_MakeLogFunc_2_
+	_ = os.Remove(testFile)
+} //                                                      Test_log_MakeLogFunc_2
 
-// -----------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// (ob *logEntry) Output()
+//
+// go test -run Test_log_logEntry_Output_
 
-// (ob *logEntry) outputDI(
-//     con io.Writer,
-//     openLogFile func(filename string, con io.Writer) io.WriteCloser,
-// )
-//
-// go test -run _log_logEntry_outputDI_
-//
-func Test_log_logEntry_outputDI_(t *testing.T) {
+func Test_log_logEntry_Output_(t *testing.T) {
 	{
 		// test writing to console without logging to a file
 		const msg = "test message #3146250897"
@@ -115,40 +108,40 @@ func Test_log_logEntry_outputDI_(t *testing.T) {
 			t.Error("0xE58FB6")
 		}
 	}
-	const filename = "udpt.Test_log_logEntry_outputDI_.tmp"
-	_ = os.Remove(filename)
+	const testFile = "udpt.Test_log_logEntry_Output_.tmp"
+	_ = os.Remove(testFile)
 	{
 		// test logging to a file without writing to console
 		const msg = "test message #9473258061"
-		l := logEntry{printMsg: false, logFile: filename, msg: msg}
+		l := logEntry{printMsg: false, logFile: testFile, msg: msg}
 		var sb strings.Builder
 		l.outputDI(&sb, openLogFile)
 		if sb.String() != "" {
 			t.Error("0xE8BB8F")
 		}
-		data, err := ioutil.ReadFile(filename)
+		data, err := ioutil.ReadFile(testFile)
 		if string(data) != msg+"\n" || err != nil {
 			t.Error("0xED98CA")
 		}
 	}
-	_ = os.Remove(filename)
+	_ = os.Remove(testFile)
 	{
 		// test that no file is created when openLogFile() returns nil
 		const msg = "test message #2361498057"
-		l := logEntry{printMsg: false, logFile: filename, msg: msg}
+		l := logEntry{printMsg: false, logFile: testFile, msg: msg}
 		openLogFile := func(string, io.Writer) io.WriteCloser { return nil }
 		var sb strings.Builder
 		l.outputDI(&sb, openLogFile)
-		data, err := ioutil.ReadFile(filename)
+		data, err := ioutil.ReadFile(testFile)
 		if data != nil || !os.IsNotExist(err) {
 			t.Error("0xE7BC99")
 		}
 	}
-	_ = os.Remove(filename)
+	_ = os.Remove(testFile)
 	{
 		// test that errors are written to console when Write() and Close() fail
 		const msg = "test message #1540938672"
-		l := logEntry{printMsg: false, logFile: filename, msg: msg}
+		l := logEntry{printMsg: false, logFile: testFile, msg: msg}
 		openLogFile := func(string, io.Writer) io.WriteCloser {
 			return &mockWriteCloser{failWrite: true, failClose: true}
 		}
@@ -163,37 +156,37 @@ func Test_log_logEntry_outputDI_(t *testing.T) {
 			t.Error("0xEA1B28")
 		}
 		// must not create/write to file
-		data, err := ioutil.ReadFile(filename)
+		data, err := ioutil.ReadFile(testFile)
 		if data != nil || !os.IsNotExist(err) {
 			t.Error("0xEB38C2")
 		}
 	}
-	_ = os.Remove(filename)
-} //                                                 Test_log_logEntry_outputDI_
+	_ = os.Remove(testFile)
+} //                                                   Test_log_logEntry_Output_
 
 // openLogFile(filename string, con io.Writer) io.WriteCloser
 //
-// go test -run _log_openLogFile_
+// go test -run Test_log_openLogFile_
 //
 func Test_log_openLogFile_(t *testing.T) {
 	{
 		// must succeed opening a file and writing to it two times
-		const filename = "udpt.Test_log_openLogFile_.tmp"
-		_ = os.Remove(filename)
+		const testFile = "udpt.Test_log_openLogFile_.tmp"
+		_ = os.Remove(testFile)
 		var sb strings.Builder
 		now := time.Now().String()
 		msg1 := now + " msg1\n"
 		msg2 := now + " msg2\n"
 		//
-		wrc := openLogFile(filename, &sb)
+		wrc := openLogFile(testFile, &sb)
 		wrc.Write([]byte(msg1))
 		wrc.Close()
 		//
-		wrc = openLogFile(filename, &sb)
+		wrc = openLogFile(testFile, &sb)
 		wrc.Write([]byte(msg2))
 		wrc.Close()
 		//
-		data, err := ioutil.ReadFile(filename)
+		data, err := ioutil.ReadFile(testFile)
 		if err != nil {
 			t.Error("0xE7B84B")
 		}
@@ -204,7 +197,7 @@ func Test_log_openLogFile_(t *testing.T) {
 		if sb.String() != "" {
 			t.Error("0xE4CE4D")
 		}
-		_ = os.Remove(filename)
+		_ = os.Remove(testFile)
 	}
 	{
 		// must fail to open a file with an invalid name
@@ -221,7 +214,7 @@ func Test_log_openLogFile_(t *testing.T) {
 
 // logInit()
 //
-// go test -run _log_logInit_
+// go test -run Test_log_logInit_
 //
 func Test_log_logInit_(t *testing.T) {
 	logInit()
@@ -230,9 +223,9 @@ func Test_log_logInit_(t *testing.T) {
 	}
 } //                                                           Test_log_logInit_
 
-// logMakeMessage(args ...interface{}) string
+// logMakeMessage(tm time.Time, args ...interface{}) string
 //
-// go test -run _log_logMakeMessage_
+// go test -run Test_log_logMakeMessage_
 //
 func Test_log_logMakeMessage_(t *testing.T) {
 	for _, it := range []struct {

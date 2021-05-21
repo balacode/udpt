@@ -10,13 +10,13 @@ import (
 )
 
 // to run all tests in this file:
-// go test -v -run _string_
+// go test -v -run Test_string_*
 
 // -----------------------------------------------------------------------------
 
 // getPart(s, prefix, suffix string) string
 //
-// go test -run _string_getPart_
+// go test -run Test_string_getPart_
 //
 func Test_string_getPart_(t *testing.T) {
 	for _, it := range []struct {
@@ -61,7 +61,7 @@ func Test_string_getPart_(t *testing.T) {
 
 // joinArgs(tag string, args ...interface{}) string
 //
-// go test -run _string_joinArgs_
+// go test -run Test_string_joinArgs_
 //
 func Test_string_joinArgs_(t *testing.T) {
 	for _, it := range []struct {
@@ -90,7 +90,7 @@ func Test_string_joinArgs_(t *testing.T) {
 
 // padf(minLength int, format string, args ...interface{}) string
 //
-// go test -run _string_padf_
+// go test -run Test_string_padf_
 //
 func Test_string_padf_(t *testing.T) {
 	for _, it := range []struct {

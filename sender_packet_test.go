@@ -11,13 +11,13 @@ import (
 )
 
 // to run all tests in this file:
-// go test -v -run _senderPacket_
+// go test -v -run Test_senderPacket_*
 
 // -----------------------------------------------------------------------------
 
 // (ob *senderPacket) IsDelivered() bool
 //
-// go test -run _senderPacket_IsDelivered_
+// go test -run Test_senderPacket_IsDelivered_
 //
 func Test_senderPacket_IsDelivered_(t *testing.T) {
 	var pk senderPacket
@@ -36,7 +36,7 @@ func Test_senderPacket_IsDelivered_(t *testing.T) {
 
 // (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error
 //
-// go test -run _senderPacket_Send_
+// go test -run Test_senderPacket_Send_
 //
 func Test_senderPacket_Send_(t *testing.T) {
 	{
