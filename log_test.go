@@ -158,8 +158,8 @@ func Test_log_logEntry_outputDI_(t *testing.T) {
 		// console must contain two error messages
 		con := sb.String()
 		if !strings.Contains(con, "ERROR 0x") ||
-			!strings.Contains(con, "from mockWriteCloser.Write") ||
-			!strings.Contains(con, "from mockWriteCloser.Close") {
+			!strings.Contains(con, "failed mockWriteCloser.Write") ||
+			!strings.Contains(con, "failed mockWriteCloser.Close") {
 			t.Error("0xEA1B28")
 		}
 		// must not create/write to file

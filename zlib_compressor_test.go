@@ -59,7 +59,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		if comp != nil {
 			t.Error("0xE27BB2")
 		}
-		if !matchError(err, "0xE12345: from mockWriteCloser.Write") {
+		if !matchError(err, "failed mockWriteCloser.Write") {
 			t.Error("0xEE9C54", err)
 		}
 	}
@@ -72,7 +72,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		if comp != nil {
 			t.Error("0xE6F6A5")
 		}
-		if !matchError(err, "0xE12345: from mockWriteCloser.Close") {
+		if !matchError(err, "failed mockWriteCloser.Close") {
 			t.Error("0xE4DF92", err)
 		}
 	}
@@ -86,7 +86,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		if uncomp != nil {
 			t.Error("0xE3DA4F")
 		}
-		if !matchError(err, "0xE12345: from mockReadCloser.Read") {
+		if !matchError(err, "failed mockReadCloser.Read") {
 			t.Error("0xE81C62")
 		}
 	}
@@ -100,7 +100,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		if uncomp != nil {
 			t.Error("0xEF3A01")
 		}
-		if !matchError(err, "0xE12345: from mockReadCloser.Close") {
+		if !matchError(err, "failed mockReadCloser.Close") {
 			t.Error("0xEA0F76")
 		}
 	}
@@ -120,7 +120,7 @@ type mockReadCloser struct {
 //
 func (ob *mockReadCloser) Read(p []byte) (n int, err error) {
 	if ob.failRead {
-		return 0, makeError(0xE12345, "from mockReadCloser.Read")
+		return 0, makeError(0xEF8E54, "failed mockReadCloser.Read")
 	}
 	return len(p), nil
 } //                                                                        Read
@@ -131,7 +131,7 @@ func (ob *mockReadCloser) Read(p []byte) (n int, err error) {
 //
 func (ob *mockReadCloser) Close() error {
 	if ob.failClose {
-		return makeError(0xE12345, "from mockReadCloser.Close")
+		return makeError(0xE1FB2C, "failed mockReadCloser.Close")
 	}
 	return nil
 } //                                                                       Close

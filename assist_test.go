@@ -46,7 +46,7 @@ type mockWriteCloser struct {
 //
 func (ob *mockWriteCloser) Write(p []byte) (n int, err error) {
 	if ob.failWrite {
-		return 0, makeError(0xE12345, "from mockWriteCloser.Write")
+		return 0, makeError(0xEA8F84, "failed mockWriteCloser.Write")
 	}
 	return len(p), nil
 } //                                                                       Write
@@ -57,7 +57,7 @@ func (ob *mockWriteCloser) Write(p []byte) (n int, err error) {
 //
 func (ob *mockWriteCloser) Close() error {
 	if ob.failClose {
-		return makeError(0xE12345, "from mockWriteCloser.Close")
+		return makeError(0xEC5E59, "failed mockWriteCloser.Close")
 	}
 	return nil
 } //                                                                       Close
