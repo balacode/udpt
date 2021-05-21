@@ -46,7 +46,7 @@ func readFromUDPConn(conn netUDPConn, tempBuf []byte, timeout time.Duration) (
 	// contents of 'tempBuf' is overwritten after every ReadFrom
 	nRead, addr, err = conn.ReadFrom(tempBuf)
 	if err != nil {
-		netError(err, 0xE0E0B1)
+		err = netError(err, 0xE0E0B1)
 	}
 	return nRead, addr, err
 } //                                                             readFromUDPConn
