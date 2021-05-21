@@ -12,12 +12,12 @@ import (
 
 // getHash returns the SHA-256 hash of data as a slice of 32 bytes.
 func getHash(data []byte) []byte {
-	return getHashD(data, sha256.New())
+	return getHashDI(data, sha256.New())
 } //                                                                     getHash
 
-// getHashD carries out the work for getHash(), and accepts
-// a dependency 'hs' that can be mocked during testing.
-func getHashD(data []byte, hs hash.Hash) []byte {
+// getHashDI is only used by getHash() and provides parameters
+// for dependency injection, to enable mocking during testing.
+func getHashDI(data []byte, hs hash.Hash) []byte {
 	n, err := hs.Write(data)
 	if n != len(data) || err != nil {
 		// this should never happen
@@ -29,6 +29,6 @@ func getHashD(data []byte, hs hash.Hash) []byte {
 		panic(makeError(0xE4D3E1, "invalid hash size").Error())
 	}
 	return ret
-} //                                                                    getHashD
+} //                                                                   getHashDI
 
 // end

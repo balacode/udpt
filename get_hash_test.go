@@ -30,7 +30,7 @@ func Test_getHash_getHash_(t *testing.T) {
 				t.Error("0xE1A10A")
 			}
 		}()
-		_ = getHashD(nil, &badHash{})
+		_ = getHashDI(nil, &badHash{})
 		t.Error("0xE20F56") // previous line should panic and never reach here
 	}()
 	func() {
@@ -40,7 +40,7 @@ func Test_getHash_getHash_(t *testing.T) {
 				t.Error("0xE4A45E")
 			}
 		}()
-		_ = getHashD([]byte{1, 2, 3}, &badHash{})
+		_ = getHashDI([]byte{1, 2, 3}, &badHash{})
 		t.Error("0xEE2EE8") // previous line should panic and never reach here
 	}()
 } //                                                       Test_getHash_getHash_
