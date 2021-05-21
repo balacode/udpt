@@ -40,6 +40,16 @@ func (ob *aesCipher) ValidateKey(key []byte) error {
 // The same key is used for encryption and decryption.
 //
 func (ob *aesCipher) SetKey(key []byte) error {
+	return ob.setKeyDI(key, aes.NewCipher, cipher.NewGCM)
+} //                                                                      SetKey
+
+// setKeyDI is only used by SetKey() and provides parameters
+// for dependency injection, to enable mocking during testing.
+func (ob *aesCipher) setKeyDI(
+	key []byte,
+	aesNewCipher func([]byte) (cipher.Block, error),
+	cipherNewGCM func(cipher.Block) (cipher.AEAD, error),
+) error {
 	err := ob.ValidateKey(key)
 	if err != nil {
 		return makeError(0xE32BD3, err)
@@ -47,18 +57,18 @@ func (ob *aesCipher) SetKey(key []byte) error {
 	if bytes.Equal(ob.cryptoKey, key) {
 		return nil
 	}
-	cphr, err := aes.NewCipher(key)
+	cphr, err := aesNewCipher(key)
 	if err != nil {
 		return err
 	}
-	gcm, err := cipher.NewGCM(cphr)
+	gcm, err := cipherNewGCM(cphr)
 	if err != nil {
 		return err
 	}
 	ob.gcm = gcm
 	ob.cryptoKey = key
 	return nil
-} //                                                                      SetKey
+} //                                                                    setKeyDI
 
 // Encrypt encrypts plaintext using the key given to SetKey and
 // returns the encrypted ciphertext, using AES-256 symmetric cipher.
