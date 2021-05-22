@@ -6,6 +6,7 @@
 package udpt
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -19,7 +20,7 @@ func makeError(id uint32, args ...interface{}) error {
 	m = string(rx.ReplaceAll([]byte(m), []byte("")))
 	m = fmt.Sprintf("ERROR 0x%06X: ", id) + m
 	m = strings.TrimSpace(m)
-	return fmt.Errorf(m)
+	return errors.New(m)
 } //                                                                   makeError
 
 // end

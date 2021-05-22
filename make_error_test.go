@@ -11,9 +11,9 @@ import (
 
 // makeError(id uint32, args ...interface{}) error
 //
-// go test -run Test_makeError_
-//
-func Test_makeError_(t *testing.T) {
+// go test -run Test_makeError_*
+
+func Test_makeError_1(t *testing.T) {
 	for _, it := range []struct {
 		id   uint32
 		args []interface{}
@@ -35,6 +35,16 @@ func Test_makeError_(t *testing.T) {
 				it.id, it.args, it.expect, got)
 		}
 	}
-} //                                                             Test_makeError_
+} //                                                            Test_makeError_1
+
+func Test_makeError_(t *testing.T) {
+	a := makeError(0xEE5D1E, "the error message")
+	b := makeError(0xE4C1F0, a.Error())
+	c := makeError(0xED10D5, b.Error())
+	got := c.Error()
+	if got != "ERROR 0x"+"ED10D5: the error message" {
+		t.Error("0xEE38BE")
+	}
+} //                                                            Test_makeError_2
 
 // end
