@@ -23,17 +23,17 @@ import (
 func Test_dataItem_IsLoaded_(t *testing.T) {
 	var dataItem0 dataItem
 	if dataItem0.IsLoaded() != false {
-		t.Error("0xE3FA57 dataItem0.IsLoaded() expect:false got:true")
+		t.Error("0xE3FA57")
 	}
 	var dataItem1 dataItem
 	dataItem1.CompressedPieces = [][]byte{{}, {1}}
 	if dataItem1.IsLoaded() != false {
-		t.Error("0xE60B69 dataItem1.IsLoaded() expect:false got:true")
+		t.Error("0xE60B69")
 	}
 	var dataItem2 dataItem
 	dataItem2.CompressedPieces = [][]byte{{1}, {23}}
 	if dataItem2.IsLoaded() != true {
-		t.Error("0xE25AC1 dataItem2.IsLoaded() expect:true got:false")
+		t.Error("0xE25AC1")
 	}
 } //                                                     Test_dataItem_IsLoaded_
 
@@ -73,9 +73,11 @@ func Test_dataItem_LogStats_(t *testing.T) {
 			"xyz size: 50 bytes\n"
 		//
 		if got != expect {
-			t.Error("\n"+"expect:\n", expect, "\n"+"got:\n", got)
-			fmt.Println([]byte(expect))
-			fmt.Println([]byte(got))
+			t.Error("0xE85AA7",
+				"\n"+"expect:\n", expect,
+				"\n"+"   got:\n", got)
+			fmt.Println("expect bytes:", []byte(expect))
+			fmt.Println("   got bytes:", []byte(got))
 		}
 	}
 	test(fmtPrintln)
@@ -96,19 +98,19 @@ func Test_dataItem_Reset_(t *testing.T) {
 	}
 	di.Reset()
 	if di.Name != "" {
-		t.Error("0xEA8B3D Name not reset")
+		t.Error("0xEA8B3D", "Name not reset")
 	}
 	if di.Hash != nil {
-		t.Error("0xEEA4C6 Hash not reset")
+		t.Error("0xEEA4C6", "Hash not reset")
 	}
 	if di.CompressedPieces != nil {
-		t.Error("0xE3BCE2 CompressedPieces not reset")
+		t.Error("0xE3BCE2", "CompressedPieces not reset")
 	}
 	if di.CompressedSizeInfo != 0 {
-		t.Error("0xE04C47 CompressedSizeInfo not reset")
+		t.Error("0xE04C47", "CompressedSizeInfo not reset")
 	}
 	if di.UncompressedSizeInfo != 0 {
-		t.Error("0xE22CD6 UncompressedSizeInfo not reset")
+		t.Error("0xE22CD6", "UncompressedSizeInfo not reset")
 	}
 } //                                                        Test_dataItem_Reset_
 
@@ -136,7 +138,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 			return ret
 		}
 		if !reflect.DeepEqual(di, expect) {
-			t.Error("0xED7D54 Retain() failed\n",
+			t.Error("0xED7D54", "\n",
 				"expect:", str(expect), "\n",
 				"   got:", str(di))
 		}

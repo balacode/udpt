@@ -51,7 +51,7 @@ func Test_string_getPart_(t *testing.T) {
 	} {
 		got := getPart(it.s, it.prefix, it.suffix)
 		if got != it.expect {
-			t.Errorf("getPart(%#v, %#v, %#v)"+
+			t.Errorf("0xE2C73F"+" getPart(%#v, %#v, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
 				it.s, it.prefix, it.suffix, it.expect, got)
@@ -80,7 +80,7 @@ func Test_string_joinArgs_(t *testing.T) {
 	} {
 		got := joinArgs(it.tag, it.args...)
 		if got != it.expect {
-			t.Errorf("padf(%#v, %#v)"+
+			t.Errorf("0xE7B77D"+" joinArgs(%#v, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
 				it.tag, it.args, it.expect, got)
@@ -106,7 +106,7 @@ func Test_string_padf_(t *testing.T) {
 	} {
 		got := padf(it.minLength, it.format, it.args...)
 		if got != it.expect {
-			t.Errorf("padf(%#v, %#v, %#v)"+
+			t.Errorf("0xEA7E4F"+" padf(%#v, %#v, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
 				it.minLength, it.format, it.args, it.expect, got)

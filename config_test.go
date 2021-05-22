@@ -44,7 +44,7 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 		expectS := formatStruct(expect)
 		//
 		if gotS != expectS {
-			t.Error(
+			t.Error("0xEB0A18", "\n",
 				"expect:", expectS, "\n",
 				"   got:", gotS,
 			)
@@ -95,7 +95,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.Cipher = nil
 		err := cf.Validate()
 		if !matchError(err, "nil Configuration.Cipher") {
-			t.Error("0xE65F82")
+			t.Error("0xE65F82", "wrong error:", err)
 		}
 	}
 	{
@@ -103,7 +103,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.Compressor = nil
 		err := cf.Validate()
 		if !matchError(err, "nil Configuration.Compressor") {
-			t.Error("0xE2CF8C")
+			t.Error("0xE2CF8C", "wrong error:", err)
 		}
 	}
 	{
@@ -111,7 +111,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.PacketSizeLimit = 8 - 1
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.PacketSizeLimit") {
-			t.Error("0xE6E9BA")
+			t.Error("0xE6E9BA", "wrong error:", err)
 		}
 	}
 	{
@@ -119,7 +119,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.PacketSizeLimit = (65535 - 8) + 1
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.PacketSizeLimit") {
-			t.Error("0xED50EB")
+			t.Error("0xED50EB", "wrong error:", err)
 		}
 	}
 	{
@@ -127,7 +127,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.PacketPayloadSize = 0
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.PacketPayloadSize") {
-			t.Error("0xEA00A5")
+			t.Error("0xEA00A5", "wrong error:", err)
 		}
 	}
 	{
@@ -136,7 +136,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.PacketPayloadSize = 1000 - 200 + 1
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.PacketPayloadSize") {
-			t.Error("0xEC92E8")
+			t.Error("0xEC92E8", "wrong error:", err)
 		}
 	}
 	{
@@ -144,7 +144,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.SendBufferSize = -1
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.SendBufferSize") {
-			t.Error("0xE2FF75")
+			t.Error("0xE2FF75", "wrong error:", err)
 		}
 	}
 	{
@@ -152,7 +152,7 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 		cf.SendRetries = -1
 		err := cf.Validate()
 		if !matchError(err, "invalid Configuration.SendRetries") {
-			t.Error("0xE0DE62")
+			t.Error("0xE0DE62", "wrong error:", err)
 		}
 	}
 } //                                         Test_config_Configuration_Validate_

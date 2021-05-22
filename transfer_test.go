@@ -103,7 +103,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		k, v := makeKV(i)
 		err := sender.Send(k, []byte(v))
 		if err != nil {
-			t.Error("failed sending "+k+":", err)
+			t.Error("0xEA8C61", "failed sending "+k+":", err)
 		}
 	}
 	time.Sleep(time.Second)
@@ -113,7 +113,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		k, vS := makeKV(i)
 		vR := received[k]
 		if !bytes.Equal(vS, vR) {
-			t.Error("mismatch for key:", k,
+			t.Error("0xE67F41", "mismatch for key:", k,
 				"len(vS):", len(vS),
 				"len(vR):", len(vR))
 		}

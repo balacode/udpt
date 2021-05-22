@@ -52,7 +52,7 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 	// test!
 	fn := MakeLogFunc(false, logFile)
 	if fn == nil {
-		t.Error("MakeLogFunc returned nil")
+		t.Error("0xEA9A06", "MakeLogFunc returned nil")
 	}
 	fn("abc", 123, "45", "de")
 	//
@@ -60,7 +60,7 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 	time.Sleep(500 * time.Millisecond) // wait for logger finish writing
 	data, err := ioutil.ReadFile(logFile)
 	if err != nil {
-		t.Error("Failed to read log file")
+		t.Error("0xE08D49", err)
 		return
 	}
 	got := string(data)
@@ -68,7 +68,7 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 	expect = strings.ReplaceAll(expect, "@tm", tm.String()[:19])
 	//
 	if got != expect {
-		t.Errorf("Wrong text in log file "+
+		t.Errorf("0xEF57A5"+" wrong text in log file "+
 			"\n expect: %#v"+
 			"\n    got: %#v",
 			expect, got)
@@ -219,7 +219,7 @@ func Test_log_openLogFile_(t *testing.T) {
 func Test_log_logInit_(t *testing.T) {
 	logInit()
 	if logChan == nil {
-		t.Error("logChan not initialized")
+		t.Error("0xE39B91", "logChan not initialized")
 	}
 } //                                                           Test_log_logInit_
 
@@ -243,7 +243,7 @@ func Test_log_logMakeMessage_(t *testing.T) {
 			expect = strings.ReplaceAll(it.expect, "@tm", tms)
 		)
 		if got != expect {
-			t.Errorf("logMakeMessage(<%s>, %#v)"+
+			t.Errorf("0xEB14AF"+" logMakeMessage(<%s>, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
 				tms, it.args, expect, got)

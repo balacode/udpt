@@ -29,7 +29,7 @@ func Test_makeError_(t *testing.T) {
 		err := makeError(it.id, it.args...)
 		got := err.Error()
 		if got != it.expect {
-			t.Errorf("makeError(%X, %#v)"+
+			t.Errorf("0xE60E1A"+" makeError(%X, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
 				it.id, it.args, it.expect, got)

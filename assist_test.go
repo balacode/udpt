@@ -15,11 +15,11 @@ import (
 func makeTestConn() *net.UDPConn {
 	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:9876")
 	if err != nil {
-		panic("0xEE52A7")
+		panic(makeError(0xEE52A7, err).Error())
 	}
 	conn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		panic("0xE1E9E7")
+		panic(makeError(0xE1E9E7, err).Error())
 	}
 	return conn
 } //                                                                makeTestConn
