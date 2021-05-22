@@ -18,9 +18,9 @@ type Configuration struct {
 
 	// Cipher is the object that handles encryption and decryption.
 	//
-	// It must implement the SymmetricCipher interface which is defined in
-	// this package. If you don't specify Cipher, then encryption will be done
-	// using the default AES-256 cipher (aesCipher) used in this package.
+	// It must implement the SymmetricCipher interface which is defined
+	// in this package. If you don't specify Cipher, then encryption will
+	// be done using the default AES-256 cipher used in this package.
 	//
 	Cipher SymmetricCipher
 
@@ -109,16 +109,16 @@ type Configuration struct {
 // If you pass multiple arguments, only the first will be used.
 //
 func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
-	cfg := NewDefaultConfig()
-	cfg.VerboseSender = true
-	cfg.VerboseReceiver = true
+	cf := NewDefaultConfig()
+	cf.VerboseSender = true
+	cf.VerboseReceiver = true
 	//
 	if len(logFunc) > 0 {
-		cfg.LogFunc = logFunc[0]
+		cf.LogFunc = logFunc[0]
 	} else {
-		cfg.LogFunc = LogPrint
+		cf.LogFunc = LogPrint
 	}
-	return cfg
+	return cf
 } //                                                              NewDebugConfig
 
 // NewDefaultConfig returns default configuration settings.
@@ -151,32 +151,32 @@ func NewDefaultConfig() *Configuration {
 //
 // Returns nil if there is no problem, or the error value.
 //
-func (ob *Configuration) Validate() error {
+func (cf *Configuration) Validate() error {
 	//
 	// Components:
-	if ob.Cipher == nil {
+	if cf.Cipher == nil {
 		return makeError(0xE16FB9, "nil Configuration.Cipher")
 	}
-	if ob.Compressor == nil {
+	if cf.Compressor == nil {
 		return makeError(0xE5B3C1, "nil Configuration.Compressor")
 	}
 	// Limits:
-	n := ob.PacketSizeLimit
+	n := cf.PacketSizeLimit
 	if n < 8 || n > (65535-8) {
 		return makeError(0xE86C2A,
 			"invalid Configuration.PacketSizeLimit:", n)
 	}
-	n = ob.PacketPayloadSize
-	if n < 1 || n > (ob.PacketSizeLimit-200) {
+	n = cf.PacketPayloadSize
+	if n < 1 || n > (cf.PacketSizeLimit-200) {
 		return makeError(0xE54BF4,
 			"invalid Configuration.PacketPayloadSize:", n)
 	}
-	n = ob.SendBufferSize
+	n = cf.SendBufferSize
 	if n < 0 {
 		return makeError(0xE27C2B,
 			"invalid Configuration.SendBufferSize:", n)
 	}
-	n = ob.SendRetries
+	n = cf.SendRetries
 	if n < 0 {
 		return makeError(0xE47C83,
 			"invalid Configuration.SendRetries:", n)

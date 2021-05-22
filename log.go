@@ -77,20 +77,20 @@ type logEntry struct {
 
 // Output immediately prints msg to standard output and if
 // logFile is not blank, appends the message to logFile.
-func (ob *logEntry) Output() {
-	ob.outputDI(os.Stdout, openLogFile)
+func (le *logEntry) Output() {
+	le.outputDI(os.Stdout, openLogFile)
 } //                                                                      Output
 
 // outputDI is only used by Output() and provides parameters
 // for dependency injection, to enable mocking during testing.
-func (ob *logEntry) outputDI(
+func (le *logEntry) outputDI(
 	con io.Writer,
 	openLogFile func(filename string, con io.Writer) io.WriteCloser,
 ) {
-	if ob.printMsg {
-		fmt.Fprintln(con, ob.msg)
+	if le.printMsg {
+		fmt.Fprintln(con, le.msg)
 	}
-	path := ob.logFile
+	path := le.logFile
 	if path == "" {
 		return
 	}
@@ -98,7 +98,7 @@ func (ob *logEntry) outputDI(
 	if wr == nil {
 		return
 	}
-	n, err := wr.Write([]byte(ob.msg + "\n"))
+	n, err := wr.Write([]byte(le.msg + "\n"))
 	if n == 0 || err != nil {
 		fmt.Fprintln(con, "ERROR 0xE81F3D:", err)
 	}

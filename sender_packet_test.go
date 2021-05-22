@@ -15,7 +15,7 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// (ob *senderPacket) IsDelivered() bool
+// (pk *senderPacket) IsDelivered() bool
 //
 // go test -run Test_senderPacket_IsDelivered_
 //
@@ -34,7 +34,7 @@ func Test_senderPacket_IsDelivered_(t *testing.T) {
 	}
 } //                                              Test_senderPacket_IsDelivered_
 
-// (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error
+// (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error
 //
 // go test -run Test_senderPacket_Send_
 //

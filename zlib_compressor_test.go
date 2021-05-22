@@ -118,8 +118,8 @@ type mockReadCloser struct {
 //
 // You can make it return an error by setting mockReadCloser.failRead.
 //
-func (ob *mockReadCloser) Read(p []byte) (n int, err error) {
-	if ob.failRead {
+func (mk *mockReadCloser) Read(p []byte) (n int, err error) {
+	if mk.failRead {
 		return 0, makeError(0xEF8E54, "failed mockReadCloser.Read")
 	}
 	return len(p), nil
@@ -129,8 +129,8 @@ func (ob *mockReadCloser) Read(p []byte) (n int, err error) {
 //
 // You can make it return an error by setting mockReadCloser.failClose.
 //
-func (ob *mockReadCloser) Close() error {
-	if ob.failClose {
+func (mk *mockReadCloser) Close() error {
+	if mk.failClose {
 		return makeError(0xE1FB2C, "failed mockReadCloser.Close")
 	}
 	return nil

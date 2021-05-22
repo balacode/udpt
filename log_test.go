@@ -93,7 +93,7 @@ func Test_log_MakeLogFunc_2(t *testing.T) {
 } //                                                      Test_log_MakeLogFunc_2
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// (ob *logEntry) Output()
+// (le *logEntry) Output()
 //
 // go test -run Test_log_logEntry_Output_
 

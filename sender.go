@@ -8,19 +8,19 @@ package udpt
 // # Sender Class
 //   Sender struct
 //
-// # Main Methods (ob *Sender)
+// # Main Methods (sd *Sender)
 //   ) Send(name string, data []byte) error
 //   ) SendString(name string, s string) error
 //
-// # Informatory Properties (ob *Sender)
+// # Informatory Properties (sd *Sender)
 //   ) AverageResponseMs() float64
 //   ) DeliveredAllParts() bool
 //   ) TransferSpeedKBpS() float64
 //
-// # Informatory Methods (ob *Sender)
+// # Informatory Methods (sd *Sender)
 //   ) LogStats()
 //
-// # Internal Lifecycle Methods (ob *Sender)
+// # Internal Lifecycle Methods (sd *Sender)
 //   ) requestDataItemHash(name string) []byte
 //   ) connect() error
 //   ) sendUndeliveredPackets() error
@@ -28,7 +28,7 @@ package udpt
 //   ) waitForAllConfirmations()
 //   ) close() error
 //
-// # Internal Helper Methods (ob *Sender)
+// # Internal Helper Methods (sd *Sender)
 //   ) getPacketCount(length int) int
 //   ) makePacket(data []byte) (*senderPacket, error)
 
@@ -104,108 +104,108 @@ type Sender struct {
 } //                                                                      Sender
 
 // -----------------------------------------------------------------------------
-// # Main Methods (ob *Sender)
+// # Main Methods (sd *Sender)
 
 // Send transfers a sequence of bytes ('data') to the
 // Receiver specified by Sender.Address and Port.
-func (ob *Sender) Send(name string, data []byte) error {
-	if ob.Config == nil {
-		ob.Config = NewDefaultConfig()
+func (sd *Sender) Send(name string, data []byte) error {
+	if sd.Config == nil {
+		sd.Config = NewDefaultConfig()
 	}
 	// setup cipher
-	if ob.Config.Cipher == nil {
-		return ob.logError(0xE83D07, "nil Sender.Config.Cipher")
+	if sd.Config.Cipher == nil {
+		return sd.logError(0xE83D07, "nil Sender.Config.Cipher")
 	}
-	err := ob.Config.Cipher.SetKey(ob.CryptoKey)
+	err := sd.Config.Cipher.SetKey(sd.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
+		return sd.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
 	}
 	// check settings
-	err = ob.Config.Validate()
+	err = sd.Config.Validate()
 	if err != nil {
-		return ob.logError(0xE5D92D, "Invalid Sender.Config:", err)
+		return sd.logError(0xE5D92D, "Invalid Sender.Config:", err)
 	}
-	if strings.TrimSpace(ob.Address) == "" {
-		return ob.logError(0xE5A04A, "missing Sender.Address")
+	if strings.TrimSpace(sd.Address) == "" {
+		return sd.logError(0xE5A04A, "missing Sender.Address")
 	}
-	if ob.Port < 1 || ob.Port > 65535 {
-		return ob.logError(0xE20BB9, "invalid Sender.Port:", ob.Port)
+	if sd.Port < 1 || sd.Port > 65535 {
+		return sd.logError(0xE20BB9, "invalid Sender.Port:", sd.Port)
 	}
 	// prepare for transfer
 	hash := getHash(data)
-	if ob.Config.VerboseSender {
-		ob.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
+	if sd.Config.VerboseSender {
+		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send name: %s size: %d hash: %X",
 				name, len(data), hash))
 	}
-	remoteHash := ob.requestDataItemHash(name)
+	remoteHash := sd.requestDataItemHash(name)
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
-	compressed, err := ob.Config.Compressor.Compress(data)
+	compressed, err := sd.Config.Compressor.Compress(data)
 	if err != nil {
-		return ob.logError(0xE2EB59, err)
+		return sd.logError(0xE2EB59, err)
 	}
-	packetCount := ob.getPacketCount(len(compressed))
-	ob.dataHash = hash
-	ob.startTime = time.Now()
-	ob.packets = make([]senderPacket, packetCount)
+	packetCount := sd.getPacketCount(len(compressed))
+	sd.dataHash = hash
+	sd.startTime = time.Now()
+	sd.packets = make([]senderPacket, packetCount)
 	//
 	// begin transfer
-	for i := range ob.packets {
-		a := i * ob.Config.PacketPayloadSize
-		b := a + ob.Config.PacketPayloadSize
+	for i := range sd.packets {
+		a := i * sd.Config.PacketPayloadSize
+		b := a + sd.Config.PacketPayloadSize
 		if b > len(compressed) {
 			b = len(compressed)
 		}
 		header := tagFragment + fmt.Sprintf(
 			"name:%s hash:%X sn:%d count:%d\n",
-			name, ob.dataHash, i+1, packetCount,
+			name, sd.dataHash, i+1, packetCount,
 		)
-		packet, err2 := ob.makePacket(
+		packet, err2 := sd.makePacket(
 			append([]byte(header), compressed[a:b]...),
 		)
 		if err2 != nil {
-			return ob.logError(0xE567A4, err2)
+			return sd.logError(0xE567A4, err2)
 		}
-		ob.packets[i] = *packet
+		sd.packets[i] = *packet
 	}
-	newConn, err := ob.connect()
+	newConn, err := sd.connect()
 	if err != nil {
-		return ob.logError(0xE8B8D0, err)
+		return sd.logError(0xE8B8D0, err)
 	}
-	ob.conn = newConn
-	go ob.collectConfirmations() // exits when conn becomes nil
-	for retries := 0; retries < ob.Config.SendRetries; retries++ {
-		err = ob.sendUndeliveredPackets()
+	sd.conn = newConn
+	go sd.collectConfirmations() // exits when conn becomes nil
+	for retries := 0; retries < sd.Config.SendRetries; retries++ {
+		err = sd.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
-				err2 := ob.close()
+				err2 := sd.close()
 				if err2 != nil {
-					_ = ob.logError(0xED94C5, err2)
+					_ = sd.logError(0xED94C5, err2)
 				}
 			}()
-			return ob.logError(0xE23CE0, err)
+			return sd.logError(0xE23CE0, err)
 		}
-		ob.waitForAllConfirmations()
-		if ob.DeliveredAllParts() {
+		sd.waitForAllConfirmations()
+		if sd.DeliveredAllParts() {
 			break
 		}
-		time.Sleep(ob.Config.SendRetryInterval)
+		time.Sleep(sd.Config.SendRetryInterval)
 	}
-	err = ob.close()
+	err = sd.close()
 	if err != nil {
-		return ob.logError(0xE40A05, err)
+		return sd.logError(0xE40A05, err)
 	}
-	if !ob.DeliveredAllParts() {
-		return ob.logError(0xE1C3A7, "undelivered packets")
+	if !sd.DeliveredAllParts() {
+		return sd.logError(0xE1C3A7, "undelivered packets")
 	}
-	remoteHash = ob.requestDataItemHash(name)
+	remoteHash = sd.requestDataItemHash(name)
 	if !bytes.Equal(hash, remoteHash) {
-		return ob.logError(0xE1F101, "hash mismatch")
+		return sd.logError(0xE1F101, "hash mismatch")
 	}
-	if ob.Config.VerboseSender {
-		ob.LogStats()
+	if sd.Config.VerboseSender {
+		sd.LogStats()
 	}
 	return nil
 } //                                                                        Send
@@ -213,33 +213,33 @@ func (ob *Sender) Send(name string, data []byte) error {
 // SendString transfers string 's' to the Receiver
 // specified by Sender.Address and Port.
 //
-func (ob *Sender) SendString(name string, s string) error {
-	return ob.Send(name, []byte(s))
+func (sd *Sender) SendString(name string, s string) error {
+	return sd.Send(name, []byte(s))
 } //                                                                  SendString
 
 // -----------------------------------------------------------------------------
-// # Informatory Properties (ob *Sender)
+// # Informatory Properties (sd *Sender)
 
 // AverageResponseMs is the average response time, in milliseconds, between
 // a packet being sent and its delivery confirmation being received.
-func (ob *Sender) AverageResponseMs() float64 {
-	if ob.stats.packetsDelivered == 0 {
+func (sd *Sender) AverageResponseMs() float64 {
+	if sd.stats.packetsDelivered == 0 {
 		return 0.0
 	}
 	// instead of using transferTime.Milliseconds(),
 	// cast to float64 to get sub-millisecond timing
-	ret := float64(ob.stats.transferTime) /
+	ret := float64(sd.stats.transferTime) /
 		float64(time.Millisecond) /
-		float64(ob.stats.packetsDelivered)
+		float64(sd.stats.packetsDelivered)
 	return ret
 } //                                                           AverageResponseMs
 
 // DeliveredAllParts returns true if all parts of the
 // sent data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
-func (ob *Sender) DeliveredAllParts() bool {
+func (sd *Sender) DeliveredAllParts() bool {
 	ret := true
-	for _, packet := range ob.packets {
+	for _, packet := range sd.packets {
 		if !bytes.Equal(packet.sentHash, packet.confirmedHash) {
 			ret = false
 			break
@@ -250,17 +250,17 @@ func (ob *Sender) DeliveredAllParts() bool {
 
 // TransferSpeedKBpS returns the transfer speed of the current Send
 // operation, in Kilobytes (more accurately, Kibibytes) per second.
-func (ob *Sender) TransferSpeedKBpS() float64 {
-	if ob.stats.transferTime < 1 {
+func (sd *Sender) TransferSpeedKBpS() float64 {
+	if sd.stats.transferTime < 1 {
 		return 0.0
 	}
-	sec := float64(ob.stats.transferTime) / float64(time.Second)
-	ret := float64(ob.stats.bytesDelivered/1024) / sec
+	sec := float64(sd.stats.transferTime) / float64(time.Second)
+	ret := float64(sd.stats.bytesDelivered/1024) / sec
 	return ret
 } //                                                           TransferSpeedKBpS
 
 // -----------------------------------------------------------------------------
-// # Informatory Methods (ob *Sender)
+// # Informatory Methods (sd *Sender)
 
 // LogStats prints UDP transfer statistics using the passed logFunc function.
 //
@@ -271,9 +271,9 @@ func (ob *Sender) TransferSpeedKBpS() float64 {
 //
 // like fmt.Println: func(...interface{}) (int, error)
 //
-func (ob *Sender) LogStats(logFunc ...interface{}) {
+func (sd *Sender) LogStats(logFunc ...interface{}) {
 	//
-	log := ob.logInfo // func(v ...interface{})
+	log := sd.logInfo // func(v ...interface{})
 	if len(logFunc) > 0 {
 		switch fn := logFunc[0].(type) {
 		case func(...interface{}): // like log.Println
@@ -283,7 +283,7 @@ func (ob *Sender) LogStats(logFunc ...interface{}) {
 		}
 	}
 	tItem := time.Duration(0)
-	for i, pack := range ob.packets {
+	for i, pack := range sd.packets {
 		tPack, status := time.Duration(0), "✔"
 		if pack.IsDelivered() {
 			if !pack.confirmedTime.IsZero() {
@@ -306,43 +306,43 @@ func (ob *Sender) LogStats(logFunc ...interface{}) {
 		tItem += tPack
 	}
 	var (
-		sec   = ob.stats.transferTime.Seconds()
-		avg   = ob.AverageResponseMs()
-		speed = ob.TransferSpeedKBpS()
+		sec   = sd.stats.transferTime.Seconds()
+		avg   = sd.AverageResponseMs()
+		speed = sd.TransferSpeedKBpS()
 		prt   = func(tag, format string, v interface{}) {
 			log(tag, fmt.Sprintf(format, v))
 		}
 	)
-	prt("B. delivered:", "%d", ob.stats.bytesDelivered)
-	prt("Bytes lost  :", "%d", ob.stats.bytesLost)
-	prt("P. delivered:", "%d", ob.stats.packetsDelivered)
-	prt("Packets lost:", "%d", ob.stats.packsLost)
+	prt("B. delivered:", "%d", sd.stats.bytesDelivered)
+	prt("Bytes lost  :", "%d", sd.stats.bytesLost)
+	prt("P. delivered:", "%d", sd.stats.packetsDelivered)
+	prt("Packets lost:", "%d", sd.stats.packsLost)
 	prt("Time in item:", "%0.1f s", sec)
 	prt("Avg./ Packet:", "%0.1f ms", avg)
 	prt("Trans. speed:", "%0.1f KiB/s", speed)
 } //                                                                    LogStats
 
 // -----------------------------------------------------------------------------
-// # Internal Lifecycle Methods (ob *Sender)
+// # Internal Lifecycle Methods (sd *Sender)
 
 // connect connects to the Receiver at Sender.Address and Port
 // and returns a new UDP connection and an error value.
 //
 // Note that it doesn't change the value of Sender.conn
 //
-func (ob *Sender) connect() (*net.UDPConn, error) {
-	addr := fmt.Sprintf("%s:%d", ob.Address, ob.Port)
+func (sd *Sender) connect() (*net.UDPConn, error) {
+	addr := fmt.Sprintf("%s:%d", sd.Address, sd.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		return nil, ob.logError(0xEC7C6B, err)
+		return nil, sd.logError(0xEC7C6B, err)
 	}
 	conn, err := net.DialUDP("udp", nil, udpAddr) // (*net.UDPConn, error)
 	if err != nil {
-		return nil, ob.logError(0xE15CE1, err)
+		return nil, sd.logError(0xE15CE1, err)
 	}
-	err = conn.SetWriteBuffer(ob.Config.SendBufferSize)
+	err = conn.SetWriteBuffer(sd.Config.SendBufferSize)
 	if err != nil {
-		return nil, ob.logError(0xE5F9C7, err)
+		return nil, sd.logError(0xE5F9C7, err)
 	}
 	return conn, nil
 } //                                                                     connect
@@ -350,38 +350,38 @@ func (ob *Sender) connect() (*net.UDPConn, error) {
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by 'name'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
-func (ob *Sender) requestDataItemHash(name string) []byte {
-	tempConn, err := ob.connect()
+func (sd *Sender) requestDataItemHash(name string) []byte {
+	tempConn, err := sd.connect()
 	if err != nil {
-		_ = ob.logError(0xE7DF8B, err)
+		_ = sd.logError(0xE7DF8B, err)
 		return nil
 	}
-	packet, err := ob.makePacket([]byte(tagDataItemHash + name))
+	packet, err := sd.makePacket([]byte(tagDataItemHash + name))
 	if err != nil {
-		_ = ob.logError(0xE34A8E, err)
+		_ = sd.logError(0xE34A8E, err)
 		return nil
 	}
-	err = packet.Send(tempConn, ob.Config.Cipher)
+	err = packet.Send(tempConn, sd.Config.Cipher)
 	if err != nil {
-		_ = ob.logError(0xE89B11, err)
+		_ = sd.logError(0xE89B11, err)
 		return nil
 	}
-	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
+	encryptedReply := make([]byte, sd.Config.PacketSizeLimit)
 	nRead, _, err :=
-		readFromUDPConn(tempConn, encryptedReply, ob.Config.ReplyTimeout)
+		readFromUDPConn(tempConn, encryptedReply, sd.Config.ReplyTimeout)
 	if err != nil {
-		_ = ob.logError(0xE97FC3, err)
+		_ = sd.logError(0xE97FC3, err)
 		return nil
 	}
-	reply, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
+	reply, err := sd.Config.Cipher.Decrypt(encryptedReply[:nRead])
 	if err != nil {
-		_ = ob.logError(0xE2B5A1, err)
+		_ = sd.logError(0xE2B5A1, err)
 		return nil
 	}
 	var hash []byte
 	if len(reply) > 0 {
 		if !bytes.HasPrefix(reply, []byte(tagDataItemHash)) {
-			_ = ob.logError(0xE08AD4, "invalid reply:", reply)
+			_ = sd.logError(0xE08AD4, "invalid reply:", reply)
 			return nil
 		}
 		hexHash := string(reply[len(tagDataItemHash):])
@@ -390,7 +390,7 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 		}
 		hash, err = hex.DecodeString(hexHash)
 		if err != nil {
-			_ = ob.logError(0xE6E7A9, err)
+			_ = sd.logError(0xE6E7A9, err)
 			return nil
 		}
 	}
@@ -399,21 +399,21 @@ func (ob *Sender) requestDataItemHash(name string) []byte {
 
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
-func (ob *Sender) sendUndeliveredPackets() error {
-	n := len(ob.packets)
+func (sd *Sender) sendUndeliveredPackets() error {
+	n := len(sd.packets)
 	for i := 0; i < n; i++ {
-		packet := &ob.packets[i]
+		packet := &sd.packets[i]
 		if packet.IsDelivered() {
 			continue
 		}
-		time.Sleep(ob.Config.SendPacketInterval)
-		ob.wg.Add(1)
+		time.Sleep(sd.Config.SendPacketInterval)
+		sd.wg.Add(1)
 		go func() {
-			err := packet.Send(ob.conn, ob.Config.Cipher)
+			err := packet.Send(sd.conn, sd.Config.Cipher)
 			if err != nil {
-				_ = ob.logError(0xE67BA4, err)
+				_ = sd.logError(0xE67BA4, err)
 			}
-			ob.wg.Done()
+			sd.wg.Done()
 		}()
 	}
 	return nil
@@ -421,44 +421,44 @@ func (ob *Sender) sendUndeliveredPackets() error {
 
 // collectConfirmations enters a loop that receives confirmation packets
 // from the sender, and marks all confirmed packets as delivered.
-func (ob *Sender) collectConfirmations() {
-	encryptedReply := make([]byte, ob.Config.PacketSizeLimit)
-	for ob.conn != nil {
+func (sd *Sender) collectConfirmations() {
+	encryptedReply := make([]byte, sd.Config.PacketSizeLimit)
+	for sd.conn != nil {
 		// 'encryptedReply' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(ob.conn, encryptedReply, ob.Config.ReplyTimeout)
+			readFromUDPConn(sd.conn, encryptedReply, sd.Config.ReplyTimeout)
 		if err == errClosed {
 			break
 		}
 		if err != nil {
-			_ = ob.logError(0xE9D1CC, err)
+			_ = sd.logError(0xE9D1CC, err)
 			continue
 		}
 		if nRead == 0 {
-			_ = ob.logError(0xE4CB0B, "received no data")
+			_ = sd.logError(0xE4CB0B, "received no data")
 			continue
 		}
-		recv, err := ob.Config.Cipher.Decrypt(encryptedReply[:nRead])
+		recv, err := sd.Config.Cipher.Decrypt(encryptedReply[:nRead])
 		if err != nil {
-			_ = ob.logError(0xE4AD67, err)
+			_ = sd.logError(0xE4AD67, err)
 			continue
 		}
 		if !bytes.HasPrefix(recv, []byte(tagConfirmation)) {
-			_ = ob.logError(0xE96D3B, "bad reply header")
-			if ob.Config.VerboseSender {
-				ob.logInfo("ERROR received:", len(recv), "bytes")
+			_ = sd.logError(0xE96D3B, "bad reply header")
+			if sd.Config.VerboseSender {
+				sd.logInfo("ERROR received:", len(recv), "bytes")
 			}
 			continue
 		}
 		confirmedHash := recv[len(tagConfirmation):]
-		if ob.Config.VerboseSender {
-			ob.logInfo("Sender received", nRead, "bytes from", addr)
+		if sd.Config.VerboseSender {
+			sd.logInfo("Sender received", nRead, "bytes from", addr)
 		}
 		go func(confirmedHash []byte) {
-			for i, packet := range ob.packets {
+			for i, packet := range sd.packets {
 				if bytes.Equal(packet.sentHash, confirmedHash) {
-					ob.packets[i].confirmedTime = time.Now()
-					ob.packets[i].confirmedHash = confirmedHash
+					sd.packets[i].confirmedTime = time.Now()
+					sd.packets[i].confirmedHash = confirmedHash
 					break
 				}
 			}
@@ -470,63 +470,63 @@ func (ob *Sender) collectConfirmations() {
 // be received from the receiver. Since UDP packet delivery is not
 // guaranteed, some confirmations may not be received. This method
 // will only wait for the duration specified in Config.ReplyTimeout.
-func (ob *Sender) waitForAllConfirmations() {
-	ob.logInfo("Waiting . . .")
+func (sd *Sender) waitForAllConfirmations() {
+	sd.logInfo("Waiting . . .")
 	t0 := time.Now()
-	ob.wg.Wait()
+	sd.wg.Wait()
 	for {
-		time.Sleep(ob.Config.SendWaitInterval)
-		if ob.DeliveredAllParts() {
-			if ob.Config.VerboseSender {
-				ob.logInfo("Delivered all packets")
+		time.Sleep(sd.Config.SendWaitInterval)
+		if sd.DeliveredAllParts() {
+			if sd.Config.VerboseSender {
+				sd.logInfo("Delivered all packets")
 			}
 			break
 		}
 		since := time.Since(t0)
-		if since >= ob.Config.ReplyTimeout {
-			ob.logInfo("Config.ReplyTimeout exceeded",
+		if since >= sd.Config.ReplyTimeout {
+			sd.logInfo("Config.ReplyTimeout exceeded",
 				fmt.Sprintf("%0.1f", since.Seconds()))
 			break
 		}
 	}
-	for _, packet := range ob.packets {
+	for _, packet := range sd.packets {
 		if packet.IsDelivered() {
-			ob.stats.bytesDelivered += int64(len(packet.data))
-			ob.stats.packetsDelivered++
+			sd.stats.bytesDelivered += int64(len(packet.data))
+			sd.stats.packetsDelivered++
 		} else {
-			ob.stats.bytesLost += int64(len(packet.data))
-			ob.stats.packsLost++
+			sd.stats.bytesLost += int64(len(packet.data))
+			sd.stats.packsLost++
 		}
 	}
-	if ob.Config.VerboseSender {
-		ob.logInfo("Waited:", time.Since(t0))
+	if sd.Config.VerboseSender {
+		sd.logInfo("Waited:", time.Since(t0))
 	}
 } //                                                     waitForAllConfirmations
 
 // close closes the UDP connection.
-func (ob *Sender) close() error {
-	if ob.conn == nil {
+func (sd *Sender) close() error {
+	if sd.conn == nil {
 		return nil
 	}
-	err := ob.conn.Close()
-	ob.conn = nil
+	err := sd.conn.Close()
+	sd.conn = nil
 	if err != nil {
-		return ob.logError(0xEA7D7E, err)
+		return sd.logError(0xEA7D7E, err)
 	}
 	return nil
 } //                                                                       close
 
 // -----------------------------------------------------------------------------
-// # Internal Helper Methods (ob *Sender)
+// # Internal Helper Methods (sd *Sender)
 
 // getPacketCount calculates the number of packets needed to send 'length'
 // bytes. This depends on the setting of Config.PacketPayloadSize.
-func (ob *Sender) getPacketCount(length int) int {
+func (sd *Sender) getPacketCount(length int) int {
 	if length < 1 {
 		return 0
 	}
-	count := length / ob.Config.PacketPayloadSize
-	if (count * ob.Config.PacketPayloadSize) < length {
+	count := length / sd.Config.PacketPayloadSize
+	if (count * sd.Config.PacketPayloadSize) < length {
 		count++
 	}
 	return count
@@ -534,19 +534,19 @@ func (ob *Sender) getPacketCount(length int) int {
 
 // logError returns a new error value generated by joining id and args
 // and optionally calls Sender.LogFunc (if not nil) to log the error.
-func (ob *Sender) logError(id uint32, args ...interface{}) error {
+func (sd *Sender) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.Config != nil && ob.Config.LogFunc != nil {
+	if sd.Config != nil && sd.Config.LogFunc != nil {
 		msg := ret.Error()
-		ob.Config.LogFunc(msg)
+		sd.Config.LogFunc(msg)
 	}
 	return ret
 } //                                                                    logError
 
 // logInfo calls Sender.LogFunc (if not nil) to log a message.
-func (ob *Sender) logInfo(args ...interface{}) {
-	if ob.Config != nil && ob.Config.LogFunc != nil {
-		ob.Config.LogFunc(args...)
+func (sd *Sender) logInfo(args ...interface{}) {
+	if sd.Config != nil && sd.Config.LogFunc != nil {
+		sd.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo
 
@@ -555,10 +555,10 @@ func (ob *Sender) logInfo(args ...interface{}) {
 //
 // The size of the packet must not exceed Config.PacketSizeLimit
 //
-func (ob *Sender) makePacket(data []byte) (*senderPacket, error) {
-	if len(data) > ob.Config.PacketSizeLimit {
-		return nil, ob.logError(0xE71F9B, "len(data)", len(data),
-			"> Config.PacketSizeLimit", ob.Config.PacketSizeLimit)
+func (sd *Sender) makePacket(data []byte) (*senderPacket, error) {
+	if len(data) > sd.Config.PacketSizeLimit {
+		return nil, sd.logError(0xE71F9B, "len(data)", len(data),
+			"> Config.PacketSizeLimit", sd.Config.PacketSizeLimit)
 	}
 	sentHash := getHash(data)
 	packet := senderPacket{

@@ -18,7 +18,7 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// (ob *Receiver) Run() error
+// (rc *Receiver) Run() error
 //
 // go test -run Test_Receiver_Run_
 //
@@ -78,7 +78,7 @@ func Test_Receiver_Run_(t *testing.T) {
 	}
 } //                                                          Test_Receiver_Run_
 
-// (ob *Receiver) receiveFragment(recv []byte) ([]byte, error)
+// (rc *Receiver) receiveFragment(recv []byte) ([]byte, error)
 //
 // go test -run Test_Receiver_receiveFragment_
 //
@@ -204,7 +204,7 @@ func Test_Receiver_receiveFragment_(t *testing.T) {
 	}
 } //                                              Test_Receiver_receiveFragment_
 
-// (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error)
+// (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error)
 //
 // go test -run Test_Receiver_sendDataItemHash_
 //
@@ -277,7 +277,7 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Logging Methods
 
-// (ob *Receiver) logError(id uint32, args ...interface{}) error
+// (rc *Receiver) logError(id uint32, args ...interface{}) error
 //
 // go test -run Test_Receiver_logError_
 //
@@ -306,7 +306,7 @@ func Test_Receiver_logError_(t *testing.T) {
 	}
 } //                                                     Test_Receiver_logError_
 
-// (ob *Receiver) logInfo(args ...interface{})
+// (rc *Receiver) logInfo(args ...interface{})
 //
 // go test -run Test_Receiver_logInfo_
 //

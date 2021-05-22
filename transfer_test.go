@@ -60,14 +60,14 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	received := make(map[string][]byte, N)
 	//
 	// enable verbose logging but don't print the output
-	cfg := NewDefaultConfig()
-	cfg.LogFunc = func(args ...interface{}) {}
-	cfg.VerboseSender = true
-	cfg.VerboseReceiver = true
+	cf := NewDefaultConfig()
+	cf.LogFunc = func(args ...interface{}) {}
+	cf.VerboseSender = true
+	cf.VerboseReceiver = true
 	//
 	// set-up and run the receiver
-	receiver := Receiver{
-		Port: 1234, CryptoKey: cryptoKey, Config: cfg,
+	rc := Receiver{
+		Port: 1234, CryptoKey: cryptoKey, Config: cf,
 		//
 		ReceiveData: func(name string, data []byte) error {
 			k, v := name, data
@@ -79,8 +79,8 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 			return v, nil
 		},
 	}
-	go func() { _ = receiver.Run() }()
-	defer func() { receiver.Stop() }()
+	go func() { _ = rc.Run() }()
+	defer func() { rc.Stop() }()
 	//
 	// make a map of N messages
 	for i := 0; i < N; i++ {
@@ -91,7 +91,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	// send the messages to the receiver
 	time.Sleep(time.Second)
 	sender := Sender{
-		Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cfg,
+		Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cf,
 	}
 	makeKV := func(i int) (string, []byte) {
 		sn := fmt.Sprintf("%04d", i)
@@ -119,9 +119,9 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		}
 	}
 	if false {
-		cfg.LogFunc = LogPrint
-		cfg.VerboseSender = true
-		cfg.VerboseReceiver = true
+		cf.LogFunc = LogPrint
+		cf.VerboseSender = true
+		cf.VerboseReceiver = true
 		sender.LogStats()
 	}
 	time.Sleep(time.Second)

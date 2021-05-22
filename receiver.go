@@ -84,119 +84,119 @@ type Receiver struct {
 // previously-received data item. This hash is sent to the sender
 // so it can confirm that a data transfer is successful.
 //
-func (ob *Receiver) Run() error {
-	if ob.Config == nil {
-		ob.Config = NewDefaultConfig()
+func (rc *Receiver) Run() error {
+	if rc.Config == nil {
+		rc.Config = NewDefaultConfig()
 	}
 	// setup cipher
-	if ob.Config.Cipher == nil {
-		return ob.logError(0xE62F4F, "nil Receiver.Config.Cipher")
+	if rc.Config.Cipher == nil {
+		return rc.logError(0xE62F4F, "nil Receiver.Config.Cipher")
 	}
-	err := ob.Config.Cipher.SetKey(ob.CryptoKey)
+	err := rc.Config.Cipher.SetKey(rc.CryptoKey)
 	if err != nil {
-		return ob.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
+		return rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
 	}
 	// check settings
-	err = ob.Config.Validate()
+	err = rc.Config.Validate()
 	if err != nil {
-		return ob.logError(0xE14BC8, err)
+		return rc.logError(0xE14BC8, err)
 	}
-	if ob.Port < 1 || ob.Port > 65535 {
-		return ob.logError(0xE58B2F, "invalid Receiver.Port:", ob.Port)
+	if rc.Port < 1 || rc.Port > 65535 {
+		return rc.logError(0xE58B2F, "invalid Receiver.Port:", rc.Port)
 	}
-	if ob.ReceiveData == nil {
-		return ob.logError(0xE82C9E, "nil Receiver.ReceiveData")
+	if rc.ReceiveData == nil {
+		return rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
 	}
-	if ob.ProvideData == nil {
-		return ob.logError(0xE48CC6, "nil Receiver.ProvideData")
+	if rc.ProvideData == nil {
+		return rc.logError(0xE48CC6, "nil Receiver.ProvideData")
 	}
 	// prepare for reception
-	if ob.Config.VerboseReceiver {
-		ob.logInfo(strings.Repeat("-", 80))
-		ob.logInfo("UDPT started in receiver mode")
+	if rc.Config.VerboseReceiver {
+		rc.logInfo(strings.Repeat("-", 80))
+		rc.logInfo("UDPT started in receiver mode")
 	}
 	udpAddr, err := net.ResolveUDPAddr("udp",
-		fmt.Sprintf("0.0.0.0:%d", ob.Port))
+		fmt.Sprintf("0.0.0.0:%d", rc.Port))
 	if err != nil {
-		return ob.logError(0xE1D68C, err)
+		return rc.logError(0xE1D68C, err)
 	}
-	ob.conn, err = net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
+	rc.conn, err = net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
 	if err != nil {
-		return ob.logError(0xEBF95F, err)
+		return rc.logError(0xEBF95F, err)
 	}
 	defer func() {
-		if ob.conn != nil {
-			err := ob.conn.Close()
+		if rc.conn != nil {
+			err := rc.conn.Close()
 			if err != nil {
-				_ = ob.logError(0xEC82DB, err)
+				_ = rc.logError(0xEC82DB, err)
 			}
 		}
 	}()
-	if ob.Config.VerboseReceiver {
-		ob.logInfo("Receiver.Run() called net.ListenUDP")
+	if rc.Config.VerboseReceiver {
+		rc.logInfo("Receiver.Run() called net.ListenUDP")
 	}
 	// receive transmissions
-	encryptedReq := make([]byte, ob.Config.PacketSizeLimit)
-	for ob.conn != nil {
+	encryptedReq := make([]byte, rc.Config.PacketSizeLimit)
+	for rc.conn != nil {
 		// 'encryptedReq' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(ob.conn, encryptedReq, ob.Config.ReplyTimeout)
+			readFromUDPConn(rc.conn, encryptedReq, rc.Config.ReplyTimeout)
 		if err == errClosed {
 			break
 		}
 		if err != nil {
-			_ = ob.logError(0xEA288A, err)
+			_ = rc.logError(0xEA288A, err)
 			continue
 		}
-		recv, err := ob.Config.Cipher.Decrypt(encryptedReq[:nRead])
+		recv, err := rc.Config.Cipher.Decrypt(encryptedReq[:nRead])
 		if err != nil {
-			_ = ob.logError(0xE9AF2F, err)
+			_ = rc.logError(0xE9AF2F, err)
 			continue
 		}
-		if ob.Config.VerboseReceiver {
-			ob.logInfo()
-			ob.logInfo(strings.Repeat("-", 80))
-			ob.logInfo("Receiver read", nRead, "bytes from", addr)
+		if rc.Config.VerboseReceiver {
+			rc.logInfo()
+			rc.logInfo(strings.Repeat("-", 80))
+			rc.logInfo("Receiver read", nRead, "bytes from", addr)
 		}
 		var reply []byte
 		switch {
 		case len(recv) == 0:
-			_ = ob.logError(0xE6B3BA, "received no data")
+			_ = rc.logError(0xE6B3BA, "received no data")
 			continue
 		case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
-			reply, err = ob.sendDataItemHash(recv)
+			reply, err = rc.sendDataItemHash(recv)
 			if err != nil {
-				_ = ob.logError(0xE69C60, err)
+				_ = rc.logError(0xE69C60, err)
 				continue
 			}
 		case bytes.HasPrefix(recv, []byte(tagFragment)):
-			reply, err = ob.receiveFragment(recv)
+			reply, err = rc.receiveFragment(recv)
 			if err != nil {
-				_ = ob.logError(0xE3A46C, err)
+				_ = rc.logError(0xE3A46C, err)
 				continue
 			}
 		default:
-			_ = ob.logError(0xE985CC, "invalid packet header")
+			_ = rc.logError(0xE985CC, "invalid packet header")
 			reply = []byte("invalid_packet_header")
 		}
-		encryptedReply, err := ob.Config.Cipher.Encrypt(reply)
+		encryptedReply, err := rc.Config.Cipher.Encrypt(reply)
 		if err != nil {
-			_ = ob.logError(0xE06B58, err)
+			_ = rc.logError(0xE06B58, err)
 			continue
 		}
-		deadline := time.Now().Add(ob.Config.WriteTimeout)
-		err = ob.conn.SetWriteDeadline(deadline)
+		deadline := time.Now().Add(rc.Config.WriteTimeout)
+		err = rc.conn.SetWriteDeadline(deadline)
 		if err != nil {
-			_ = ob.logError(0xE0AD06, err)
+			_ = rc.logError(0xE0AD06, err)
 			continue
 		}
-		nWrit, err := ob.conn.WriteTo(encryptedReply, addr)
+		nWrit, err := rc.conn.WriteTo(encryptedReply, addr)
 		if err != nil {
-			_ = ob.logError(0xEA63C4, err)
+			_ = rc.logError(0xEA63C4, err)
 			continue
 		}
-		if ob.Config.VerboseReceiver {
-			ob.logInfo("Receiver wrote", nWrit, "bytes to", addr)
+		if rc.Config.VerboseReceiver {
+			rc.logInfo("Receiver wrote", nWrit, "bytes to", addr)
 		}
 	}
 	return nil
@@ -204,15 +204,15 @@ func (ob *Receiver) Run() error {
 
 // Stop stops the Receiver from listening and
 // receiving data by closing its connection.
-func (ob *Receiver) Stop() {
-	if ob.conn == nil {
+func (rc *Receiver) Stop() {
+	if rc.conn == nil {
 		return
 	}
-	err := ob.conn.Close()
+	err := rc.conn.Close()
 	if err != nil {
-		_ = ob.logError(0xE9C2D1, err)
+		_ = rc.logError(0xE9C2D1, err)
 	}
-	ob.conn = nil
+	rc.conn = nil
 } //                                                                        Stop
 
 // -----------------------------------------------------------------------------
@@ -220,17 +220,17 @@ func (ob *Receiver) Stop() {
 
 // receiveFragment handles a tagFragment packet sent by a Sender, and
 // sends back a confirmation packet (tagConfirmation) to the Sender.
-func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
+func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	if !bytes.HasPrefix(recv, []byte(tagFragment)) {
-		return nil, ob.logError(0xE4F3C5, "missing header")
+		return nil, rc.logError(0xE4F3C5, "missing header")
 	}
-	err := ob.Config.Validate()
+	err := rc.Config.Validate()
 	if err != nil {
-		return nil, ob.logError(0xE9B5C7, err)
+		return nil, rc.logError(0xE9B5C7, err)
 	}
 	dataOffset := bytes.Index(recv, []byte("\n"))
 	if dataOffset == -1 {
-		return nil, ob.logError(0xE6CF52, "newline not found")
+		return nil, rc.logError(0xE6CF52, "newline not found")
 	}
 	dataOffset++ // skip newline
 	var (
@@ -242,53 +242,53 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	)
 	packetCount, err := strconv.Atoi(count)
 	if err != nil || packetCount < 1 {
-		return nil, ob.logError(0xE18A95, "bad 'count'")
+		return nil, rc.logError(0xE18A95, "bad 'count'")
 	}
 	index, err := strconv.Atoi(sn)
 	if err != nil {
-		return nil, ob.logError(0xEF27F8, "bad 'sn':", sn)
+		return nil, rc.logError(0xEF27F8, "bad 'sn':", sn)
 	}
 	if index < 1 || index > packetCount {
-		return nil, ob.logError(0xE8CF4D,
+		return nil, rc.logError(0xE8CF4D,
 			"'sn'", index, "out of range 1 -", packetCount)
 	}
 	index--
 	hash, err := hex.DecodeString(hexHash)
 	if err != nil {
-		return nil, ob.logError(0xE5CA62, err)
+		return nil, rc.logError(0xE5CA62, err)
 	}
 	if len(hash) != 32 {
-		return nil, ob.logError(0xEB6CB7, "bad hash size")
+		return nil, rc.logError(0xEB6CB7, "bad hash size")
 	}
-	it := &ob.receivingDataItem
+	it := &rc.receivingDataItem
 	it.Retain(name, hash, packetCount)
 	compressedData := recv[dataOffset:]
 	if len(compressedData) < 1 {
-		return nil, ob.logError(0xE92B0F, "received no data")
+		return nil, rc.logError(0xE92B0F, "received no data")
 	}
 	// store the current piece
 	if len(it.CompressedPieces[index]) == 0 {
 		it.CompressedPieces[index] = compressedData
 	} else if !bytes.Equal(compressedData, it.CompressedPieces[index]) {
-		return nil, ob.logError(0xE1A99A, "unknown packet alteration")
+		return nil, rc.logError(0xE1A99A, "unknown packet alteration")
 	}
 	if it.IsLoaded() {
-		if ob.ReceiveData == nil {
-			return nil, ob.logError(0xE49E2A, "nil Receiver.ReceiveData")
+		if rc.ReceiveData == nil {
+			return nil, rc.logError(0xE49E2A, "nil Receiver.ReceiveData")
 		}
-		data, err := it.UnpackBytes(ob.Config.Compressor)
+		data, err := it.UnpackBytes(rc.Config.Compressor)
 		if err != nil {
-			return nil, ob.logError(0xE3DB1D, err)
+			return nil, rc.logError(0xE3DB1D, err)
 		}
-		err = ob.ReceiveData(it.Name, data)
+		err = rc.ReceiveData(it.Name, data)
 		if err != nil {
-			return nil, ob.logError(0xE77B4D, err)
+			return nil, rc.logError(0xE77B4D, err)
 		}
-		ob.logInfo("received:", it.Name)
-		if ob.Config.VerboseReceiver {
+		rc.logInfo("received:", it.Name)
+		if rc.Config.VerboseReceiver {
 			var sb strings.Builder
 			it.LogStats("receiveFragment", &sb)
-			ob.logInfo(sb.String())
+			rc.logInfo(sb.String())
 		}
 		it.Reset()
 	}
@@ -298,17 +298,17 @@ func (ob *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 } //                                                             receiveFragment
 
 // sendDataItemHash handles a tagDataItemHash sent by a Sender.
-func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
+func (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if !bytes.HasPrefix(req, []byte(tagDataItemHash)) {
-		return nil, ob.logError(0xE7B653, "missing header")
+		return nil, rc.logError(0xE7B653, "missing header")
 	}
-	if ob.ProvideData == nil {
-		return nil, ob.logError(0xE73A1C, "nil ProvideData")
+	if rc.ProvideData == nil {
+		return nil, rc.logError(0xE73A1C, "nil ProvideData")
 	}
 	name := string(req[len(tagDataItemHash):])
-	data, err := ob.ProvideData(name)
+	data, err := rc.ProvideData(name)
 	if err != nil {
-		return nil, ob.logError(0xE7F7C9, err)
+		return nil, rc.logError(0xE7F7C9, err)
 	}
 	hash := getHash(data)
 	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
@@ -320,19 +320,19 @@ func (ob *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 
 // logError returns a new error value generated by joining id and args
 // and optionally calls Receiver.LogFunc (if not nil) to log the error.
-func (ob *Receiver) logError(id uint32, args ...interface{}) error {
+func (rc *Receiver) logError(id uint32, args ...interface{}) error {
 	ret := makeError(id, args...)
-	if ob.Config != nil && ob.Config.LogFunc != nil {
+	if rc.Config != nil && rc.Config.LogFunc != nil {
 		msg := ret.Error()
-		ob.Config.LogFunc(msg)
+		rc.Config.LogFunc(msg)
 	}
 	return ret
 } //                                                                    logError
 
 // logInfo calls Receiver.LogFunc (if not nil) to log a message.
-func (ob *Receiver) logInfo(args ...interface{}) {
-	if ob.Config != nil && ob.Config.LogFunc != nil {
-		ob.Config.LogFunc(args...)
+func (rc *Receiver) logInfo(args ...interface{}) {
+	if rc.Config != nil && rc.Config.LogFunc != nil {
+		rc.Config.LogFunc(args...)
 	}
 } //                                                                     logInfo
 

@@ -16,7 +16,7 @@ import (
 // -----------------------------------------------------------------------------
 // # Property
 
-// (ob *dataItem) IsLoaded() bool
+// (di *dataItem) IsLoaded() bool
 //
 // go test -run Test_dataItem_IsLoaded_
 //
@@ -40,7 +40,7 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Methods
 
-// (ob *dataItem) LogStats(tag string, w io.Writer)
+// (di *dataItem) LogStats(tag string, w io.Writer)
 //
 // go test -run Test_dataItem_LogStats_
 //
@@ -82,7 +82,7 @@ func Test_dataItem_LogStats_(t *testing.T) {
 	test(logPrintln)
 } //                                                     Test_dataItem_LogStats_
 
-// (ob *dataItem) Reset()
+// (di *dataItem) Reset()
 //
 // go test -run Test_dataItem_Reset_
 //
@@ -112,7 +112,7 @@ func Test_dataItem_Reset_(t *testing.T) {
 	}
 } //                                                        Test_dataItem_Reset_
 
-// (ob *dataItem) Retain(name string, hash []byte, packetCount int)
+// (di *dataItem) Retain(name string, hash []byte, packetCount int)
 //
 // go test -run Test_dataItem_Retain_
 //
@@ -191,7 +191,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 	}
 } //                                                       Test_dataItem_Retain_
 
-// (ob *dataItem) UnpackBytes(compressor Compression) ([]byte, error)
+// (di *dataItem) UnpackBytes(compressor Compression) ([]byte, error)
 //
 // go test -run Test_dataItem_UnpackBytes_
 //

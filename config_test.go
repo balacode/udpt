@@ -24,8 +24,8 @@ import (
 func Test_config_NewDebugConfig_(t *testing.T) {
 	//
 	// returns *Configuration as a string and strips memory addresses
-	formatStruct := func(cfg *Configuration) string {
-		s := fmt.Sprintf("%#v", cfg)
+	formatStruct := func(cf *Configuration) string {
+		s := fmt.Sprintf("%#v", cf)
 		rx := regexp.MustCompile(`\)\(0x.*?\), `)
 		ret := string(rx.ReplaceAll([]byte(s), []byte("), ")))
 		return ret
@@ -56,15 +56,15 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 			isFuncCalled = true
 		}
 		// test!
-		cfg := NewDebugConfig(logFunc)
-		cfg.LogFunc()
+		cf := NewDebugConfig(logFunc)
+		cf.LogFunc()
 		if !isFuncCalled {
 			t.Error("0xEE3AC7")
 		}
 	}
 } //                                                 Test_config_NewDebugConfig_
 
-// (ob *Configuration) Validate() error
+// (cf *Configuration) Validate() error
 //
 // go test -run Test_config_Configuration_Validate_
 //

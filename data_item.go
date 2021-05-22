@@ -34,9 +34,9 @@ type dataItem struct {
 //
 // If the item has no pieces, returns false.
 //
-func (ob *dataItem) IsLoaded() bool {
-	ret := len(ob.CompressedPieces) > 0
-	for _, piece := range ob.CompressedPieces {
+func (di *dataItem) IsLoaded() bool {
+	ret := len(di.CompressedPieces) > 0
+	for _, piece := range di.CompressedPieces {
 		if len(piece) < 1 {
 			ret = false
 			break
@@ -51,63 +51,63 @@ func (ob *dataItem) IsLoaded() bool {
 // LogStats writes details of the current data item to the
 // passed io.Writer. Each written line is prefixed with tag.
 //
-func (ob *dataItem) LogStats(tag string, w io.Writer) {
+func (di *dataItem) LogStats(tag string, w io.Writer) {
 	log := func(v ...interface{}) {
 		s := fmt.Sprintln(v...)
 		w.Write([]byte(s))
 	}
-	log(tag, "name:", ob.Name)
-	log(tag, "hash:", fmt.Sprintf("%X", ob.Hash))
-	log(tag, "pcs.:", len(ob.CompressedPieces))
-	log(tag, "comp:", ob.CompressedSizeInfo, "bytes")
-	log(tag, "size:", ob.UncompressedSizeInfo, "bytes")
+	log(tag, "name:", di.Name)
+	log(tag, "hash:", fmt.Sprintf("%X", di.Hash))
+	log(tag, "pcs.:", len(di.CompressedPieces))
+	log(tag, "comp:", di.CompressedSizeInfo, "bytes")
+	log(tag, "size:", di.UncompressedSizeInfo, "bytes")
 } //                                                                    LogStats
 
 // Reset discards the contents of the data item and clears its name and hash.
-func (ob *dataItem) Reset() {
-	ob.Name = ""
-	ob.Hash = nil
-	ob.CompressedPieces = nil
-	ob.CompressedSizeInfo = 0
-	ob.UncompressedSizeInfo = 0
+func (di *dataItem) Reset() {
+	di.Name = ""
+	di.Hash = nil
+	di.CompressedPieces = nil
+	di.CompressedSizeInfo = 0
+	di.UncompressedSizeInfo = 0
 } //                                                                       Reset
 
 // Retain changes the Name, Hash, and empties CompressedPieces when the passed
 // name, hash and packetCount don't match their current values in the object.
-func (ob *dataItem) Retain(name string, hash []byte, packetCount int) {
-	if ob.Name == name &&
-		bytes.Equal(ob.Hash, hash) &&
-		len(ob.CompressedPieces) == packetCount {
+func (di *dataItem) Retain(name string, hash []byte, packetCount int) {
+	if di.Name == name &&
+		bytes.Equal(di.Hash, hash) &&
+		len(di.CompressedPieces) == packetCount {
 		return
 	}
-	ob.Name = name
-	ob.Hash = hash
-	ob.CompressedPieces = make([][]byte, packetCount)
-	ob.CompressedSizeInfo = 0
-	ob.UncompressedSizeInfo = 0
+	di.Name = name
+	di.Hash = hash
+	di.CompressedPieces = make([][]byte, packetCount)
+	di.CompressedSizeInfo = 0
+	di.UncompressedSizeInfo = 0
 } //                                                                      Retain
 
 // UnpackBytes joins CompressedPieces and uncompresses
 // the resulting bytes to get the original data item.
-func (ob *dataItem) UnpackBytes(compressor Compression) ([]byte, error) {
+func (di *dataItem) UnpackBytes(compressor Compression) ([]byte, error) {
 	//
 	// join pieces (provided all have been collected) to get compressed data
-	if !ob.IsLoaded() {
+	if !di.IsLoaded() {
 		return nil, makeError(0xE76AF5, "data item is incomplete")
 	}
-	compressed := bytes.Join(ob.CompressedPieces, nil)
-	ob.CompressedSizeInfo = len(compressed)
+	compressed := bytes.Join(di.CompressedPieces, nil)
+	di.CompressedSizeInfo = len(compressed)
 	//
 	// uncompress data
 	ret, err := compressor.Uncompress(compressed)
 	if err != nil {
 		return nil, makeError(0xE95DFB, err)
 	}
-	ob.UncompressedSizeInfo = len(ret)
+	di.UncompressedSizeInfo = len(ret)
 	//
 	// hash of uncompressed data should match original hash
 	hash := getHash(ret)
-	if !bytes.Equal(hash, ob.Hash) {
+	if !bytes.Equal(hash, di.Hash) {
 		return nil, makeError(0xE87D89, "hash mismatch")
 	}
 	return ret, nil

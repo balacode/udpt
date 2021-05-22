@@ -24,25 +24,25 @@ type senderPacket struct {
 
 // IsDelivered returns true if this packet has been successfully
 // delivered (by receiving a successful confirmation packet).
-func (ob *senderPacket) IsDelivered() bool {
-	ret := ob.confirmedHash != nil &&
-		bytes.Equal(ob.sentHash, ob.confirmedHash)
+func (pk *senderPacket) IsDelivered() bool {
+	ret := pk.confirmedHash != nil &&
+		bytes.Equal(pk.sentHash, pk.confirmedHash)
 	return ret
 } //                                                                 IsDelivered
 
 // Send encrypts and sends this packet through connection 'conn'.
-func (ob *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
+func (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
 	if conn == nil {
 		return makeError(0xE4B1BA, EInvalidArg, "nil conn")
 	}
 	if cipher == nil {
 		return makeError(0xE44F2A, EInvalidArg, "nil cipher")
 	}
-	ciphertext, err := cipher.Encrypt(ob.data)
+	ciphertext, err := cipher.Encrypt(pk.data)
 	if err != nil {
 		return makeError(0xEB39C3, err)
 	}
-	ob.sentTime = time.Now()
+	pk.sentTime = time.Now()
 	_, err = io.Copy(conn, bytes.NewReader(ciphertext))
 	if err != nil {
 		return makeError(0xE93D1F, err)

@@ -42,16 +42,16 @@ func main() {
     var cryptoKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
     //
     // enable verbose logging (only done for demos/debugging)
-    cfg := udpt.NewDebugConfig()
+    cf := udpt.NewDebugConfig()
     //
     // set-up and run the receiver
     const tag = "-------------> DEMO"
     fmt.Println(tag, "Running the receiver")
     var received string
-    receiver := udpt.Receiver{
+    rc := udpt.Receiver{
         Port:      1234,
         CryptoKey: cryptoKey,
-        Config:    cfg,
+        Config:    cf,
         //
         // receives fully-transferred data items sent to the receiver
         ReceiveData: func(name string, data []byte) error {
@@ -72,13 +72,13 @@ func main() {
             return []byte(received), nil
         },
     }
-    go func() { _ = receiver.Run() }()
+    go func() { _ = rc.Run() }()
     //
     // send a message to the receiver
     time.Sleep(1 * time.Second)
     fmt.Println(tag, "Sending a message")
     sender := udpt.Sender{
-        Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cfg,
+        Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cf,
     }
     err := sender.SendString("demo_data", "Hello World!")
     if err != nil {

@@ -17,60 +17,60 @@ import (
 // go test -v -run Test_Sender_*
 
 // -----------------------------------------------------------------------------
-// # Main Methods (ob *Sender)
+// # Main Methods (sd *Sender)
 
-// (ob *Sender) Send(name string, data []byte) error
+// (sd *Sender) Send(name string, data []byte) error
 //
 // go test -run Test_Sender_Send_
 //
 func Test_Sender_Send_(t *testing.T) {
 	{
-		var snd Sender
-		err := snd.Send("", nil)
-		if snd.Config == nil {
+		var sd Sender
+		err := sd.Send("", nil)
+		if sd.Config == nil {
 			t.Error("0xE22B60")
 		}
-		if snd.Config.Cipher == nil {
+		if sd.Config.Cipher == nil {
 			t.Error("0xEB62B4")
 		}
 		if !matchError(err, "invalid Sender.CryptoKey") {
 			t.Error("0xE5BB36")
 		}
-		snd.CryptoKey = []byte("12345678901234567890123456789012")
+		sd.CryptoKey = []byte("12345678901234567890123456789012")
 		//
-		snd.Config.Cipher = nil
-		err = snd.Send("", nil)
+		sd.Config.Cipher = nil
+		err = sd.Send("", nil)
 		if !matchError(err, "nil Sender.Config.Cipher") {
 			t.Error("0xE32EC6")
 		}
-		snd.Config.Cipher = &aesCipher{}
+		sd.Config.Cipher = &aesCipher{}
 		//
-		snd.Config.PacketSizeLimit = 65536
-		err = snd.Send("", nil)
+		sd.Config.PacketSizeLimit = 65536
+		err = sd.Send("", nil)
 		if !matchError(err, "Sender.Config") {
 			t.Error("0xE08E7C")
 		}
-		snd.Config.PacketSizeLimit = 65535 - 8
+		sd.Config.PacketSizeLimit = 65535 - 8
 		//
-		snd.Address = ""
-		err = snd.Send("", nil)
+		sd.Address = ""
+		err = sd.Send("", nil)
 		if !matchError(err, "Sender.Address") {
 			t.Error("0xEC20C3")
 		}
-		snd.Address = "127.0.0.0"
+		sd.Address = "127.0.0.0"
 		//
-		snd.Port = 0
-		err = snd.Send("", nil)
+		sd.Port = 0
+		err = sd.Send("", nil)
 		if !matchError(err, "Sender.Port") {
 			t.Error("0xE24E74")
 		}
-		snd.Port = 9876
+		sd.Port = 9876
 		//
-		snd.Config.VerboseSender = true
-		snd.Config.SendRetries = 2
-		snd.Config.ReplyTimeout = 1 * time.Second
-		snd.Config.WriteTimeout = 1 * time.Second
-		err = snd.Send("", nil)
+		sd.Config.VerboseSender = true
+		sd.Config.SendRetries = 2
+		sd.Config.ReplyTimeout = 1 * time.Second
+		sd.Config.WriteTimeout = 1 * time.Second
+		err = sd.Send("", nil)
 		if !matchError(err, "undelivered packets") {
 			t.Error("0xEB8B96")
 		}
@@ -78,44 +78,44 @@ func Test_Sender_Send_(t *testing.T) {
 } //                                                           Test_Sender_Send_
 
 // -----------------------------------------------------------------------------
-// # Informatory Properties (ob *Sender)
+// # Informatory Properties (sd *Sender)
 
-// (ob *Sender) AverageResponseMs() float64
+// (sd *Sender) AverageResponseMs() float64
 //
 // go test -run Test_Sender_AverageResponseMs_
 //
 func Test_Sender_AverageResponseMs_(t *testing.T) {
-	var snd Sender
-	if n := snd.AverageResponseMs(); n < 0 || n > 0 {
+	var sd Sender
+	if n := sd.AverageResponseMs(); n < 0 || n > 0 {
 		t.Error("0xE29B40")
 	}
-	snd.stats.packetsDelivered = 10
-	snd.stats.transferTime = time.Millisecond
-	if n := snd.AverageResponseMs(); n < 0.1 || n > 0.1 {
+	sd.stats.packetsDelivered = 10
+	sd.stats.transferTime = time.Millisecond
+	if n := sd.AverageResponseMs(); n < 0.1 || n > 0.1 {
 		t.Error("0xE01B5F")
 	}
 } //                                              Test_Sender_AverageResponseMs_
 
-// (ob *Sender) TransferSpeedKBpS() float64
+// (sd *Sender) TransferSpeedKBpS() float64
 //
 // go test -run Test_Sender_TransferSpeedKBpS_
 //
 func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
-	var snd Sender
-	if n := snd.TransferSpeedKBpS(); n < 0 || n > 0 {
+	var sd Sender
+	if n := sd.TransferSpeedKBpS(); n < 0 || n > 0 {
 		t.Error("0xEE99D3")
 	}
-	snd.stats.transferTime = time.Second
-	snd.stats.bytesDelivered = 88 * 1024
-	if n := snd.TransferSpeedKBpS(); n < 88 || n > 88 {
+	sd.stats.transferTime = time.Second
+	sd.stats.bytesDelivered = 88 * 1024
+	if n := sd.TransferSpeedKBpS(); n < 88 || n > 88 {
 		t.Error("0xED0BD8")
 	}
 } //                                              Test_Sender_TransferSpeedKBpS_
 
 // -----------------------------------------------------------------------------
-// # Informatory Methods (ob *Sender)
+// # Informatory Methods (sd *Sender)
 
-// (ob *Sender) LogStats(logFunc ...interface{})
+// (sd *Sender) LogStats(logFunc ...interface{})
 //
 // go test -run Test_Sender_LogStats_
 //
@@ -131,14 +131,14 @@ func Test_Sender_LogStats_(t *testing.T) {
 	test := func(logFunc interface{}) {
 		sb.Reset()
 		//
-		var snd Sender
-		snd.Config = NewDefaultConfig()
-		snd.Config.LogFunc = logPrintln
-		snd.packets = []senderPacket{{
+		var sd Sender
+		sd.Config = NewDefaultConfig()
+		sd.Config.LogFunc = logPrintln
+		sd.packets = []senderPacket{{
 			sentHash:      []byte{0},
 			confirmedHash: []byte{0},
 		}}
-		snd.LogStats(logFunc)
+		sd.LogStats(logFunc)
 		//
 		got := sb.String()
 		expect := "" +
@@ -163,88 +163,88 @@ func Test_Sender_LogStats_(t *testing.T) {
 } //                                                       Test_Sender_LogStats_
 
 // -----------------------------------------------------------------------------
-// # Internal Lifecycle Methods (ob *Sender)
+// # Internal Lifecycle Methods (sd *Sender)
 
-// (ob *Sender) close() error
+// (sd *Sender) close() error
 //
 // go test -run Test_Sender_close_
 //
 func Test_Sender_close_(t *testing.T) {
-	var snd Sender
-	err := snd.close()
+	var sd Sender
+	err := sd.close()
 	if err != nil {
 		t.Error("0xEE7E05")
 	}
-	snd.conn = makeTestConn()
-	err = snd.conn.Close()
+	sd.conn = makeTestConn()
+	err = sd.conn.Close()
 	if err != nil {
 		t.Error("0xE3DD56")
 	}
-	err = snd.conn.Close()
+	err = sd.conn.Close()
 	if err == nil {
 		t.Error("0xE5FE16")
 	}
 } //                                                          Test_Sender_close_
 
 // -----------------------------------------------------------------------------
-// # Internal Helper Methods (ob *Sender)
+// # Internal Helper Methods (sd *Sender)
 
-// (ob *Sender) getPacketCount(length int) int
+// (sd *Sender) getPacketCount(length int) int
 //
 // go test -run Test_Sender_getPacketCount_
 //
 func Test_Sender_getPacketCount_(t *testing.T) {
-	var ob Sender
-	ob.Config = NewDefaultConfig()
-	ob.Config.PacketPayloadSize = 1000
+	var sd Sender
+	sd.Config = NewDefaultConfig()
+	sd.Config.PacketPayloadSize = 1000
 	//
-	if ob.getPacketCount(0) != 0 {
+	if sd.getPacketCount(0) != 0 {
 		t.Error("0xE6C4D4")
 	}
-	if ob.getPacketCount(-100000) != 0 {
+	if sd.getPacketCount(-100000) != 0 {
 		t.Error("0xE81D08")
 	}
-	if ob.getPacketCount(1) != 1 {
+	if sd.getPacketCount(1) != 1 {
 		t.Error("0xE55EB9")
 	}
-	if ob.getPacketCount(1000) != 1 {
+	if sd.getPacketCount(1000) != 1 {
 		t.Error("0xE87CB1")
 	}
-	if ob.getPacketCount(1001) != 2 {
+	if sd.getPacketCount(1001) != 2 {
 		t.Error("0xE25DD0")
 	}
-	if ob.getPacketCount(10000) != 10 {
+	if sd.getPacketCount(10000) != 10 {
 		t.Error("0xEE5EF4")
 	}
 } //                                                 Test_Sender_getPacketCount_
 
-// (ob *Sender) logError(id uint32, args ...interface{}) error
+// (sd *Sender) logError(id uint32, args ...interface{}) error
 //
 // go test -run Test_Sender_logError_
 //
 func Test_Sender_logError_(t *testing.T) {
 	var msg string
-	var ob Sender
-	ob.Config = NewDefaultConfig()
-	ob.Config.LogFunc = func(args ...interface{}) {
+	var sd Sender
+	sd.Config = NewDefaultConfig()
+	sd.Config.LogFunc = func(args ...interface{}) {
 		msg = fmt.Sprintln(args...)
 	}
-	ob.logError(0xE12345, "abc", 123)
+	sd.logError(0xE12345, "abc", 123)
 	if msg != "ERROR 0xE12345: abc 123\n" {
 		t.Error("0xE5CB5D")
 	}
 } //                                                       Test_Sender_logError_
 
-// (ob *Sender) makePacket(data []byte) (*senderPacket, error)
+// (sd *Sender) makePacket(data []byte) (*senderPacket, error)
 //
 // go test -run Test_Sender_makePacket_
 //
 func Test_Sender_makePacket_(t *testing.T) {
 	{
-		var snd Sender
-		snd.Config = NewDefaultConfig()
-		data := make([]byte, snd.Config.PacketSizeLimit+1)
-		packet, err := snd.makePacket(data)
+		var sd Sender
+		sd.Config = NewDefaultConfig()
+		data := make([]byte, sd.Config.PacketSizeLimit+1)
+		packet, err := sd.makePacket(data)
 		if packet != nil {
 			t.Error("0xE0FE30")
 		}
@@ -253,9 +253,9 @@ func Test_Sender_makePacket_(t *testing.T) {
 		}
 	}
 	{
-		var snd Sender
-		snd.Config = NewDefaultConfig()
-		packet, err := snd.makePacket([]byte{1, 2, 3})
+		var sd Sender
+		sd.Config = NewDefaultConfig()
+		packet, err := sd.makePacket([]byte{1, 2, 3})
 		if err != nil {
 			t.Error("0xE0AE90")
 		}
