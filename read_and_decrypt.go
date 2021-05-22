@@ -12,16 +12,16 @@ import (
 	"time"
 )
 
-var (
-	// errClosed error occurs when trying to read from a closed connection.
-	errClosed = errors.New("use of closed network connection")
+// errClosed error occurs when trying to read from a closed connection.
+var errClosed = errors.New("use of closed network connection")
 
-	// errTimeout error occurs when a read operation times out.
-	//
-	// NOTE: this error is currently not checked for.
-	//
-	errTimeout = errors.New("i/o timeout")
-)
+// errTimeout error occurs when a read operation times out.
+//
+// NOTE: this error is currently not checked for.
+//
+var errTimeout = errors.New("i/o timeout")
+
+// -----------------------------------------------------------------------------
 
 // readAndDecrypt reads data from the UDP connection 'conn'.
 //
