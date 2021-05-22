@@ -111,7 +111,8 @@ func (le *logEntry) outputDI(
 // openLogFile opens a file for outputDI().
 func openLogFile(filename string, con io.Writer) io.WriteCloser {
 	file, err := os.OpenFile(filename,
-		os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644,
+	)
 	if err != nil {
 		fmt.Fprintln(con, "ERROR 0xE2DA59:", err)
 		return nil

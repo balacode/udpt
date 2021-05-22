@@ -46,7 +46,7 @@ func Test_ZLibCompressor_(t *testing.T) {
 		if comp != nil {
 			t.Error("0xEE55FC")
 		}
-		if !matchError(err, "invalid 'compressed'") {
+		if !matchError(err, "invalid 'comp'") {
 			t.Error("0xE4AB37")
 		}
 	}

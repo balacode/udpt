@@ -50,28 +50,28 @@ func (*zlibCompressor) compressDI(
 	return ret, nil
 } //                                                                  compressDI
 
-// Uncompress uncompresses 'compressed' bytes using zlib and returns the
-// uncompressed bytes. If there was an error, returns nil and the error value.
-func (zc *zlibCompressor) Uncompress(compressed []byte) ([]byte, error) {
-	return zc.uncompressDI(compressed, zlib.NewReader)
+// Uncompress uncompresses bytes using zlib and returns the uncompressed bytes.
+// If there was an error, returns nil and the error value.
+func (zc *zlibCompressor) Uncompress(comp []byte) ([]byte, error) {
+	return zc.uncompressDI(comp, zlib.NewReader)
 } //                                                                  Uncompress
 
 // uncompressDI is only used by Uncompress() and provides parameters
 // for dependency injection, to enable mocking during testing.
 func (*zlibCompressor) uncompressDI(
-	compressed []byte,
+	comp []byte,
 	newReadCloser func(io.Reader) (io.ReadCloser, error),
 ) ([]byte, error) {
-	nc := len(compressed)
-	if len(compressed) <= 4 {
-		return nil, makeError(0xE41C29, "invalid 'compressed'")
+	nc := len(comp)
+	if len(comp) <= 4 {
+		return nil, makeError(0xE41C29, "invalid 'comp'")
 	}
-	// read the uncompressed data size (stored at the end of compressed bytes)
-	// to know the number of bytes to allocate for the result
-	nu := int64(binary.LittleEndian.Uint32(compressed[nc-4:]))
-	compressed = compressed[:nc-4]
+	// read uncompressed data size (stored at the end of compressed bytes)
+	// to know the array size for the result
+	nu := int64(binary.LittleEndian.Uint32(comp[nc-4:]))
+	comp = comp[:nc-4]
 	//
-	reader, err := newReadCloser(bytes.NewReader(compressed))
+	reader, err := newReadCloser(bytes.NewReader(comp))
 	if err != nil {
 		return nil, makeError(0xE07EE6, err)
 	}

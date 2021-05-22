@@ -8,13 +8,13 @@ package udpt
 // Compression implements functions to compress and uncompress byte slices.
 type Compression interface {
 
-	// Compress compresses 'uncompressed' bytes and returns the compressed
+	// Compress compresses 'data' bytes and returns the compressed
 	// bytes. If there was an error, returns nil and the error value.
-	Compress(uncompressed []byte) ([]byte, error)
+	Compress(data []byte) ([]byte, error)
 
-	// Uncompress uncompresses 'compressed' bytes and returns the uncompressed
-	// bytes. If there was an error, returns nil and the error value.
-	Uncompress(compressed []byte) ([]byte, error)
+	// Uncompress uncompresses bytes and returns the uncompressed bytes.
+	// If there was an error, returns nil and the error value.
+	Uncompress(comp []byte) ([]byte, error)
 } //                                                                 Compression
 
 // end

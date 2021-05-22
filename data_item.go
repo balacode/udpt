@@ -95,11 +95,11 @@ func (di *dataItem) UnpackBytes(compressor Compression) ([]byte, error) {
 	if !di.IsLoaded() {
 		return nil, makeError(0xE76AF5, "data item is incomplete")
 	}
-	compressed := bytes.Join(di.CompressedPieces, nil)
-	di.CompressedSizeInfo = len(compressed)
+	comp := bytes.Join(di.CompressedPieces, nil)
+	di.CompressedSizeInfo = len(comp)
 	//
 	// uncompress data
-	ret, err := compressor.Uncompress(compressed)
+	ret, err := compressor.Uncompress(comp)
 	if err != nil {
 		return nil, makeError(0xE95DFB, err)
 	}

@@ -142,11 +142,11 @@ func (sd *Sender) Send(name string, data []byte) error {
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
-	compressed, err := sd.Config.Compressor.Compress(data)
+	comp, err := sd.Config.Compressor.Compress(data)
 	if err != nil {
 		return sd.logError(0xE2EB59, err)
 	}
-	packetCount := sd.getPacketCount(len(compressed))
+	packetCount := sd.getPacketCount(len(comp))
 	sd.dataHash = hash
 	sd.startTime = time.Now()
 	sd.packets = make([]senderPacket, packetCount)
@@ -155,15 +155,15 @@ func (sd *Sender) Send(name string, data []byte) error {
 	for i := range sd.packets {
 		a := i * sd.Config.PacketPayloadSize
 		b := a + sd.Config.PacketPayloadSize
-		if b > len(compressed) {
-			b = len(compressed)
+		if b > len(comp) {
+			b = len(comp)
 		}
 		header := tagFragment + fmt.Sprintf(
 			"name:%s hash:%X sn:%d count:%d\n",
 			name, sd.dataHash, i+1, packetCount,
 		)
 		packet, err2 := sd.makePacket(
-			append([]byte(header), compressed[a:b]...),
+			append([]byte(header), comp[a:b]...),
 		)
 		if err2 != nil {
 			return sd.logError(0xE567A4, err2)

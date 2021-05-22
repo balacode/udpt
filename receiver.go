@@ -98,11 +98,11 @@ func (rc *Receiver) Run() error {
 		rc.logInfo("Receiver.Run() called net.ListenUDP")
 	}
 	// receive transmissions
-	encryptedReq := make([]byte, rc.Config.PacketSizeLimit)
+	encReq := make([]byte, rc.Config.PacketSizeLimit)
 	for rc.conn != nil {
-		// 'encryptedReq' is overwritten after every readFromUDPConn
+		// 'encReq' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(rc.conn, encryptedReq, rc.Config.ReplyTimeout)
+			readFromUDPConn(rc.conn, encReq, rc.Config.ReplyTimeout)
 		if err == errClosed {
 			break
 		}
@@ -110,7 +110,7 @@ func (rc *Receiver) Run() error {
 			_ = rc.logError(0xEA288A, err)
 			continue
 		}
-		recv, err := rc.Config.Cipher.Decrypt(encryptedReq[:nRead])
+		recv, err := rc.Config.Cipher.Decrypt(encReq[:nRead])
 		if err != nil {
 			_ = rc.logError(0xE9AF2F, err)
 			continue
