@@ -366,14 +366,13 @@ func (sd *Sender) requestDataItemHash(name string) []byte {
 		_ = sd.logError(0xE89B11, err)
 		return nil
 	}
-	encryptedReply := make([]byte, sd.Config.PacketSizeLimit)
-	nRead, _, err :=
-		readFromUDPConn(tempConn, encryptedReply, sd.Config.ReplyTimeout)
+	encReply := make([]byte, sd.Config.PacketSizeLimit)
+	nRead, _, err := readFromUDPConn(tempConn, encReply, sd.Config.ReplyTimeout)
 	if err != nil {
 		_ = sd.logError(0xE97FC3, err)
 		return nil
 	}
-	reply, err := sd.Config.Cipher.Decrypt(encryptedReply[:nRead])
+	reply, err := sd.Config.Cipher.Decrypt(encReply[:nRead])
 	if err != nil {
 		_ = sd.logError(0xE2B5A1, err)
 		return nil
@@ -422,11 +421,11 @@ func (sd *Sender) sendUndeliveredPackets() error {
 // collectConfirmations enters a loop that receives confirmation packets
 // from the sender, and marks all confirmed packets as delivered.
 func (sd *Sender) collectConfirmations() {
-	encryptedReply := make([]byte, sd.Config.PacketSizeLimit)
+	encReply := make([]byte, sd.Config.PacketSizeLimit)
 	for sd.conn != nil {
-		// 'encryptedReply' is overwritten after every readFromUDPConn
+		// 'encReply' is overwritten after every readFromUDPConn
 		nRead, addr, err :=
-			readFromUDPConn(sd.conn, encryptedReply, sd.Config.ReplyTimeout)
+			readFromUDPConn(sd.conn, encReply, sd.Config.ReplyTimeout)
 		if err == errClosed {
 			break
 		}
@@ -438,7 +437,7 @@ func (sd *Sender) collectConfirmations() {
 			_ = sd.logError(0xE4CB0B, "received no data")
 			continue
 		}
-		recv, err := sd.Config.Cipher.Decrypt(encryptedReply[:nRead])
+		recv, err := sd.Config.Cipher.Decrypt(encReply[:nRead])
 		if err != nil {
 			_ = sd.logError(0xE4AD67, err)
 			continue

@@ -37,17 +37,17 @@ import (
     "github.com/balacode/udpt"
 )
 
+// main demo
 func main() {
-    // the encryption key shared by the sender and receiver
-    var cryptoKey = []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
+    // encryption key shared by the sender and receiver
+    cryptoKey := []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
     //
-    // enable verbose logging (only done for demos/debugging)
-    cf := udpt.NewDebugConfig()
+    cf := udpt.NewDebugConfig() // verbose logging
     //
     // set-up and run the receiver
     const tag = "-------------> DEMO"
     fmt.Println(tag, "Running the receiver")
-    var received string
+    received := ""
     rc := udpt.Receiver{
         Port:      1234,
         CryptoKey: cryptoKey,

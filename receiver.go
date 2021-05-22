@@ -179,7 +179,7 @@ func (rc *Receiver) Run() error {
 			_ = rc.logError(0xE985CC, "invalid packet header")
 			reply = []byte("invalid_packet_header")
 		}
-		encryptedReply, err := rc.Config.Cipher.Encrypt(reply)
+		encReply, err := rc.Config.Cipher.Encrypt(reply)
 		if err != nil {
 			_ = rc.logError(0xE06B58, err)
 			continue
@@ -190,7 +190,7 @@ func (rc *Receiver) Run() error {
 			_ = rc.logError(0xE0AD06, err)
 			continue
 		}
-		nWrit, err := rc.conn.WriteTo(encryptedReply, addr)
+		nWrit, err := rc.conn.WriteTo(encReply, addr)
 		if err != nil {
 			_ = rc.logError(0xEA63C4, err)
 			continue
