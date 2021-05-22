@@ -36,7 +36,7 @@ func readFromUDPConn(conn netUDPConn, tempBuf []byte, timeout time.Duration) (
 	err error,
 ) {
 	if conn == nil {
-		return 0, nil, makeError(0xE4ED27, EInvalidArg)
+		return 0, nil, makeError(0xE4ED27, "nil connection")
 	}
 	dl := time.Now().Add(timeout)
 	err = conn.SetReadDeadline(dl)

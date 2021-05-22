@@ -33,10 +33,10 @@ func (pk *senderPacket) IsDelivered() bool {
 // Send encrypts and sends this packet through connection 'conn'.
 func (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
 	if conn == nil {
-		return makeError(0xE4B1BA, EInvalidArg, "nil conn")
+		return makeError(0xE4B1BA, "nil connection")
 	}
 	if cipher == nil {
-		return makeError(0xE44F2A, EInvalidArg, "nil cipher")
+		return makeError(0xE44F2A, "nil cipher")
 	}
 	ciphertext, err := cipher.Encrypt(pk.data)
 	if err != nil {

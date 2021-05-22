@@ -79,6 +79,7 @@ func Test_senderPacket_Send_(t *testing.T) {
 		cipher.SetKey([]byte("12345678901234567890123456789012"))
 		err := pk.Send(conn, cipher)
 		if !matchError(err, "invalid argument") {
+			// TODO: above error description may differ on Linux or Mac OS
 			t.Error("0xE65B73")
 		}
 	}

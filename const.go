@@ -20,9 +20,4 @@ const (
 	tagConfirmation = "CONF:"
 )
 
-const (
-	// EInvalidArg error indicates an invalid argument.
-	EInvalidArg = "Invalid argument"
-)
-
 // end
