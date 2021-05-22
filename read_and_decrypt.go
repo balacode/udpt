@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// github.com/balacode/udpt                             /[read_from_udp_conn.go]
+// github.com/balacode/udpt                               /[read_and_decrypt.go]
 // (c) balarabe@protonmail.com                                      License: MIT
 // -----------------------------------------------------------------------------
 
@@ -23,35 +23,50 @@ var (
 	errTimeout = errors.New("i/o timeout")
 )
 
-// readFromUDPConn reads data from the UDP connection 'conn'.
+// readAndDecrypt reads data from the UDP connection 'conn'.
 //
 // 'tempBuf' contains a temporary buffer that holds the received
 // packet's data. It is reused between calls to this function to
 // avoid unnecessary memory allocations and de-allocations.
 // The size of 'tempBuf' must be Config.PacketSizeLimit or greater.
 //
-func readFromUDPConn(conn netUDPConn, tempBuf []byte, timeout time.Duration) (
-	nRead int,
+func readAndDecrypt(
+	conn netUDPConn,
+	timeout time.Duration,
+	decryptor SymmetricCipher,
+	tempBuf []byte,
+) (
+	data []byte,
 	addr net.Addr,
 	err error,
 ) {
 	if conn == nil {
-		return 0, nil, makeError(0xE4ED27, "nil connection")
+		return nil, nil, makeError(0xE4ED27, "nil connection")
+	}
+	if decryptor == nil {
+		return nil, nil, makeError(0xEF7F01, "nil decryptor")
+	}
+	if tempBuf == nil {
+		return nil, nil, makeError(0xED80B0, "nil tempBuf")
 	}
 	dl := time.Now().Add(timeout)
 	err = conn.SetReadDeadline(dl)
 	if err != nil {
-		return 0, nil, netError(err, 0xE09B6A)
+		return nil, nil, netError(err, 0xE09B6A)
 	}
 	// contents of 'tempBuf' is overwritten after every ReadFrom
-	nRead, addr, err = conn.ReadFrom(tempBuf)
+	nRead, addr, err := conn.ReadFrom(tempBuf)
 	if err != nil {
-		err = netError(err, 0xE0E0B1)
+		return nil, nil, netError(err, 0xE0E0B1)
 	}
-	return nRead, addr, err
-} //                                                             readFromUDPConn
+	data, err = decryptor.Decrypt(tempBuf[:nRead])
+	if err != nil {
+		data, addr, err = nil, nil, makeError(0xE2B5A1, err)
+	}
+	return data, addr, err
+} //                                                              readAndDecrypt
 
-// netError filters out network errors for readFromUDPConn() and returns
+// netError filters out network errors for readAndDecrypt() and returns
 // them as distinct error values like errClosed and errTimeout.
 //
 // For other errors, it just calls makeError().

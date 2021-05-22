@@ -100,9 +100,9 @@ func (rc *Receiver) Run() error {
 	// receive transmissions
 	encReq := make([]byte, rc.Config.PacketSizeLimit)
 	for rc.conn != nil {
-		// 'encReq' is overwritten after every readFromUDPConn
-		nRead, addr, err :=
-			readFromUDPConn(rc.conn, encReq, rc.Config.ReplyTimeout)
+		// 'encReq' is overwritten after every readAndDecrypt
+		recv, addr, err := readAndDecrypt(rc.conn, rc.Config.ReplyTimeout,
+			rc.Config.Cipher, encReq)
 		if err == errClosed {
 			break
 		}
@@ -110,15 +110,10 @@ func (rc *Receiver) Run() error {
 			_ = rc.logError(0xEA288A, err)
 			continue
 		}
-		recv, err := rc.Config.Cipher.Decrypt(encReq[:nRead])
-		if err != nil {
-			_ = rc.logError(0xE9AF2F, err)
-			continue
-		}
 		if rc.Config.VerboseReceiver {
 			rc.logInfo()
 			rc.logInfo(strings.Repeat("-", 80))
-			rc.logInfo("Receiver read", nRead, "bytes from", addr)
+			rc.logInfo("Receiver read", len(recv), "bytes from", addr)
 		}
 		encReply, err := rc.buildReply(recv)
 		if len(encReply) == 0 || err != nil {
