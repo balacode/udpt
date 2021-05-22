@@ -85,53 +85,15 @@ type Receiver struct {
 // so it can confirm that a data transfer is successful.
 //
 func (rc *Receiver) Run() error {
-	if rc.Config == nil {
-		rc.Config = NewDefaultConfig()
-	}
-	// setup cipher
-	if rc.Config.Cipher == nil {
-		return rc.logError(0xE62F4F, "nil Receiver.Config.Cipher")
-	}
-	err := rc.Config.Cipher.SetKey(rc.CryptoKey)
+	udpAddr, err := rc.initRun()
 	if err != nil {
-		return rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
-	}
-	// check settings
-	err = rc.Config.Validate()
-	if err != nil {
-		return rc.logError(0xE14BC8, err)
-	}
-	if rc.Port < 1 || rc.Port > 65535 {
-		return rc.logError(0xE58B2F, "invalid Receiver.Port:", rc.Port)
-	}
-	if rc.ReceiveData == nil {
-		return rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
-	}
-	if rc.ProvideData == nil {
-		return rc.logError(0xE48CC6, "nil Receiver.ProvideData")
-	}
-	// prepare for reception
-	if rc.Config.VerboseReceiver {
-		rc.logInfo(strings.Repeat("-", 80))
-		rc.logInfo("UDPT started in receiver mode")
-	}
-	udpAddr, err := net.ResolveUDPAddr("udp",
-		fmt.Sprintf("0.0.0.0:%d", rc.Port))
-	if err != nil {
-		return rc.logError(0xE1D68C, err)
+		return err
 	}
 	rc.conn, err = net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
 	if err != nil {
 		return rc.logError(0xEBF95F, err)
 	}
-	defer func() {
-		if rc.conn != nil {
-			err := rc.conn.Close()
-			if err != nil {
-				_ = rc.logError(0xEC82DB, err)
-			}
-		}
-	}()
+	defer rc.Stop()
 	if rc.Config.VerboseReceiver {
 		rc.logInfo("Receiver.Run() called net.ListenUDP")
 	}
@@ -158,30 +120,8 @@ func (rc *Receiver) Run() error {
 			rc.logInfo(strings.Repeat("-", 80))
 			rc.logInfo("Receiver read", nRead, "bytes from", addr)
 		}
-		var reply []byte
-		switch {
-		case len(recv) == 0:
-			_ = rc.logError(0xE6B3BA, "received no data")
-			continue
-		case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
-			reply, err = rc.sendDataItemHash(recv)
-			if err != nil {
-				_ = rc.logError(0xE69C60, err)
-				continue
-			}
-		case bytes.HasPrefix(recv, []byte(tagFragment)):
-			reply, err = rc.receiveFragment(recv)
-			if err != nil {
-				_ = rc.logError(0xE3A46C, err)
-				continue
-			}
-		default:
-			_ = rc.logError(0xE985CC, "invalid packet header")
-			reply = []byte("invalid_packet_header")
-		}
-		encReply, err := rc.Config.Cipher.Encrypt(reply)
-		if err != nil {
-			_ = rc.logError(0xE06B58, err)
+		encReply, err := rc.buildReply(recv)
+		if len(encReply) == 0 || err != nil {
 			continue
 		}
 		deadline := time.Now().Add(rc.Config.WriteTimeout)
@@ -214,6 +154,65 @@ func (rc *Receiver) Stop() {
 	}
 	rc.conn = nil
 } //                                                                        Stop
+
+// -----------------------------------------------------------------------------
+// # Run() Helpers
+
+func (rc *Receiver) initRun() (*net.UDPAddr, error) {
+	if rc.Config == nil {
+		rc.Config = NewDefaultConfig()
+	}
+	err := rc.Config.Validate()
+	if err != nil {
+		return nil, rc.logError(0xE14BC8, err)
+	}
+	if rc.Port < 1 || rc.Port > 65535 {
+		return nil, rc.logError(0xE58B2F, "invalid Receiver.Port:", rc.Port)
+	}
+	err = rc.Config.Cipher.SetKey(rc.CryptoKey)
+	if err != nil {
+		return nil, rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
+	}
+	if rc.ReceiveData == nil {
+		return nil, rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
+	}
+	if rc.ProvideData == nil {
+		return nil, rc.logError(0xE48CC6, "nil Receiver.ProvideData")
+	}
+	udpAddr, err := net.ResolveUDPAddr("udp",
+		fmt.Sprintf("0.0.0.0:%d", rc.Port))
+	if err != nil {
+		return nil, rc.logError(0xE1D68C, err)
+	}
+	if rc.Config.VerboseReceiver {
+		rc.logInfo(strings.Repeat("-", 80))
+		rc.logInfo("UDPT started in receiver mode")
+	}
+	return udpAddr, nil
+} //                                                                     initRun
+
+func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
+	switch {
+	case len(recv) == 0:
+		_ = rc.logError(0xE6B3BA, "received no data")
+		reply, err = nil, nil
+	case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
+		reply, err = rc.sendDataItemHash(recv)
+	case bytes.HasPrefix(recv, []byte(tagFragment)):
+		reply, err = rc.receiveFragment(recv)
+	default:
+		reply = []byte("invalid_packet_header")
+		err = rc.logError(0xE985CC, "invalid packet header")
+	}
+	if err != nil {
+		return nil, err
+	}
+	encReply, err := rc.Config.Cipher.Encrypt(reply)
+	if err != nil {
+		return nil, rc.logError(0xE06B58, err)
+	}
+	return encReply, err
+} //                                                                  buildReply
 
 // -----------------------------------------------------------------------------
 // # Packet Handlers

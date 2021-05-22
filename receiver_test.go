@@ -25,10 +25,29 @@ import (
 func Test_Receiver_Run_(t *testing.T) {
 	var rc Receiver
 	//
-	// expecting startup error: CryptoKey is not specfied
+	// expecting startup error: Port is not specfied
 	err := rc.Run()
-	if !matchError(err, "Receiver.CryptoKey") {
+	if !matchError(err, "Receiver.Port") {
 		t.Error("0xE57F1E")
+	}
+	// expecting startup error: Port number too big
+	rc.Port = 65535 + 1
+	err = rc.Run()
+	if !matchError(err, "Receiver.Port") {
+		t.Error("0xE8E6D5")
+	}
+	// expecting startup error: Port number is negative
+	rc.Port = -123
+	err = rc.Run()
+	if !matchError(err, "Receiver.Port") {
+		t.Error("0xED3AE1")
+	}
+	// expecting startup error: CryptoKey is not set
+	rc.Port = 9876
+	rc.CryptoKey = nil
+	err = rc.Run()
+	if !matchError(err, "AES-256 key") {
+		t.Error("0xE19A88")
 	}
 	// expecting startup error: CryptoKey is wrong size
 	rc.CryptoKey = []byte{1, 2, 3}
@@ -36,34 +55,17 @@ func Test_Receiver_Run_(t *testing.T) {
 	if !matchError(err, "AES-256 key") {
 		t.Error("0xE19A88")
 	}
-	// expecting startup error: Port is not set
-	rc.CryptoKey = []byte("0123456789abcdefghijklmnopqrst12")
-	err = rc.Run()
-	if !matchError(err, "Receiver.Port") {
-		t.Error("0xE21D17")
-	}
-	// expecting startup error: Port number is wrong
-	rc.Port = 65535 + 1
-	err = rc.Run()
-	if !matchError(err, "Receiver.Port") {
-		t.Error("0xE8E6D5")
-	}
-	// expecting startup error: Port number is wrong
-	rc.Port = 0
-	err = rc.Run()
-	if !matchError(err, "Receiver.Port") {
-		t.Error("0xED3AE1")
-	}
 	// expecting startup error: ReceiveData not specified
+	rc.CryptoKey = []byte("0123456789abcdefghijklmnopqrst12")
 	rc.Port = 9874
 	err = rc.Run()
-	if !matchError(err, "Receiver.ReceiveData") {
+	if !matchError(err, "nil Receiver.ReceiveData") {
 		t.Error("0xE7C0AC")
 	}
 	// expecting startup error: ProvideData not specified
 	rc.ReceiveData = func(name string, data []byte) error { return nil }
 	err = rc.Run()
-	if !matchError(err, "Receiver.ProvideData") {
+	if !matchError(err, "nil Receiver.ProvideData") {
 		t.Error("0xEF5FF2")
 	}
 	// expecting no startup error
