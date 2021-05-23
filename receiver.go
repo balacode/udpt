@@ -111,8 +111,13 @@ func (rc *Receiver) Run() error {
 			rc.logInfo(strings.Repeat("-", 80))
 			rc.logInfo("Receiver read", len(recv), "bytes from", addr)
 		}
-		encReply, err := rc.buildReply(recv)
-		if len(encReply) == 0 || err != nil {
+		reply, err := rc.buildReply(recv)
+		if len(reply) == 0 || err != nil {
+			continue
+		}
+		encReply, err := rc.Config.Cipher.Encrypt(reply)
+		if err != nil {
+			_ = rc.logError(0xE5C3E8, err)
 			continue
 		}
 		deadline := time.Now().Add(rc.Config.WriteTimeout)
@@ -198,7 +203,6 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	switch {
 	case len(recv) == 0:
 		_ = rc.logError(0xE6B3BA, "received no data")
-		reply, err = nil, nil
 	case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
 		reply, err = rc.sendDataItemHash(recv)
 	case bytes.HasPrefix(recv, []byte(tagFragment)):
@@ -207,14 +211,7 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 		reply = []byte("invalid_packet_header")
 		err = rc.logError(0xE985CC, "invalid packet header")
 	}
-	if err != nil {
-		return nil, err
-	}
-	encReply, err := rc.Config.Cipher.Encrypt(reply)
-	if err != nil {
-		return nil, rc.logError(0xE06B58, err)
-	}
-	return encReply, err
+	return reply, err
 } //                                                                  buildReply
 
 // -----------------------------------------------------------------------------
