@@ -75,7 +75,7 @@ func main() {
     go func() { _ = rc.Run() }()
     //
     // send a message to the receiver
-    time.Sleep(1 * time.Second)
+    time.Sleep(time.Second)
     fmt.Println(tag, "Sending a message")
     sender := udpt.Sender{
         Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cf,
@@ -84,9 +84,7 @@ func main() {
     if err != nil {
         fmt.Println(tag, "failed sending:", err)
     }
-    wait := 2 * time.Second
-    fmt.Println(tag, "Waiting", wait, "before exiting")
-    time.Sleep(wait)
+    time.Sleep(time.Second)
 } //                                                                        main
 
 ```
