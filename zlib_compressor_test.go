@@ -12,99 +12,93 @@ import (
 	"testing"
 )
 
-// go test -run Test_ZLibCompressor_
-//
-func Test_ZLibCompressor_(t *testing.T) {
-	input := []byte(
-		strings.Repeat("The quick brown fox jumps over the lazy dog!", 7),
-	)
-	// compresses input: must always succeed
-	compress := func() []byte {
-		zc := zlibCompressor{}
-		comp, err := zc.Compress(input)
-		if err != nil {
-			t.Error("0xE26CD5", err)
-		}
-		return comp
+// to run all tests in this file:
+// go test -v -run Test_zlibCompressor_*
+
+// -----------------------------------------------------------------------------
+
+// must succeed compressing and uncompressing data:
+func Test_zlibCompressor_1(t *testing.T) {
+	comp := zCompress(t)
+	zc := zlibCompressor{}
+	uncomp, err := zc.Uncompress(comp) // must succeed
+	if err != nil {
+		t.Error("0xE38FD2", err)
 	}
-	{
-		// tests compressing and uncompressing data
-		comp := compress()
-		zc := zlibCompressor{}
-		uncomp, err := zc.Uncompress(comp) // must succeed
-		if err != nil {
-			t.Error("0xE38FD2", err)
-		}
-		if !bytes.Equal(input, uncomp) {
-			t.Error("0xEB0E80", "data corrupted")
-		}
+	if !bytes.Equal(zInput(), uncomp) {
+		t.Error("0xEB0E80", "data corrupted")
 	}
-	{
-		// uncompressing less than 4 bytes must fail
-		zc := zlibCompressor{}
-		comp, err := zc.Uncompress([]byte{1, 2, 3})
-		if comp != nil {
-			t.Error("0xEE55FC")
-		}
-		if !matchError(err, "invalid 'comp'") {
-			t.Error("0xE4AB37")
-		}
+} //                                                       Test_zlibCompressor_1
+
+// uncompressing less than 4 bytes must fail:
+func Test_zlibCompressor_2(t *testing.T) {
+	zc := zlibCompressor{}
+	comp, err := zc.Uncompress([]byte{1, 2, 3})
+	if comp != nil {
+		t.Error("0xEE55FC")
 	}
-	{
-		// test wr.Write() failing in compressDI()
-		zc := zlibCompressor{}
-		cbuf := bytes.Buffer{}
-		wrc := &mockWriteCloser{failWrite: true}
-		comp, err := zc.compressDI(input, wrc, &cbuf)
-		if comp != nil {
-			t.Error("0xE27BB2")
-		}
-		if !matchError(err, "failed mockWriteCloser.Write") {
-			t.Error("0xEE9C54", err)
-		}
+	if !matchError(err, "invalid 'comp'") {
+		t.Error("0xE4AB37", "wrong error:", err)
 	}
-	{
-		// test wr.Close() failing in compressDI()
-		zc := zlibCompressor{}
-		cbuf := bytes.Buffer{}
-		wrc := &mockWriteCloser{failClose: true}
-		comp, err := zc.compressDI(input, wrc, &cbuf)
-		if comp != nil {
-			t.Error("0xE6F6A5")
-		}
-		if !matchError(err, "failed mockWriteCloser.Close") {
-			t.Error("0xE4DF92", err)
-		}
+} //                                                       Test_zlibCompressor_2
+
+// uncompressing must fail when wr.Write() fails in compressDI():
+func Test_zlibCompressor_3(t *testing.T) {
+	zc := zlibCompressor{}
+	cbuf := bytes.Buffer{}
+	wrc := &mockWriteCloser{failWrite: true}
+	comp, err := zc.compressDI(zInput(), wrc, &cbuf)
+	if comp != nil {
+		t.Error("0xE27BB2")
 	}
-	{
-		// test reader.Read() failing so io.Copy() fails too in uncompressDI()
-		comp, zc := compress(), zlibCompressor{}
-		newMockReadCloser := func(io.Reader) (io.ReadCloser, error) {
-			return &mockReadCloser{failRead: true}, nil
-		}
-		uncomp, err := zc.uncompressDI(comp, newMockReadCloser)
-		if uncomp != nil {
-			t.Error("0xE3DA4F")
-		}
-		if !matchError(err, "failed mockReadCloser.Read") {
-			t.Error("0xE81C62")
-		}
+	if !matchError(err, "failed mockWriteCloser.Write") {
+		t.Error("0xEE9C54", "wrong error:", err)
 	}
-	{
-		// test reader.Close() failing in uncompressDI()
-		comp, zc := compress(), zlibCompressor{}
-		newMockReadCloser := func(io.Reader) (io.ReadCloser, error) {
-			return &mockReadCloser{failClose: true}, nil
-		}
-		uncomp, err := zc.uncompressDI(comp, newMockReadCloser)
-		if uncomp != nil {
-			t.Error("0xEF3A01")
-		}
-		if !matchError(err, "failed mockReadCloser.Close") {
-			t.Error("0xEA0F76")
-		}
+} //                                                       Test_zlibCompressor_3
+
+// uncompressing must fail when wr.Close() fails in compressDI():
+func Test_zlibCompressor_4(t *testing.T) {
+	zc := zlibCompressor{}
+	cbuf := bytes.Buffer{}
+	wrc := &mockWriteCloser{failClose: true}
+	comp, err := zc.compressDI(zInput(), wrc, &cbuf)
+	if comp != nil {
+		t.Error("0xE6F6A5")
 	}
-} //                                                        Test_ZLibCompressor_
+	if !matchError(err, "failed mockWriteCloser.Close") {
+		t.Error("0xE4DF92", "wrong error:", err)
+	}
+} //                                                       Test_zlibCompressor_4
+
+// uncompressing must fail when reader.Read or io.Copy fail in uncompressDI():
+func Test_zlibCompressor_5(t *testing.T) {
+	comp, zc := zCompress(t), zlibCompressor{}
+	newMockReadCloser := func(io.Reader) (io.ReadCloser, error) {
+		return &mockReadCloser{failRead: true}, nil
+	}
+	uncomp, err := zc.uncompressDI(comp, newMockReadCloser)
+	if uncomp != nil {
+		t.Error("0xE3DA4F")
+	}
+	if !matchError(err, "failed mockReadCloser.Read") {
+		t.Error("0xE81C62", "wrong error:", err)
+	}
+} //                                                       Test_zlibCompressor_5
+
+// uncompressing must fail when reader.Close() fails in uncompressDI():
+func Test_zlibCompressor_6(t *testing.T) {
+	comp, zc := zCompress(t), zlibCompressor{}
+	newMockReadCloser := func(io.Reader) (io.ReadCloser, error) {
+		return &mockReadCloser{failClose: true}, nil
+	}
+	uncomp, err := zc.uncompressDI(comp, newMockReadCloser)
+	if uncomp != nil {
+		t.Error("0xEF3A01")
+	}
+	if !matchError(err, "failed mockReadCloser.Close") {
+		t.Error("0xEA0F76", "wrong error:", err)
+	}
+} //                                                       Test_zlibCompressor_6
 
 // -----------------------------------------------------------------------------
 
@@ -135,5 +129,25 @@ func (mk *mockReadCloser) Close() error {
 	}
 	return nil
 } //                                                                       Close
+
+// -----------------------------------------------------------------------------
+
+// zCompress compresses the message from zInput(): must always succeed
+func zCompress(t *testing.T) []byte {
+	zc := zlibCompressor{}
+	input := zInput()
+	comp, err := zc.Compress(input)
+	if err != nil {
+		t.Error("0xE26CD5", err)
+	}
+	return comp
+} //                                                                   zCompress
+
+// zInput: provides a message to compress
+func zInput() []byte {
+	return []byte(
+		strings.Repeat("The quick brown fox jumps over the lazy dog!", 7),
+	)
+} //                                                                      zInput
 
 // end
