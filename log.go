@@ -14,7 +14,7 @@ import (
 )
 
 // pl is like fmt.Println but returns no values. It is only used for debugging.
-func pl(args ...interface{}) { fmt.Println(args...) }
+func pl(a ...interface{}) { fmt.Println(a...) }
 
 var _ = pl
 
@@ -31,10 +31,10 @@ var logTimeNow = time.Now
 //
 // You can assign it to Sender.LogFunc and Receiver.LogFunc.
 //
-func LogPrint(args ...interface{}) {
+func LogPrint(a ...interface{}) {
 	const printMsg = true
 	const logFile = ""
-	logEnter(printMsg, logFile, args...)
+	logEnter(printMsg, logFile, a...)
 } //                                                                    LogPrint
 
 // MakeLogFunc creates and returns a function to use for default logging.
@@ -49,9 +49,9 @@ func LogPrint(args ...interface{}) {
 //
 // logFile specifies the log file into which to append.
 //
-func MakeLogFunc(printMsg bool, logFile string) func(args ...interface{}) {
-	return func(args ...interface{}) {
-		logEnter(printMsg, logFile, args...)
+func MakeLogFunc(printMsg bool, logFile string) func(a ...interface{}) {
+	return func(a ...interface{}) {
+		logEnter(printMsg, logFile, a...)
 	}
 } //                                                                 MakeLogFunc
 
@@ -84,37 +84,37 @@ func (le *logEntry) Output() {
 // outputDI is only used by Output() and provides parameters
 // for dependency injection, to enable mocking during testing.
 func (le *logEntry) outputDI(
-	con io.Writer,
-	openLogFile func(filename string, con io.Writer) io.WriteCloser,
+	cons io.Writer,
+	openLogFile func(filename string, cons io.Writer) io.WriteCloser,
 ) {
 	if le.printMsg {
-		fmt.Fprintln(con, le.msg)
+		fmt.Fprintln(cons, le.msg)
 	}
 	path := le.logFile
 	if path == "" {
 		return
 	}
-	wr := openLogFile(path, con)
+	wr := openLogFile(path, cons)
 	if wr == nil {
 		return
 	}
 	n, err := wr.Write([]byte(le.msg + "\n"))
 	if n == 0 || err != nil {
-		fmt.Fprintln(con, "ERROR 0xE81F3D:", err)
+		fmt.Fprintln(cons, "ERROR 0xE81F3D:", err)
 	}
 	err = wr.Close()
 	if err != nil {
-		fmt.Fprintln(con, "ERROR 0xE50F96:", err)
+		fmt.Fprintln(cons, "ERROR 0xE50F96:", err)
 	}
 } //                                                                    outputDI
 
 // openLogFile opens a file for outputDI().
-func openLogFile(filename string, con io.Writer) io.WriteCloser {
+func openLogFile(filename string, cons io.Writer) io.WriteCloser {
 	file, err := os.OpenFile(filename,
 		os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644,
 	)
 	if err != nil {
-		fmt.Fprintln(con, "ERROR 0xE2DA59:", err)
+		fmt.Fprintln(cons, "ERROR 0xE2DA59:", err)
 		return nil
 	}
 	return file
@@ -122,7 +122,7 @@ func openLogFile(filename string, con io.Writer) io.WriteCloser {
 
 // -----------------------------------------------------------------------------
 
-// logEnter enters a log message (built from args) in the log queue (logChan).
+// logEnter sends a log message built from args 'a' to log channel 'logChan'.
 //
 // If logChanSize is 1, outputs the message immediately.
 //
@@ -130,8 +130,8 @@ func openLogFile(filename string, con io.Writer) io.WriteCloser {
 //
 // logFile: specifies the log file into which to append.
 //
-func logEnter(printMsg bool, logFile string, args ...interface{}) {
-	msg := logMakeMessage(logTimeNow(), args...)
+func logEnter(printMsg bool, logFile string, a ...interface{}) {
+	msg := logMakeMessage(logTimeNow(), a...)
 	entry := logEntry{printMsg: printMsg, logFile: logFile, msg: msg}
 	if logChan == nil {
 		logInit()
@@ -150,14 +150,14 @@ func logInit() {
 	}()
 } //                                                                     logInit
 
-// logMakeMessage creates a log message by joining args.
+// logMakeMessage creates a log message by joining arguments in 'a'.
 //
 // Prefixes each line with the date/time specified in 'tm'.
 //
-func logMakeMessage(tm time.Time, args ...interface{}) string {
+func logMakeMessage(tm time.Time, a ...interface{}) string {
 	var (
 		tms = tm.String()[:19]
-		msg = joinArgs("", args...)
+		msg = joinArgs("", a...)
 	)
 	// prefix each line with a timestamp
 	var lines = strings.Split(msg, "\n")

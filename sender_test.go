@@ -218,7 +218,7 @@ func Test_Sender_getPacketCount_(t *testing.T) {
 	}
 } //                                                 Test_Sender_getPacketCount_
 
-// (sd *Sender) logError(id uint32, args ...interface{}) error
+// (sd *Sender) logError(id uint32, a ...interface{}) error
 //
 // go test -run Test_Sender_logError_
 //
@@ -226,8 +226,8 @@ func Test_Sender_logError_(t *testing.T) {
 	var msg string
 	var sd Sender
 	sd.Config = NewDefaultConfig()
-	sd.Config.LogFunc = func(args ...interface{}) {
-		msg = fmt.Sprintln(args...)
+	sd.Config.LogFunc = func(a ...interface{}) {
+		msg = fmt.Sprintln(a...)
 	}
 	sd.logError(0xE12345, "abc", 123)
 	if msg != "ERROR 0xE12345: abc 123\n" {

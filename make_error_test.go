@@ -9,14 +9,14 @@ import (
 	"testing"
 )
 
-// makeError(id uint32, args ...interface{}) error
+// makeError(id uint32, a ...interface{}) error
 //
 // go test -run Test_makeError_*
 
 func Test_makeError_1(t *testing.T) {
 	for _, it := range []struct {
-		id   uint32
-		args []interface{}
+		id uint32
+		a  []interface{}
 		//
 		expect string
 	}{
@@ -26,13 +26,13 @@ func Test_makeError_1(t *testing.T) {
 		{0xE12345, []interface{}{"failed"}, "ERROR 0xE12345: failed"},
 		{0xE12345, []interface{}{"failed", 123}, "ERROR 0xE12345: failed 123"},
 	} {
-		err := makeError(it.id, it.args...)
+		err := makeError(it.id, it.a...)
 		got := err.Error()
 		if got != it.expect {
 			t.Errorf("0xE60E1A"+" makeError(%X, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
-				it.id, it.args, it.expect, got)
+				it.id, it.a, it.expect, got)
 		}
 	}
 } //                                                            Test_makeError_1

@@ -17,7 +17,7 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration
+// NewDebugConfig(logFunc ...func(a ...interface{})) *Configuration
 //
 // go test -run Test_config_NewDebugConfig_
 //
@@ -52,7 +52,7 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 	}
 	{
 		isFuncCalled := false
-		logFunc := func(args ...interface{}) {
+		logFunc := func(a ...interface{}) {
 			isFuncCalled = true
 		}
 		// test!

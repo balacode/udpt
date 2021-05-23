@@ -85,7 +85,7 @@ type Configuration struct {
 
 	// LogFunc is the function used to log logError() and logInfo() messages.
 	// If you leave it nil, no logging will be done.
-	LogFunc func(args ...interface{})
+	LogFunc func(a ...interface{})
 
 	// VerboseReceiver specifies if the receiver should print
 	// informational messages to the standard output.
@@ -108,7 +108,7 @@ type Configuration struct {
 //
 // If you pass multiple arguments, only the first will be used.
 //
-func NewDebugConfig(logFunc ...func(args ...interface{})) *Configuration {
+func NewDebugConfig(logFunc ...func(a ...interface{})) *Configuration {
 	cf := NewDefaultConfig()
 	cf.VerboseSender = true
 	cf.VerboseReceiver = true

@@ -59,14 +59,14 @@ func Test_string_getPart_(t *testing.T) {
 	}
 } //                                                        Test_string_getPart_
 
-// joinArgs(tag string, args ...interface{}) string
+// joinArgs(tag string, a ...interface{}) string
 //
 // go test -run Test_string_joinArgs_
 //
 func Test_string_joinArgs_(t *testing.T) {
 	for _, it := range []struct {
-		tag  string
-		args []interface{}
+		tag string
+		a   []interface{}
 		//
 		expect string
 	}{
@@ -78,17 +78,17 @@ func Test_string_joinArgs_(t *testing.T) {
 		{"tag", []interface{}{"a", 1, "b", 2, 3, "c"}, "tag a 1 b 2 3 c"},
 		{"", []interface{}{"abc", 123, "de", 34}, "abc 123 de 34"},
 	} {
-		got := joinArgs(it.tag, it.args...)
+		got := joinArgs(it.tag, it.a...)
 		if got != it.expect {
 			t.Errorf("0xE7B77D"+" joinArgs(%#v, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
-				it.tag, it.args, it.expect, got)
+				it.tag, it.a, it.expect, got)
 		}
 	}
 } //                                                       Test_string_joinArgs_
 
-// padf(minLength int, format string, args ...interface{}) string
+// padf(minLength int, format string, a ...interface{}) string
 //
 // go test -run Test_string_padf_
 //
@@ -96,7 +96,7 @@ func Test_string_padf_(t *testing.T) {
 	for _, it := range []struct {
 		minLength int
 		format    string
-		args      []interface{}
+		a         []interface{}
 		//
 		expect string
 	}{
@@ -104,12 +104,12 @@ func Test_string_padf_(t *testing.T) {
 		{0, "%s", []interface{}{"abc"}, "abc"},
 		{6, "%s", []interface{}{"abc"}, "abc   "},
 	} {
-		got := padf(it.minLength, it.format, it.args...)
+		got := padf(it.minLength, it.format, it.a...)
 		if got != it.expect {
 			t.Errorf("0xEA7E4F"+" padf(%#v, %#v, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
-				it.minLength, it.format, it.args, it.expect, got)
+				it.minLength, it.format, it.a, it.expect, got)
 		}
 	}
 } //                                                           Test_string_padf_

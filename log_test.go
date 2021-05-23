@@ -19,7 +19,7 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// pl(args ...interface{})
+// pl(a ...interface{})
 //
 // go test -run Test_log_pl_
 //
@@ -27,7 +27,7 @@ func Test_log_pl_(t *testing.T) {
 	pl()
 } //                                                                Test_log_pl_
 
-// LogPrint(args ...interface{})
+// LogPrint(a ...interface{})
 //
 // go test -run Test_log_LogPrint_
 //
@@ -36,7 +36,7 @@ func Test_log_LogPrint_(t *testing.T) {
 } //                                                          Test_log_LogPrint_
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// MakeLogFunc(printMsg bool, logFile string) func(args ...interface{})
+// MakeLogFunc(printMsg bool, logFile string) func(a ...interface{})
 //
 // go test -run Test_log_MakeLogFunc_*
 
@@ -149,10 +149,10 @@ func Test_log_logEntry_Output_(t *testing.T) {
 		l.outputDI(&sb, openLogFile)
 		//
 		// console must contain two error messages
-		con := sb.String()
-		if !strings.Contains(con, "ERROR 0x") ||
-			!strings.Contains(con, "failed mockWriteCloser.Write") ||
-			!strings.Contains(con, "failed mockWriteCloser.Close") {
+		cons := sb.String()
+		if !strings.Contains(cons, "ERROR 0x") ||
+			!strings.Contains(cons, "failed mockWriteCloser.Write") ||
+			!strings.Contains(cons, "failed mockWriteCloser.Close") {
 			t.Error("0xEA1B28")
 		}
 		// must not create/write to file
@@ -164,7 +164,7 @@ func Test_log_logEntry_Output_(t *testing.T) {
 	_ = os.Remove(testFile)
 } //                                                   Test_log_logEntry_Output_
 
-// openLogFile(filename string, con io.Writer) io.WriteCloser
+// openLogFile(filename string, cons io.Writer) io.WriteCloser
 //
 // go test -run Test_log_openLogFile_
 //
@@ -223,13 +223,13 @@ func Test_log_logInit_(t *testing.T) {
 	}
 } //                                                           Test_log_logInit_
 
-// logMakeMessage(tm time.Time, args ...interface{}) string
+// logMakeMessage(tm time.Time, a ...interface{}) string
 //
 // go test -run Test_log_logMakeMessage_
 //
 func Test_log_logMakeMessage_(t *testing.T) {
 	for _, it := range []struct {
-		args   []interface{}
+		a      []interface{}
 		expect string
 	}{
 		{nil, "@tm "},
@@ -239,14 +239,14 @@ func Test_log_logMakeMessage_(t *testing.T) {
 		var (
 			tm     = time.Now()
 			tms    = tm.String()[:19]
-			got    = logMakeMessage(tm, it.args...)
+			got    = logMakeMessage(tm, it.a...)
 			expect = strings.ReplaceAll(it.expect, "@tm", tms)
 		)
 		if got != expect {
 			t.Errorf("0xEB14AF"+" logMakeMessage(<%s>, %#v)"+
 				"\n expect: %#v"+
 				"\n    got: %#v",
-				tms, it.args, expect, got)
+				tms, it.a, expect, got)
 		}
 	}
 } //                                                    Test_log_logMakeMessage_

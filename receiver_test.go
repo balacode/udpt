@@ -279,14 +279,14 @@ func Test_Receiver_sendDataItemHash_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Logging Methods
 
-// (rc *Receiver) logError(id uint32, args ...interface{}) error
+// (rc *Receiver) logError(id uint32, a ...interface{}) error
 //
 // go test -run Test_Receiver_logError_
 //
 func Test_Receiver_logError_(t *testing.T) {
 	var sb strings.Builder
-	fn := func(args ...interface{}) {
-		sb.WriteString(fmt.Sprint(args...))
+	fn := func(a ...interface{}) {
+		sb.WriteString(fmt.Sprint(a...))
 	}
 	{
 		var rc Receiver
@@ -308,14 +308,14 @@ func Test_Receiver_logError_(t *testing.T) {
 	}
 } //                                                     Test_Receiver_logError_
 
-// (rc *Receiver) logInfo(args ...interface{})
+// (rc *Receiver) logInfo(a ...interface{})
 //
 // go test -run Test_Receiver_logInfo_
 //
 func Test_Receiver_logInfo_(t *testing.T) {
 	var sb strings.Builder
-	fn := func(args ...interface{}) {
-		sb.WriteString(fmt.Sprint(args...))
+	fn := func(a ...interface{}) {
+		sb.WriteString(fmt.Sprint(a...))
 	}
 	{
 		var rc Receiver

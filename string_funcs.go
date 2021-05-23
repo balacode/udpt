@@ -35,10 +35,10 @@ func getPart(s, prefix, suffix string) string {
 	return s[:at]
 } //                                                                     getPart
 
-// joinArgs joins args into a single string, with a space between arguments.
-func joinArgs(tag string, args ...interface{}) string {
-	ar := make([]string, len(args))
-	for i, arg := range args {
+// joinArgs joins 'a' into a single string, with a space between arguments.
+func joinArgs(tag string, a ...interface{}) string {
+	ar := make([]string, len(a))
+	for i, arg := range a {
 		ar[i] = fmt.Sprint(arg)
 	}
 	ret := strings.TrimSpace(tag + " " + strings.Join(ar, " "))
@@ -50,8 +50,8 @@ func joinArgs(tag string, args ...interface{}) string {
 //
 // If the string is wider than 'minLength', returns the string as it is.
 //
-func padf(minLength int, format string, args ...interface{}) string {
-	format = fmt.Sprintf(format, args...)
+func padf(minLength int, format string, a ...interface{}) string {
+	format = fmt.Sprintf(format, a...)
 	if len(format) < minLength {
 		return format + strings.Repeat(" ", minLength-len(format))
 	}
