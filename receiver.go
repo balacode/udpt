@@ -149,7 +149,18 @@ func (rc *Receiver) Stop() {
 // -----------------------------------------------------------------------------
 // # Run() Helpers
 
+// initRun checks if the receiver is properly configured
+// and starts listening on the configured UDP address.
 func (rc *Receiver) initRun() error {
+	return rc.initRunDI(net.ResolveUDPAddr, net.ListenUDP)
+} //                                                                     initRun
+
+// initRunDI is only used by initRun() and provides parameters
+// for dependency injection, to enable mocking during testing.
+func (rc *Receiver) initRunDI(
+	netResolveUDPAddr func(network string, addr string) (*net.UDPAddr, error),
+	netListenUDP func(network string, laddr *net.UDPAddr) (*net.UDPConn, error),
+) error {
 	err := rc.Config.Validate()
 	if err != nil {
 		return rc.logError(0xE14BC8, err)
@@ -167,7 +178,7 @@ func (rc *Receiver) initRun() error {
 	if rc.ProvideData == nil {
 		return rc.logError(0xE48CC6, "nil Receiver.ProvideData")
 	}
-	udpAddr, err := net.ResolveUDPAddr("udp",
+	udpAddr, err := netResolveUDPAddr("udp",
 		fmt.Sprintf("0.0.0.0:%d", rc.Port))
 	if err != nil {
 		return rc.logError(0xE1D68C, err)
@@ -176,12 +187,12 @@ func (rc *Receiver) initRun() error {
 		rc.logInfo(strings.Repeat("-", 80))
 		rc.logInfo("Receiver listening...")
 	}
-	rc.conn, err = net.ListenUDP("udp", udpAddr)
+	rc.conn, err = netListenUDP("udp", udpAddr)
 	if err != nil {
 		return rc.logError(0xEBF95F, err)
 	}
 	return nil
-} //                                                                     initRun
+} //                                                                   initRunDI
 
 func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	switch {
