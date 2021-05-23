@@ -120,20 +120,7 @@ func (rc *Receiver) Run() error {
 			_ = rc.logError(0xE5C3E8, err)
 			continue
 		}
-		deadline := time.Now().Add(rc.Config.WriteTimeout)
-		err = rc.conn.SetWriteDeadline(deadline)
-		if err != nil {
-			_ = rc.logError(0xE0AD06, err)
-			continue
-		}
-		nWrit, err := rc.conn.WriteTo(encReply, addr)
-		if err != nil {
-			_ = rc.logError(0xEA63C4, err)
-			continue
-		}
-		if rc.Config.VerboseReceiver {
-			rc.logInfo("Receiver wrote", nWrit, "bytes to", addr)
-		}
+		rc.sendReply(rc.conn, addr, encReply)
 	}
 	return nil
 } //                                                                         Run
@@ -213,6 +200,23 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	}
 	return reply, err
 } //                                                                  buildReply
+
+func (rc *Receiver) sendReply(conn netUDPConn, addr net.Addr, reply []byte) {
+	deadline := time.Now().Add(rc.Config.WriteTimeout)
+	err := conn.SetWriteDeadline(deadline)
+	if err != nil {
+		_ = rc.logError(0xE0AD06, err)
+		return
+	}
+	nWrit, err := conn.WriteTo(reply, addr)
+	if err != nil {
+		_ = rc.logError(0xEA63C4, err)
+		return
+	}
+	if rc.Config.VerboseReceiver {
+		rc.logInfo("Receiver wrote", nWrit, "bytes to", addr)
+	}
+} //                                                                   sendReply
 
 // -----------------------------------------------------------------------------
 // # Packet Handlers
