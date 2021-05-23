@@ -52,12 +52,24 @@ func (mk *mockNetAddr) String() string { return mk.addr }
 
 // mockNetUDPConn is a mock net.UDPConn with methods you can make fail.
 type mockNetUDPConn struct {
-	failSetReadDeadline bool
-	failReadFrom        bool
-	failClose           bool
+	failSetReadDeadline  bool
+	failSetWriteDeadline bool
+	failReadFrom         bool
+	failWriteTo          bool
+	failClose            bool
+	//
+	nSetReadDeadline  int
+	nSetWriteDeadline int
+	nReadFrom         int
+	nWriteTo          int
+	nClose            int
+	//
+	writeDeadline time.Time
+	written       []byte
 } //                                                              mockNetUDPConn
 
 func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
+	mk.nReadFrom++
 	if mk.failReadFrom {
 		return 0, nil, makeError(0xED19BF, "failed SetReadDeadline")
 	}
@@ -66,21 +78,33 @@ func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 } //                                                                    ReadFrom
 
 func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
-	return 0, nil
+	mk.nWriteTo++
+	if mk.failWriteTo {
+		return 0, makeError(0xEE40E7, "failed WriteTo")
+	}
+	mk.written = append(mk.written, b...)
+	return len(b), nil
 } //                                                                     WriteTo
 
 func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
+	mk.nSetReadDeadline++
 	if mk.failSetReadDeadline {
 		return makeError(0xED5A2C, "failed SetReadDeadline")
 	}
 	return nil
 } //                                                             SetReadDeadline
 
-func (mk *mockNetUDPConn) SetWriteDeadline(time.Time) error {
+func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
+	mk.nSetWriteDeadline++
+	if mk.failSetWriteDeadline {
+		return makeError(0xE63B56, "failed SetWriteDeadline")
+	}
+	mk.writeDeadline = deadline
 	return nil
 } //                                                            SetWriteDeadline
 
 func (mk *mockNetUDPConn) Close() error {
+	mk.nClose++
 	if mk.failClose {
 		return makeError(0xE60D82, "failed Close")
 	}
