@@ -85,17 +85,13 @@ type Receiver struct {
 // so it can confirm that a data transfer is successful.
 //
 func (rc *Receiver) Run() error {
-	udpAddr, err := rc.initRun()
+	defer rc.Stop()
+	if rc.Config == nil {
+		rc.Config = NewDefaultConfig()
+	}
+	err := rc.initRun()
 	if err != nil {
 		return err
-	}
-	rc.conn, err = net.ListenUDP("udp", udpAddr) // (*net.UDPConn, error)
-	if err != nil {
-		return rc.logError(0xEBF95F, err)
-	}
-	defer rc.Stop()
-	if rc.Config.VerboseReceiver {
-		rc.logInfo("Receiver.Run() called net.ListenUDP")
 	}
 	// receive transmissions
 	encReq := make([]byte, rc.Config.PacketSizeLimit)
@@ -153,37 +149,38 @@ func (rc *Receiver) Stop() {
 // -----------------------------------------------------------------------------
 // # Run() Helpers
 
-func (rc *Receiver) initRun() (*net.UDPAddr, error) {
-	if rc.Config == nil {
-		rc.Config = NewDefaultConfig()
-	}
+func (rc *Receiver) initRun() error {
 	err := rc.Config.Validate()
 	if err != nil {
-		return nil, rc.logError(0xE14BC8, err)
+		return rc.logError(0xE14BC8, err)
 	}
 	if rc.Port < 1 || rc.Port > 65535 {
-		return nil, rc.logError(0xE58B2F, "invalid Receiver.Port:", rc.Port)
+		return rc.logError(0xE58B2F, "invalid Receiver.Port:", rc.Port)
 	}
 	err = rc.Config.Cipher.SetKey(rc.CryptoKey)
 	if err != nil {
-		return nil, rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
+		return rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
 	}
 	if rc.ReceiveData == nil {
-		return nil, rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
+		return rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
 	}
 	if rc.ProvideData == nil {
-		return nil, rc.logError(0xE48CC6, "nil Receiver.ProvideData")
+		return rc.logError(0xE48CC6, "nil Receiver.ProvideData")
 	}
 	udpAddr, err := net.ResolveUDPAddr("udp",
 		fmt.Sprintf("0.0.0.0:%d", rc.Port))
 	if err != nil {
-		return nil, rc.logError(0xE1D68C, err)
+		return rc.logError(0xE1D68C, err)
 	}
 	if rc.Config.VerboseReceiver {
 		rc.logInfo(strings.Repeat("-", 80))
-		rc.logInfo("UDPT started in receiver mode")
+		rc.logInfo("Receiver listening...")
 	}
-	return udpAddr, nil
+	rc.conn, err = net.ListenUDP("udp", udpAddr)
+	if err != nil {
+		return rc.logError(0xEBF95F, err)
+	}
+	return nil
 } //                                                                     initRun
 
 func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
