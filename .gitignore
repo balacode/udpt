@@ -20,4 +20,8 @@ __debug_bin
 # Log Files
 *.log
 
+# Temporary Files
+*.tmp
+tmp.*
+
 ## end
