@@ -331,13 +331,24 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 // Note that it doesn't change the value of Sender.conn
 //
 func (sd *Sender) connect() (netUDPConn, error) {
+	return sd.connectDI(
+		func(network string, laddr *net.UDPAddr, raddr *net.UDPAddr,
+		) (netUDPConn, error) {
+			return net.DialUDP(network, laddr, raddr)
+		},
+	)
+} //                                                                     connect
+
+func (sd *Sender) connectDI(
+	netDialUDP func(string, *net.UDPAddr, *net.UDPAddr) (netUDPConn, error),
+) (netUDPConn, error) {
 	addr := fmt.Sprintf("%s:%d", sd.Address, sd.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		return nil, sd.logError(0xEC7C6B, err)
+		return nil, sd.logError(0xEC7C6B, "ResolveUDPAddr:", err)
 	}
 	var conn netUDPConn
-	conn, err = net.DialUDP("udp", nil, udpAddr)
+	conn, err = netDialUDP("udp", nil, udpAddr)
 	if err != nil {
 		return nil, sd.logError(0xE15CE1, err)
 	}
@@ -346,7 +357,7 @@ func (sd *Sender) connect() (netUDPConn, error) {
 		return nil, sd.logError(0xE5F9C7, err)
 	}
 	return conn, nil
-} //                                                                     connect
+} //                                                                   connectDI
 
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by 'name'. If the receiver
