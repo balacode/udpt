@@ -81,7 +81,7 @@ type Sender struct {
 	// -------------------------------------------------------------------------
 
 	// conn holds the UDP connection to a Receiver
-	conn *net.UDPConn
+	conn netUDPConn
 
 	// dataHash contains the hash of all bytes of the data item being sent
 	dataHash []byte
@@ -330,13 +330,14 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 //
 // Note that it doesn't change the value of Sender.conn
 //
-func (sd *Sender) connect() (*net.UDPConn, error) {
+func (sd *Sender) connect() (netUDPConn, error) {
 	addr := fmt.Sprintf("%s:%d", sd.Address, sd.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, sd.logError(0xEC7C6B, err)
 	}
-	conn, err := net.DialUDP("udp", nil, udpAddr) // (*net.UDPConn, error)
+	var conn netUDPConn
+	conn, err = net.DialUDP("udp", nil, udpAddr)
 	if err != nil {
 		return nil, sd.logError(0xE15CE1, err)
 	}

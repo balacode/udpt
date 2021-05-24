@@ -8,7 +8,6 @@ package udpt
 import (
 	"bytes"
 	"io"
-	"net"
 	"time"
 )
 
@@ -31,7 +30,7 @@ func (pk *senderPacket) IsDelivered() bool {
 } //                                                                 IsDelivered
 
 // Send encrypts and sends this packet through connection 'conn'.
-func (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error {
+func (pk *senderPacket) Send(conn netUDPConn, cipher SymmetricCipher) error {
 	if conn == nil {
 		return makeError(0xE4B1BA, "nil connection")
 	}
