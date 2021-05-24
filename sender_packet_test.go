@@ -34,65 +34,75 @@ func Test_senderPacket_IsDelivered_(t *testing.T) {
 	}
 } //                                              Test_senderPacket_IsDelivered_
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error
 //
-// go test -run Test_senderPacket_Send_
-//
-func Test_senderPacket_Send_(t *testing.T) {
-	{
-		var pk senderPacket
-		err := pk.Send(nil, nil)
-		if !matchError(err, "nil conn") {
-			t.Error("0xE31FF5")
-		}
+// go test -run Test_senderPacket_Send_*
+
+// must succeed
+func Test_senderPacket_Send_1(t *testing.T) {
+	var pk senderPacket
+	conn := makeTestConn()
+	cipher := &aesCipher{}
+	cipher.SetKey([]byte("12345678901234567890123456789012"))
+	err := pk.Send(conn, cipher)
+	if err != nil {
+		t.Error("0xED62D8", err)
 	}
-	{
-		var pk senderPacket
-		conn := makeTestConn()
-		err := pk.Send(conn, nil)
-		if !matchError(err, "nil cipher") {
-			t.Error("0xE03CD3")
-		}
+} //                                                    Test_senderPacket_Send_1
+
+// must fail when passed a nil connection
+func Test_senderPacket_Send_2(t *testing.T) {
+	var pk senderPacket
+	err := pk.Send(nil, nil)
+	if !matchError(err, "nil conn") {
+		t.Error("0xE31FF5", "wrong error:", err)
 	}
-	{
-		var pk senderPacket
-		conn := makeTestConn()
-		cipher := &aesCipher{}
-		err := pk.Send(conn, cipher)
-		if !matchError(err, "key must be 32 bytes long") {
-			t.Error("0xE12AB8")
-		}
+} //                                                    Test_senderPacket_Send_2
+
+// must fail when passed an invalid connection
+func Test_senderPacket_Send_3(t *testing.T) {
+	var pk senderPacket
+	conn := &net.UDPConn{} // bad connection
+	cipher := &aesCipher{}
+	cipher.SetKey([]byte("12345678901234567890123456789012"))
+	err := pk.Send(conn, cipher)
+	if !matchError(err, "invalid argument") {
+		// TODO: above error description may differ on Linux or Mac OS
+		t.Error("0xE65B73", "wrong error:", err)
 	}
-	{
-		var pk senderPacket
-		conn := makeTestConn()
-		cipher := &aesCipher{cryptoKey: []byte{1, 2, 3}}
-		err := pk.Send(conn, cipher)
-		if !matchError(err, "key must be 32 bytes long") {
-			t.Error("0xE53A3B")
-		}
+} //                                                    Test_senderPacket_Send_3
+
+// must fail when passed a nil cipher
+func Test_senderPacket_Send_4(t *testing.T) {
+	var pk senderPacket
+	conn := makeTestConn()
+	err := pk.Send(conn, nil)
+	if !matchError(err, "nil cipher") {
+		t.Error("0xE03CD3", "wrong error:", err)
 	}
-	{
-		var pk senderPacket
-		conn := &net.UDPConn{}
-		cipher := &aesCipher{}
-		cipher.SetKey([]byte("12345678901234567890123456789012"))
-		err := pk.Send(conn, cipher)
-		if !matchError(err, "invalid argument") {
-			// TODO: above error description may differ on Linux or Mac OS
-			t.Error("0xE65B73")
-		}
+} //                                                    Test_senderPacket_Send_4
+
+// must fail when the encryption key is not set
+func Test_senderPacket_Send_5(t *testing.T) {
+	var pk senderPacket
+	conn := makeTestConn()
+	cipher := &aesCipher{}
+	err := pk.Send(conn, cipher)
+	if !matchError(err, "key must be 32 bytes long") {
+		t.Error("0xE12AB8", "wrong error:", err)
 	}
-	{
-		var pk senderPacket
-		conn := makeTestConn()
-		cipher := &aesCipher{}
-		cipher.SetKey([]byte("12345678901234567890123456789012"))
-		err := pk.Send(conn, cipher)
-		if err != nil {
-			t.Error("0xED62D8")
-		}
+} //                                                    Test_senderPacket_Send_5
+
+// must fail when the encryption key is invalid
+func Test_senderPacket_Send_6(t *testing.T) {
+	var pk senderPacket
+	conn := makeTestConn()
+	cipher := &aesCipher{cryptoKey: []byte{1, 2, 3}}
+	err := pk.Send(conn, cipher)
+	if !matchError(err, "key must be 32 bytes long") {
+		t.Error("0xE53A3B", "wrong error:", err)
 	}
-} //                                                     Test_senderPacket_Send_
+} //                                                    Test_senderPacket_Send_6
 
 // end
