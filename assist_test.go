@@ -53,19 +53,24 @@ func (mk *mockNetAddr) String() string { return mk.addr }
 // mockNetUDPConn is a mock net.UDPConn with methods you can make fail.
 type mockNetUDPConn struct {
 	failSetReadDeadline  bool
+	failSetWriteBuffer   bool
 	failSetWriteDeadline bool
 	failReadFrom         bool
+	failWrite            bool
 	failWriteTo          bool
 	failClose            bool
 	//
 	nSetReadDeadline  int
+	nSetWriteBuffer   int
 	nSetWriteDeadline int
 	nReadFrom         int
+	nWrite            int
 	nWriteTo          int
 	nClose            int
 	//
-	writeDeadline time.Time
-	written       []byte
+	sertWriteBufferArg int
+	writeDeadline      time.Time
+	written            []byte
 } //                                                              mockNetUDPConn
 
 func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
@@ -76,6 +81,15 @@ func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	addr := &mockNetAddr{network: "udp", addr: "127.8.9.10:11"}
 	return len(b), addr, nil
 } //                                                                    ReadFrom
+
+func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
+	mk.nWrite++
+	if mk.failWrite {
+		return 0, makeError(0xEC15F0, "failed Write")
+	}
+	mk.written = append(mk.written, b...)
+	return len(b), nil
+} //                                                                       Write
 
 func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	mk.nWriteTo++
@@ -93,6 +107,15 @@ func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
 	}
 	return nil
 } //                                                             SetReadDeadline
+
+func (mk *mockNetUDPConn) SetWriteBuffer(bytes int) error {
+	mk.nSetWriteBuffer++
+	if mk.failSetWriteBuffer {
+		return makeError(0xE3EE33, "failed SetWriteBuffer")
+	}
+	mk.sertWriteBufferArg = bytes
+	return nil
+} //                                                              SetWriteBuffer
 
 func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
 	mk.nSetWriteDeadline++
