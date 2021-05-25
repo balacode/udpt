@@ -143,147 +143,165 @@ func Test_dataItem_Retain_(t *testing.T) {
 				"   got:", str(di))
 		}
 	}
-	{
-		// nothing changed
-		test("ItemName", []byte{1, 2, 3}, 2, initDataItem())
+	// nothing changed
+	test("ItemName", []byte{1, 2, 3}, 2, initDataItem())
+	//
+	// 'name' parameter changed
+	expect := dataItem{
+		Name:                 "DiffName",
+		Hash:                 []byte{1, 2, 3},
+		CompressedPieces:     [][]byte{nil, nil},
+		CompressedSizeInfo:   0,
+		UncompressedSizeInfo: 0,
 	}
-	{
-		// 'name' parameter changed
-		expect := dataItem{
-			Name:                 "DiffName",
-			Hash:                 []byte{1, 2, 3},
-			CompressedPieces:     [][]byte{nil, nil},
-			CompressedSizeInfo:   0,
-			UncompressedSizeInfo: 0,
-		}
-		test("DiffName", []byte{1, 2, 3}, 2, expect)
+	test("DiffName", []byte{1, 2, 3}, 2, expect)
+	//
+	// 'hash' parameter changed
+	expect = dataItem{
+		Name:                 "ItemName",
+		Hash:                 []byte{6, 7, 8},
+		CompressedPieces:     [][]byte{nil, nil},
+		CompressedSizeInfo:   0,
+		UncompressedSizeInfo: 0,
 	}
-	{
-		// 'hash' parameter changed
-		expect := dataItem{
-			Name:                 "ItemName",
-			Hash:                 []byte{6, 7, 8},
-			CompressedPieces:     [][]byte{nil, nil},
-			CompressedSizeInfo:   0,
-			UncompressedSizeInfo: 0,
-		}
-		test("ItemName", []byte{6, 7, 8}, 2, expect)
+	test("ItemName", []byte{6, 7, 8}, 2, expect)
+	//
+	// 'packetCount' parameter changed
+	expect = dataItem{
+		Name:                 "ItemName",
+		Hash:                 []byte{1, 2, 3},
+		CompressedPieces:     [][]byte{nil},
+		CompressedSizeInfo:   0,
+		UncompressedSizeInfo: 0,
 	}
-	{
-		// 'packetCount' parameter changed
-		expect := dataItem{
-			Name:                 "ItemName",
-			Hash:                 []byte{1, 2, 3},
-			CompressedPieces:     [][]byte{nil},
-			CompressedSizeInfo:   0,
-			UncompressedSizeInfo: 0,
-		}
-		test("ItemName", []byte{1, 2, 3}, 1, expect)
+	test("ItemName", []byte{1, 2, 3}, 1, expect)
+	//
+	// all 3 parameters changed
+	expect = dataItem{
+		Name:                 "OtherName",
+		Hash:                 []byte{4, 5, 6},
+		CompressedPieces:     [][]byte{nil, nil, nil},
+		CompressedSizeInfo:   0,
+		UncompressedSizeInfo: 0,
 	}
-	{
-		// all 3 parameters changed
-		expect := dataItem{
-			Name:                 "OtherName",
-			Hash:                 []byte{4, 5, 6},
-			CompressedPieces:     [][]byte{nil, nil, nil},
-			CompressedSizeInfo:   0,
-			UncompressedSizeInfo: 0,
-		}
-		test("OtherName", []byte{4, 5, 6}, 3, expect)
-	}
+	test("OtherName", []byte{4, 5, 6}, 3, expect)
 } //                                                       Test_dataItem_Retain_
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (di *dataItem) UnpackBytes(compressor Compression) ([]byte, error)
 //
-// go test -run Test_dataItem_UnpackBytes_
-//
-func Test_dataItem_UnpackBytes_(t *testing.T) {
+// go test -run Test_dataItem_UnpackBytes_*
+
+func Test_dataItem_UnpackBytes_1(t *testing.T) {
 	zc := &zlibCompressor{}
+	var dataItem0 dataItem
+	data, err := dataItem0.UnpackBytes(zc)
+	if data != nil {
+		t.Error("0xED52E6")
+	}
+	if !matchError(err, "data item is incomplete") {
+		t.Error("0xEE0C63", "wrong error:", err)
+	}
+} //                                                 Test_dataItem_UnpackBytes_1
+
+func Test_dataItem_UnpackBytes_2(t *testing.T) {
+	source := []byte(strings.Repeat(
+		"The quick brown fox jumps over the lazy dog. ", 300,
+	))
+	hash := getHash(source)
+	zc := &zlibCompressor{}
+	comp, err := zc.Compress(source)
+	if err != nil {
+		t.Error("0xE4A56C", "Compress failed")
+	}
+	var compPieces [][]byte
 	{
-		var dataItem0 dataItem
-		data, err := dataItem0.UnpackBytes(zc)
-		if data != nil {
-			t.Error("0xED52E6 dataItem0.UnpackBytes()",
-				"returned: data != nil, expect: data == nil")
-		}
-		if err == nil {
-			t.Error("0xEE0C63 dataItem0.UnpackBytes()",
-				"returned: error == nil, expect: error != nil")
+		a := comp[:]
+		for len(a) > 0 {
+			n := len(a)
+			if n > 50 {
+				n = 50
+			}
+			compPieces = append(compPieces, a[:n])
+			a = a[n:]
 		}
 	}
+	var dataItem1 = dataItem{
+		Hash:             hash,
+		CompressedPieces: compPieces,
+	}
+	uncomp, err := dataItem1.UnpackBytes(zc)
+	if err != nil {
+		t.Error("0xEF6D12", err)
+	}
+	if !bytes.Equal(source, uncomp) {
+		t.Error("0xE91A65", "corrupted data")
+	}
+	if !bytes.Equal(hash, dataItem1.Hash) {
+		t.Error("0xEC4E68", "corrupted hash")
+	}
+	if dataItem1.CompressedSizeInfo != len(comp) {
+		t.Error("0xEB4A34", "wrong CompressedSizeInfo")
+	}
+	if dataItem1.UncompressedSizeInfo != len(source) {
+		t.Error("0xEC1E61", "wrong UncompressedSizeInfo")
+	}
+} //                                                 Test_dataItem_UnpackBytes_2
+
+func Test_dataItem_UnpackBytes_3(t *testing.T) {
+	source := []byte(strings.Repeat(
+		"The quick brown fox jumps over the lazy dog. ", 300,
+	))
+	zc := &zlibCompressor{}
+	comp, err := zc.Compress(source)
+	if err != nil {
+		t.Error("0xE70C74", "Compress failed")
+	}
+	var compPieces [][]byte
 	{
-		source := []byte(strings.Repeat(
-			"The quick brown fox jumps over the lazy dog. ", 300,
-		))
-		hash := getHash(source)
-		compressed, err := zc.Compress(source)
-		if err != nil {
-			t.Error("0xE70C74 Compress failed")
-		}
-		var compPieces [][]byte
-		{
-			a := compressed[:]
-			for len(a) > 0 {
-				n := len(a)
-				if n > 50 {
-					n = 50
-				}
-				compPieces = append(compPieces, a[:n])
-				a = a[n:]
+		a := comp[:]
+		for len(a) > 0 {
+			n := len(a)
+			if n > 50 {
+				n = 50
 			}
-		}
-		var dataItem1 = dataItem{
-			Hash:             hash,
-			CompressedPieces: compPieces,
-		}
-		uncompressed, err := dataItem1.UnpackBytes(zc)
-		if err != nil {
-			t.Error("0xEF6D12 UnpackBytes:", err)
-		}
-		if !bytes.Equal(source, uncompressed) {
-			t.Error("0xE91A65 UnpackBytes: corrupted data")
-		}
-		if !bytes.Equal(hash, dataItem1.Hash) {
-			t.Error("0xEC4E68 UnpackBytes: corrupted hash")
-		}
-		if dataItem1.CompressedSizeInfo != len(compressed) {
-			t.Error("0xEB4A34",
-				"CompressedSizeInfo", dataItem1.CompressedSizeInfo,
-				"!= len(compressed)", len(compressed))
-		}
-		if dataItem1.UncompressedSizeInfo != len(source) {
-			t.Error("0xEC1E61",
-				"UncompressedSizeInfo", dataItem1.UncompressedSizeInfo,
-				"!= len(source)", len(source))
-		}
-		{
-			dataItem1.Hash = []byte{0}
-			uncompressed, err := dataItem1.UnpackBytes(zc)
-			if uncompressed != nil {
-				t.Error("0xED14FA")
-			}
-			if !matchError(err, "hash mismatch") {
-				t.Error("0xEA19E1")
-			}
+			compPieces = append(compPieces, a[:n])
+			a = a[n:]
 		}
 	}
-	{
-		// try to uncompress an item containing garbage bytes
-		var dataItem3 = dataItem{
-			Hash: []byte{0xA1, 0x96, 0x9E, 0xBF, 0x93, 0xE5},
-			CompressedPieces: [][]byte{{
-				0xC6, 0x44, 0x0D, 0xAC, 0xA9, 0x55, 0x4D, 0xEF,
-				0xA1, 0x93, 0x8D, 0x41, 0x80, 0x61, 0x29, 0xC2,
-			}},
-		}
-		uncompressed, err := dataItem3.UnpackBytes(zc)
-		if !matchError(err, "zlib") {
-			t.Error("0xEF8DE2")
-		}
-		if uncompressed != nil {
-			t.Error("0xE59B01")
-		}
+	var dataItem1 = dataItem{
+		Hash:             getHash(source),
+		CompressedPieces: compPieces,
 	}
-} //                                                  Test_dataItem_UnpackBytes_
+	dataItem1.Hash = []byte{0}
+	zc = &zlibCompressor{}
+	uncomp, err := dataItem1.UnpackBytes(zc)
+	if uncomp != nil {
+		t.Error("0xED14FA")
+	}
+	if !matchError(err, "hash mismatch") {
+		t.Error("0xEA19E1", "wrong error:", err)
+	}
+} //                                                 Test_dataItem_UnpackBytes_3
+
+func Test_dataItem_UnpackBytes_4(t *testing.T) {
+	//
+	// try to uncompress an item containing garbage bytes
+	var dataItem3 = dataItem{
+		Hash: []byte{0xA1, 0x96, 0x9E, 0xBF, 0x93, 0xE5},
+		CompressedPieces: [][]byte{{
+			0xC6, 0x44, 0x0D, 0xAC, 0xA9, 0x55, 0x4D, 0xEF,
+			0xA1, 0x93, 0x8D, 0x41, 0x80, 0x61, 0x29, 0xC2,
+		}},
+	}
+	zc := &zlibCompressor{}
+	uncomp, err := dataItem3.UnpackBytes(zc)
+	if uncomp != nil {
+		t.Error("0xE59B01")
+	}
+	if !matchError(err, "zlib") {
+		t.Error("0xEF8DE2", "wrong error:", err)
+	}
+} //                                                 Test_dataItem_UnpackBytes_4
 
 // end
