@@ -18,7 +18,24 @@ const testAESKey = "A0CFDD4FA7B545088826A73C9A93AB8A"
 //
 // go test -run Test_aesCipher_ValidateKey_
 //
-func Test_aesCipher_ValidateKey_(t *testing.T) { // TODO: unit test
+func Test_aesCipher_ValidateKey_(t *testing.T) {
+	ac := &aesCipher{}
+	err := ac.ValidateKey([]byte("12345678901234567890123456789012")) // 32b
+	if err != nil {
+		t.Error("0xEE98F7", err)
+	}
+	err = ac.ValidateKey(nil)
+	if !matchError(err, "AES-256 key must be 32 bytes long") {
+		t.Error("0xEC1B42")
+	}
+	err = ac.ValidateKey([]byte("1234567890123456789012345678901")) // 31b
+	if !matchError(err, "AES-256 key must be 32 bytes long") {
+		t.Error("0xE1D2B9")
+	}
+	err = ac.ValidateKey([]byte("123456789012345678901234567890123")) // 33b
+	if !matchError(err, "AES-256 key must be 32 bytes long") {
+		t.Error("0xE85BC4")
+	}
 } //                                                 Test_aesCipher_ValidateKey_
 
 // (ac *aesCipher) SetKey(key []byte) error
