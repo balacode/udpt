@@ -13,8 +13,6 @@ import (
 	"io"
 )
 
-const errAESKeySize = "AES-256 key must be 32 bytes long"
-
 // aesCipher implements the SymmetricCipher interface that encrypts and
 // decrypts plaintext using the AES-256 symmetric cipher algorithm.
 type aesCipher struct {
@@ -27,9 +25,9 @@ type aesCipher struct {
 //
 // For AES-256, the encryption key must be exactly 32 bytes long.
 //
-func (ac *aesCipher) ValidateKey(key []byte) error {
-	if len(key) != 32 {
-		return makeError(0xE42FDB, errAESKeySize)
+func (ac *aesCipher) ValidateKey(cryptoKey []byte) error {
+	if len(cryptoKey) != 32 {
+		return makeError(0xE42FDB, "AES-256 key must be 32 bytes long")
 	}
 	return nil
 } //                                                                 ValidateKey
@@ -39,25 +37,25 @@ func (ac *aesCipher) ValidateKey(key []byte) error {
 // If the cipher is already initialized with the given key, does nothing.
 // The same key is used for encryption and decryption.
 //
-func (ac *aesCipher) SetKey(key []byte) error {
-	return ac.setKeyDI(key, aes.NewCipher, cipher.NewGCM)
+func (ac *aesCipher) SetKey(cryptoKey []byte) error {
+	return ac.setKeyDI(cryptoKey, aes.NewCipher, cipher.NewGCM)
 } //                                                                      SetKey
 
 // setKeyDI is only used by SetKey() and provides parameters
 // for dependency injection, to enable mocking during testing.
 func (ac *aesCipher) setKeyDI(
-	key []byte,
+	cryptoKey []byte,
 	aesNewCipher func([]byte) (cipher.Block, error),
 	cipherNewGCM func(cipher.Block) (cipher.AEAD, error),
 ) error {
-	err := ac.ValidateKey(key)
+	err := ac.ValidateKey(cryptoKey)
 	if err != nil {
 		return makeError(0xE32BD3, err)
 	}
-	if bytes.Equal(ac.cryptoKey, key) {
+	if bytes.Equal(ac.cryptoKey, cryptoKey) {
 		return nil
 	}
-	cphr, err := aesNewCipher(key)
+	cphr, err := aesNewCipher(cryptoKey)
 	if err != nil {
 		return err
 	}
@@ -66,7 +64,7 @@ func (ac *aesCipher) setKeyDI(
 		return err
 	}
 	ac.gcm = gcm
-	ac.cryptoKey = key
+	ac.cryptoKey = cryptoKey
 	return nil
 } //                                                                    setKeyDI
 

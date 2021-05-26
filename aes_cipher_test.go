@@ -14,7 +14,7 @@ import (
 
 const testAESKey = "A0CFDD4FA7B545088826A73C9A93AB8A"
 
-// (ac *aesCipher) ValidateKey(key []byte) error
+// (ac *aesCipher) ValidateKey(cryptoKey []byte) error
 //
 // go test -run Test_aesCipher_ValidateKey_
 //
@@ -38,7 +38,7 @@ func Test_aesCipher_ValidateKey_(t *testing.T) {
 	}
 } //                                                 Test_aesCipher_ValidateKey_
 
-// (ac *aesCipher) SetKey(key []byte) error
+// (ac *aesCipher) SetKey(cryptoKey []byte) error
 //
 // go test -run Test_aesCipher_SetKey_
 //
@@ -53,9 +53,9 @@ func Test_aesCipher_SetKey_(t *testing.T) {
 	}
 	// must succeed, but since the key is the same, don't create cipher again
 	createdCipher := false
-	aesNewCipher := func(key []byte) (cipher.Block, error) {
+	aesNewCipher := func(cryptoKey []byte) (cipher.Block, error) {
 		createdCipher = true
-		return aes.NewCipher(key)
+		return aes.NewCipher(cryptoKey)
 	}
 	cipherNewGCM := func(c cipher.Block) (cipher.AEAD, error) {
 		createdCipher = true

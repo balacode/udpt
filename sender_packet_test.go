@@ -89,7 +89,7 @@ func Test_senderPacket_Send_5(t *testing.T) {
 	conn := makeTestConn()
 	cipher := &aesCipher{}
 	err := pk.Send(conn, cipher)
-	if !matchError(err, "key must be 32 bytes long") {
+	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE12AB8", "wrong error:", err)
 	}
 } //                                                    Test_senderPacket_Send_5
@@ -100,7 +100,7 @@ func Test_senderPacket_Send_6(t *testing.T) {
 	conn := makeTestConn()
 	cipher := &aesCipher{cryptoKey: []byte{1, 2, 3}}
 	err := pk.Send(conn, cipher)
-	if !matchError(err, "key must be 32 bytes long") {
+	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE53A3B", "wrong error:", err)
 	}
 } //                                                    Test_senderPacket_Send_6
