@@ -19,7 +19,7 @@ import (
 // is split into several smaller pieces that are sent as UDP packets.
 //
 type dataItem struct {
-	Name                 string
+	Key                  string
 	Hash                 []byte
 	CompressedPieces     [][]byte
 	CompressedSizeInfo   int
@@ -56,31 +56,31 @@ func (di *dataItem) LogStats(tag string, w io.Writer) {
 		s := fmt.Sprintln(v...)
 		w.Write([]byte(s))
 	}
-	log(tag, "name:", di.Name)
+	log(tag, " key:", di.Key)
 	log(tag, "hash:", fmt.Sprintf("%X", di.Hash))
 	log(tag, "pcs.:", len(di.CompressedPieces))
 	log(tag, "comp:", di.CompressedSizeInfo, "bytes")
 	log(tag, "size:", di.UncompressedSizeInfo, "bytes")
 } //                                                                    LogStats
 
-// Reset discards the contents of the data item and clears its name and hash.
+// Reset discards the contents of the data item and clears its key and hash.
 func (di *dataItem) Reset() {
-	di.Name = ""
+	di.Key = ""
 	di.Hash = nil
 	di.CompressedPieces = nil
 	di.CompressedSizeInfo = 0
 	di.UncompressedSizeInfo = 0
 } //                                                                       Reset
 
-// Retain changes the Name, Hash, and empties CompressedPieces when the passed
-// name, hash and packetCount don't match their current values in the object.
-func (di *dataItem) Retain(name string, hash []byte, packetCount int) {
-	if di.Name == name &&
+// Retain changes the Key, Hash, and empties CompressedPieces when the passed
+// key, hash and packetCount don't match their current values in the object.
+func (di *dataItem) Retain(k string, hash []byte, packetCount int) {
+	if di.Key == k &&
 		bytes.Equal(di.Hash, hash) &&
 		len(di.CompressedPieces) == packetCount {
 		return
 	}
-	di.Name = name
+	di.Key = k
 	di.Hash = hash
 	di.CompressedPieces = make([][]byte, packetCount)
 	di.CompressedSizeInfo = 0

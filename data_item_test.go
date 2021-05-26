@@ -55,7 +55,7 @@ func Test_dataItem_LogStats_(t *testing.T) {
 	}
 	test := func(logFunc interface{}) {
 		var di = dataItem{
-			Name:                 "ItemName",
+			Key:                  "ItemName",
 			Hash:                 []byte{1, 2, 3, 4, 5},
 			CompressedPieces:     [][]byte{{6}, {7, 8}, {9, 10, 11}},
 			CompressedSizeInfo:   20,
@@ -66,7 +66,7 @@ func Test_dataItem_LogStats_(t *testing.T) {
 		got := sb.String()
 		//
 		expect := "" +
-			"xyz name: ItemName\n" +
+			"xyz  key: ItemName\n" +
 			"xyz hash: 0102030405\n" +
 			"xyz pcs.: 3\n" +
 			"xyz comp: 20 bytes\n" +
@@ -90,15 +90,15 @@ func Test_dataItem_LogStats_(t *testing.T) {
 //
 func Test_dataItem_Reset_(t *testing.T) {
 	var di = dataItem{
-		Name:                 "ItemName",
+		Key:                  "ItemName",
 		Hash:                 []byte{1, 2, 3, 4, 5},
 		CompressedPieces:     [][]byte{{6}, {7, 8}, {9, 10, 11}},
 		CompressedSizeInfo:   20,
 		UncompressedSizeInfo: 50,
 	}
 	di.Reset()
-	if di.Name != "" {
-		t.Error("0xEA8B3D", "Name not reset")
+	if di.Key != "" {
+		t.Error("0xEA8B3D", "Key not reset")
 	}
 	if di.Hash != nil {
 		t.Error("0xEEA4C6", "Hash not reset")
@@ -114,23 +114,23 @@ func Test_dataItem_Reset_(t *testing.T) {
 	}
 } //                                                        Test_dataItem_Reset_
 
-// (di *dataItem) Retain(name string, hash []byte, packetCount int)
+// (di *dataItem) Retain(k string, hash []byte, packetCount int)
 //
 // go test -run Test_dataItem_Retain_
 //
 func Test_dataItem_Retain_(t *testing.T) {
 	initDataItem := func() dataItem {
 		return dataItem{
-			Name:                 "ItemName",
+			Key:                  "ItemName",
 			Hash:                 []byte{1, 2, 3},
 			CompressedPieces:     [][]byte{{6}, {7, 8}},
 			CompressedSizeInfo:   20,
 			UncompressedSizeInfo: 50,
 		}
 	}
-	test := func(name string, hash []byte, packetCount int, expect dataItem) {
+	test := func(k string, hash []byte, packetCount int, expect dataItem) {
 		var di = initDataItem()
-		di.Retain(name, hash, packetCount)
+		di.Retain(k, hash, packetCount)
 		str := func(di dataItem) string {
 			ret := fmt.Sprintf("%#v", di)
 			ret = strings.ReplaceAll(ret, "[]uint8", "")
@@ -146,9 +146,9 @@ func Test_dataItem_Retain_(t *testing.T) {
 	// nothing changed
 	test("ItemName", []byte{1, 2, 3}, 2, initDataItem())
 	//
-	// 'name' parameter changed
+	// 'k' parameter changed
 	expect := dataItem{
-		Name:                 "DiffName",
+		Key:                  "DiffName",
 		Hash:                 []byte{1, 2, 3},
 		CompressedPieces:     [][]byte{nil, nil},
 		CompressedSizeInfo:   0,
@@ -158,7 +158,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 	//
 	// 'hash' parameter changed
 	expect = dataItem{
-		Name:                 "ItemName",
+		Key:                  "ItemName",
 		Hash:                 []byte{6, 7, 8},
 		CompressedPieces:     [][]byte{nil, nil},
 		CompressedSizeInfo:   0,
@@ -168,7 +168,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 	//
 	// 'packetCount' parameter changed
 	expect = dataItem{
-		Name:                 "ItemName",
+		Key:                  "ItemName",
 		Hash:                 []byte{1, 2, 3},
 		CompressedPieces:     [][]byte{nil},
 		CompressedSizeInfo:   0,
@@ -178,7 +178,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 	//
 	// all 3 parameters changed
 	expect = dataItem{
-		Name:                 "OtherName",
+		Key:                  "OtherName",
 		Hash:                 []byte{4, 5, 6},
 		CompressedPieces:     [][]byte{nil, nil, nil},
 		CompressedSizeInfo:   0,

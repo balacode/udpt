@@ -285,11 +285,11 @@ func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		if err != nil {
 			return nil, rc.logError(0xE3DB1D, err)
 		}
-		err = rc.ReceiveData(it.Name, data)
+		err = rc.ReceiveData(it.Key, data)
 		if err != nil {
 			return nil, rc.logError(0xE77B4D, err)
 		}
-		rc.logInfo("received:", it.Name)
+		rc.logInfo("received:", it.Key)
 		if rc.Config.VerboseReceiver {
 			var sb strings.Builder
 			it.LogStats("receiveFragment", &sb)
