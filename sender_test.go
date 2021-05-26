@@ -57,14 +57,13 @@ func Test_Sender_Send_(t *testing.T) {
 	if !matchError(err, "Sender.Address") {
 		t.Error("0xEC20C3", "wrong error:", err)
 	}
-	sd.Address = "127.0.0.0"
 	//
-	sd.Port = 0
+	sd.Address = "127.0.0.0:0"
 	err = sd.Send("", nil)
-	if !matchError(err, "Sender.Port") {
+	if !matchError(err, "invalid port in Sender.Address") {
 		t.Error("0xE24E74", "wrong error:", err)
 	}
-	sd.Port = 9876
+	sd.Address = "127.0.0.0:9876"
 	//
 	sd.Config.VerboseSender = true
 	sd.Config.SendRetries = 2
@@ -82,8 +81,7 @@ func Test_Sender_Send_(t *testing.T) {
 //
 func Test_Sender_SendString_(t *testing.T) {
 	sd := Sender{
-		Address:   "127.0.0.0",
-		Port:      9876,
+		Address:   "127.0.0.0:9876",
 		CryptoKey: []byte("12345678901234567890123456789012"),
 		Config: &Configuration{
 			Cipher:            &aesCipher{},
@@ -197,7 +195,7 @@ func Test_Sender_LogStats_(t *testing.T) {
 
 // must succeed
 func Test_Sender_connect_1(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1", Port: 9876}
+	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1:9876"}
 	netDialUDP := func(network string, laddr, raddr *net.UDPAddr,
 	) (netUDPConn, error) {
 		return net.DialUDP(network, laddr, raddr)
@@ -211,9 +209,9 @@ func Test_Sender_connect_1(t *testing.T) {
 	}
 } //                                                       Test_Sender_connect_1
 
-// must fail because Address is invalid
+// must fail because the host in the address is invalid
 func Test_Sender_connect_2(t *testing.T) {
-	sd := Sender{Address: "257.258.259.260", Port: 9876}
+	sd := Sender{Address: "257.258.259.260:9876"}
 	udpConn, err := sd.connect()
 	if udpConn != nil {
 		t.Error("0xEF8F6B")
@@ -223,9 +221,9 @@ func Test_Sender_connect_2(t *testing.T) {
 	}
 } //                                                       Test_Sender_connect_2
 
-// must fail because Port is invalid
+// must fail because the port in the address is invalid
 func Test_Sender_connect_3(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1", Port: 65536}
+	sd := Sender{Address: "127.0.0.1:65536"}
 	udpConn, err := sd.connect()
 	if udpConn != nil {
 		t.Error("0xE6FA25")
@@ -237,7 +235,7 @@ func Test_Sender_connect_3(t *testing.T) {
 
 // must fail when net.DialUDP() fails
 func Test_Sender_connect_4(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1", Port: 9876}
+	sd := Sender{Address: "127.0.0.1:9876"}
 	netDialUDP := func(_ string, _, _ *net.UDPAddr) (netUDPConn, error) {
 		return nil, makeError(0xEC10B4, "failed netDialUDP")
 	}
@@ -252,7 +250,7 @@ func Test_Sender_connect_4(t *testing.T) {
 
 // must fail when conn.SetWriteBuffer() fails
 func Test_Sender_connect_5(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1", Port: 9876}
+	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1:9876"}
 	netDialUDP := func(_ string, _, _ *net.UDPAddr) (netUDPConn, error) {
 		return &mockNetUDPConn{failSetWriteBuffer: true}, nil
 	}

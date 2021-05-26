@@ -37,6 +37,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -60,13 +61,12 @@ type udpStats struct {
 //
 type Sender struct {
 
-	// Address is the domain name or IP address of the
-	// listening receiver, excluding the port number.
+	// Address is the domain name or IP address of the listening
+	// receiver with the port number. For example: "127.0.0.1:9876"
+	//
+	// The port number must be between 1 and 65535.
+	//
 	Address string
-
-	// Port is the port number of the listening server.
-	// This number must be between 1 and 65535.
-	Port int
 
 	// CryptoKey is the secret symmetric encryption key that
 	// must be shared between the Sender and the Receiver.
@@ -106,8 +106,8 @@ type Sender struct {
 // -----------------------------------------------------------------------------
 // # Main Methods (sd *Sender)
 
-// Send transfers a sequence of bytes ('data') to the
-// Receiver specified by Sender.Address and Port.
+// Send transfers a sequence of bytes ('data')
+// to the Receiver specified by Sender.Address
 func (sd *Sender) Send(name string, data []byte) error {
 	if sd.Config == nil {
 		sd.Config = NewDefaultConfig()
@@ -128,8 +128,12 @@ func (sd *Sender) Send(name string, data []byte) error {
 	if strings.TrimSpace(sd.Address) == "" {
 		return sd.logError(0xE5A04A, "missing Sender.Address")
 	}
-	if sd.Port < 1 || sd.Port > 65535 {
-		return sd.logError(0xE20BB9, "invalid Sender.Port:", sd.Port)
+	var port int
+	if i := strings.Index(sd.Address, ":"); i != -1 {
+		port, _ = strconv.Atoi(sd.Address[i+1:])
+	}
+	if port < 1 || port > 65535 {
+		return sd.logError(0xE20BB9, "invalid port in Sender.Address")
 	}
 	// prepare for transfer
 	hash := getHash(data)
@@ -210,8 +214,8 @@ func (sd *Sender) Send(name string, data []byte) error {
 	return nil
 } //                                                                        Send
 
-// SendString transfers string 's' to the Receiver
-// specified by Sender.Address and Port.
+// SendString transfers string 's' to the
+// Receiver specified by Sender.Address.
 //
 func (sd *Sender) SendString(name string, s string) error {
 	return sd.Send(name, []byte(s))
@@ -325,8 +329,8 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (sd *Sender)
 
-// connect connects to the Receiver at Sender.Address and Port
-// and returns a new UDP connection and an error value.
+// connect connects to the Receiver at Sender.Address and
+// returns a new UDP connection and an error value.
 //
 // Note that it doesn't change the value of Sender.conn
 //
@@ -342,8 +346,7 @@ func (sd *Sender) connect() (netUDPConn, error) {
 func (sd *Sender) connectDI(
 	netDialUDP func(string, *net.UDPAddr, *net.UDPAddr) (netUDPConn, error),
 ) (netUDPConn, error) {
-	addr := fmt.Sprintf("%s:%d", sd.Address, sd.Port)
-	udpAddr, err := net.ResolveUDPAddr("udp", addr)
+	udpAddr, err := net.ResolveUDPAddr("udp", sd.Address)
 	if err != nil {
 		return nil, sd.logError(0xEC7C6B, "ResolveUDPAddr:", err)
 	}
