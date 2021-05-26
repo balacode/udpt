@@ -25,7 +25,7 @@ func main() {
 	fmt.Println(tag, "Running the receiver")
 	received := ""
 	rc := udpt.Receiver{
-		Port:      1234,
+		Port:      9876,
 		CryptoKey: cryptoKey,
 		Config:    cf,
 		//
@@ -54,7 +54,7 @@ func main() {
 	time.Sleep(time.Second)
 	fmt.Println(tag, "Sending a message")
 	sender := udpt.Sender{
-		Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cf,
+		Address: "127.0.0.1", Port: 9876, CryptoKey: cryptoKey, Config: cf,
 	}
 	err := sender.SendString("demo_data", "Hello World!")
 	if err != nil {

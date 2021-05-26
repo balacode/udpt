@@ -67,7 +67,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	//
 	// set-up and run the receiver
 	rc := Receiver{
-		Port: 1234, CryptoKey: cryptoKey, Config: cf,
+		Port: 9876, CryptoKey: cryptoKey, Config: cf,
 		//
 		ReceiveData: func(name string, data []byte) error {
 			k, v := name, data
@@ -91,7 +91,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	// send the messages to the receiver
 	time.Sleep(time.Second)
 	sender := Sender{
-		Address: "127.0.0.1", Port: 1234, CryptoKey: cryptoKey, Config: cf,
+		Address: "127.0.0.1", Port: 9876, CryptoKey: cryptoKey, Config: cf,
 	}
 	makeKV := func(i int) (string, []byte) {
 		sn := fmt.Sprintf("%04d", i)
