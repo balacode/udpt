@@ -37,13 +37,13 @@ type Receiver struct {
 	// ReceiveData is a callback function you must specify. This Receiver
 	// will call it when a data item has been fully transferred.
 	//
-	// The 'name' and 'data' parameters will contain the key and
-	// value sent by Sender.Send() or Sender.SendString(), etc.
+	// 'k' and 'v' will contain the key and value sent
+	// by Sender.Send() or Sender.SendString(), etc.
 	//
 	// The reason there are two parameters is to separate metadata like
 	// timestamps or filenames from the content of the transferred resource.
 	//
-	ReceiveData func(name string, data []byte) error
+	ReceiveData func(k string, v []byte) error
 
 	// ProvideData is a callback function you must specify. This
 	// Receiver will call it to read back the named data item.
@@ -51,8 +51,8 @@ type Receiver struct {
 	// This is needed to send back a confirmation hash to the Sender
 	// to confirm the transfer. The Receiver carries out the hashing.
 	//
-	// If the resource specified by 'name' is found,
-	// it should return its bytes with a nil error value.
+	// If the resource specified by key 'k' is found,
+	// it should return its bytes with a nil error.
 	//
 	// If the resource is not found, return (nil, nil).
 	//
@@ -61,7 +61,7 @@ type Receiver struct {
 	// NOTE: This callback may be removed because the hashing could be done
 	// internally by the Receiver, so there'll be no need for a callback.
 	//
-	ProvideData func(name string) ([]byte, error)
+	ProvideData func(k string) ([]byte, error)
 
 	// -------------------------------------------------------------------------
 
@@ -240,7 +240,7 @@ func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	dataOffset++ // skip newline
 	var (
 		header  = string(recv[len(tagFragment):dataOffset])
-		name    = getPart(header, "name:", " ")
+		key     = getPart(header, "key:", " ")
 		hexHash = getPart(header, "hash:", " ")
 		sn      = getPart(header, "sn:", " ")
 		count   = getPart(header, "count:", "\n")
@@ -266,7 +266,7 @@ func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		return nil, rc.logError(0xEB6CB7, "bad hash size")
 	}
 	it := &rc.receivingDataItem
-	it.Retain(name, hash, packetCount)
+	it.Retain(key, hash, packetCount)
 	compressedData := recv[dataOffset:]
 	if len(compressedData) < 1 {
 		return nil, rc.logError(0xE92B0F, "received no data")
@@ -310,12 +310,12 @@ func (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 	if rc.ProvideData == nil {
 		return nil, rc.logError(0xE73A1C, "nil ProvideData")
 	}
-	name := string(req[len(tagDataItemHash):])
-	data, err := rc.ProvideData(name)
+	k := string(req[len(tagDataItemHash):])
+	v, err := rc.ProvideData(k)
 	if err != nil {
 		return nil, rc.logError(0xE7F7C9, err)
 	}
-	hash := getHash(data)
+	hash := getHash(v)
 	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
 	return reply, nil
 } //                                                            sendDataItemHash

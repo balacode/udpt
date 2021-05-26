@@ -27,8 +27,8 @@ func newRunnableReceiver() Receiver {
 		Port:        9876,
 		CryptoKey:   []byte("0123456789abcdefghijklmnopqrst12"),
 		Config:      NewDefaultConfig(),
-		ReceiveData: func(name string, data []byte) error { return nil },
-		ProvideData: func(name string) ([]byte, error) { return nil, nil },
+		ReceiveData: func(k string, v []byte) error { return nil },
+		ProvideData: func(k string) ([]byte, error) { return nil, nil },
 	}
 	ret.Config.ReplyTimeout = 500 * time.Millisecond
 	ret.Config.WriteTimeout = 500 * time.Millisecond
@@ -315,14 +315,14 @@ func Test_Receiver_initRun_2(t *testing.T) {
 	if !matchError(err, "nil Receiver.ReceiveData") {
 		t.Error("0xE2F00D", "wrong error:", err)
 	}
-	rc.ReceiveData = func(name string, data []byte) error { return nil }
+	rc.ReceiveData = func(k string, v []byte) error { return nil }
 	//
 	// fail because ProvideData is not assigned
 	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "nil Receiver.ProvideData") {
 		t.Error("0xE3E29F", "wrong error:", err)
 	}
-	rc.ProvideData = func(name string) ([]byte, error) { return nil, nil }
+	rc.ProvideData = func(k string) ([]byte, error) { return nil, nil }
 	//
 	// at this point, none of the net functions must have been called
 	if c1 {
@@ -386,7 +386,7 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 		return nil
 	}
 	reply, err := rc.buildReply([]byte(
-		tagFragment + "name:test1 " +
+		tagFragment + "key:test1 " +
 			"hash:BA7816BF8F01CFEA414140DE5DAE2223" +
 			"B00361A396177A9CB410FF61F20015AD sn:1 count:1\n" +
 			string(comp),
@@ -564,7 +564,7 @@ func Test_Receiver_receiveFragment_03(t *testing.T) {
 func Test_Receiver_receiveFragment_04(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:0 sn:bad count:1\n"))
+		"key:abc hash:0 sn:bad count:1\n"))
 	if data != nil {
 		t.Error("0xEA0B81")
 	}
@@ -576,7 +576,7 @@ func Test_Receiver_receiveFragment_04(t *testing.T) {
 func Test_Receiver_receiveFragment_05(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:0 sn:1 count:bad\n"))
+		"key:abc hash:0 sn:1 count:bad\n"))
 	if data != nil {
 		t.Error("0xEA9D01")
 	}
@@ -588,7 +588,7 @@ func Test_Receiver_receiveFragment_05(t *testing.T) {
 func Test_Receiver_receiveFragment_06(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:0 sn:2 count:1\n"))
+		"key:abc hash:0 sn:2 count:1\n"))
 	if data != nil {
 		t.Error("0xEB21B0")
 	}
@@ -600,7 +600,7 @@ func Test_Receiver_receiveFragment_06(t *testing.T) {
 func Test_Receiver_receiveFragment_07(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:0 sn:1 count:1\n"))
+		"key:abc hash:0 sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xE11DF3")
 	}
@@ -612,7 +612,7 @@ func Test_Receiver_receiveFragment_07(t *testing.T) {
 func Test_Receiver_receiveFragment_08(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:GG sn:1 count:1\n"))
+		"key:abc hash:GG sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xEF09EC")
 	}
@@ -624,7 +624,7 @@ func Test_Receiver_receiveFragment_08(t *testing.T) {
 func Test_Receiver_receiveFragment_09(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:FF sn:1 count:1\n"))
+		"key:abc hash:FF sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xE24F86")
 	}
@@ -636,7 +636,7 @@ func Test_Receiver_receiveFragment_09(t *testing.T) {
 func Test_Receiver_receiveFragment_10(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"name:abc hash:" +
+		"key:abc hash:" +
 		"12345678123456781234567812345678" +
 		"12345678123456781234567812345678 sn:1 count:1\n"))
 	if data != nil {
@@ -676,7 +676,7 @@ func Test_Receiver_sendDataItemHash_2(t *testing.T) {
 
 func Test_Receiver_sendDataItemHash_3(t *testing.T) {
 	var rc Receiver
-	rc.ProvideData = func(name string) ([]byte, error) {
+	rc.ProvideData = func(k string) ([]byte, error) {
 		return nil, errors.New("test error")
 	}
 	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
@@ -690,7 +690,7 @@ func Test_Receiver_sendDataItemHash_3(t *testing.T) {
 
 func Test_Receiver_sendDataItemHash_4(t *testing.T) {
 	var rc Receiver
-	rc.ProvideData = func(name string) ([]byte, error) {
+	rc.ProvideData = func(k string) ([]byte, error) {
 		return nil, nil
 	}
 	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
@@ -706,7 +706,7 @@ func Test_Receiver_sendDataItemHash_4(t *testing.T) {
 
 func Test_Receiver_sendDataItemHash_5(t *testing.T) {
 	var rc Receiver
-	rc.ProvideData = func(name string) ([]byte, error) {
+	rc.ProvideData = func(k string) ([]byte, error) {
 		return []byte("0123456789"), nil
 	}
 	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))

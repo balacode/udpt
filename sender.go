@@ -9,8 +9,8 @@ package udpt
 //   Sender struct
 //
 // # Main Methods (sd *Sender)
-//   ) Send(name string, data []byte) error
-//   ) SendString(name string, s string) error
+//   ) Send(k string, v []byte) error
+//   ) SendString(k, v string) error
 //
 // # Informatory Properties (sd *Sender)
 //   ) AverageResponseMs() float64
@@ -21,7 +21,7 @@ package udpt
 //   ) LogStats()
 //
 // # Internal Lifecycle Methods (sd *Sender)
-//   ) requestDataItemHash(name string) []byte
+//   ) requestDataItemHash(k string) []byte
 //   ) connect() error
 //   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
@@ -110,14 +110,14 @@ type Sender struct {
 
 // Send transfers a key-value to the Receiver specified by Sender.Address.
 //
-// name is any string you want to use as the key. It can be blank if not needed.
+// 'k' is any string you want to use as the key. It can be blank if not needed.
 // It could be a filename, timestamp, UUID, or some other metadata that
 // gives context to the value being sent.
 //
-// data is the value being sent as a sequence of bytes. It can be as large
+// 'v' is the value being sent as a sequence of bytes. It can be as large
 // as the free memory available on the Sender's and Receiver's machine.
 //
-func (sd *Sender) Send(name string, data []byte) error {
+func (sd *Sender) Send(k string, v []byte) error {
 	if sd.Config == nil {
 		sd.Config = NewDefaultConfig()
 	}
@@ -145,17 +145,17 @@ func (sd *Sender) Send(name string, data []byte) error {
 		return sd.logError(0xE20BB9, "invalid port in Sender.Address")
 	}
 	// prepare for transfer
-	hash := getHash(data)
+	hash := getHash(v)
 	if sd.Config.VerboseSender {
 		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
-			fmt.Sprintf("Send name: %s size: %d hash: %X",
-				name, len(data), hash))
+			fmt.Sprintf("Send key: %s size: %d hash: %X",
+				k, len(v), hash))
 	}
-	remoteHash := sd.requestDataItemHash(name)
+	remoteHash := sd.requestDataItemHash(k)
 	if bytes.Equal(hash, remoteHash) {
 		return nil
 	}
-	comp, err := sd.Config.Compressor.Compress(data)
+	comp, err := sd.Config.Compressor.Compress(v)
 	if err != nil {
 		return sd.logError(0xE2EB59, err)
 	}
@@ -172,8 +172,8 @@ func (sd *Sender) Send(name string, data []byte) error {
 			b = len(comp)
 		}
 		header := tagFragment + fmt.Sprintf(
-			"name:%s hash:%X sn:%d count:%d\n",
-			name, sd.dataHash, i+1, packetCount,
+			"key:%s hash:%X sn:%d count:%d\n",
+			k, sd.dataHash, i+1, packetCount,
 		)
 		packet, err2 := sd.makePacket(
 			append([]byte(header), comp[a:b]...),
@@ -213,7 +213,7 @@ func (sd *Sender) Send(name string, data []byte) error {
 	if !sd.DeliveredAllParts() {
 		return sd.logError(0xE1C3A7, "undelivered packets")
 	}
-	remoteHash = sd.requestDataItemHash(name)
+	remoteHash = sd.requestDataItemHash(k)
 	if !bytes.Equal(hash, remoteHash) {
 		return sd.logError(0xE1F101, "hash mismatch")
 	}
@@ -226,15 +226,15 @@ func (sd *Sender) Send(name string, data []byte) error {
 // SendString transfers a key and value string
 // to the Receiver specified by Sender.Address.
 //
-// name is any string you want to use as the key. It can be blank if not needed.
+// 'k' is any string you want to use as the key. It can be blank if not needed.
 // It could be a filename, timestamp, UUID, or some other metadata that
 // gives context to the value being sent.
 //
-// s is the value being sent as a string. It can be as large as the
+// 'v' is the value being sent as a string. It can be as large as the
 // free memory available on the Sender's and Receiver's machine.
 //
-func (sd *Sender) SendString(name string, s string) error {
-	return sd.Send(name, []byte(s))
+func (sd *Sender) SendString(k string, v string) error {
+	return sd.Send(k, []byte(v))
 } //                                                                  SendString
 
 // -----------------------------------------------------------------------------
@@ -379,15 +379,15 @@ func (sd *Sender) connectDI(
 } //                                                                   connectDI
 
 // requestDataItemHash requests and waits for the listening receiver to
-// return the hash of the data item identified by 'name'. If the receiver
+// return the hash of the data item identified by key 'k'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
-func (sd *Sender) requestDataItemHash(name string) []byte {
+func (sd *Sender) requestDataItemHash(k string) []byte {
 	tempConn, err := sd.connect()
 	if err != nil {
 		_ = sd.logError(0xE7DF8B, err)
 		return nil
 	}
-	packet, err := sd.makePacket([]byte(tagDataItemHash + name))
+	packet, err := sd.makePacket([]byte(tagDataItemHash + k))
 	if err != nil {
 		_ = sd.logError(0xE34A8E, err)
 		return nil

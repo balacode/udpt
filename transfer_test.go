@@ -69,13 +69,12 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	rc := Receiver{
 		Port: 9876, CryptoKey: cryptoKey, Config: cf,
 		//
-		ReceiveData: func(name string, data []byte) error {
-			k, v := name, data
+		ReceiveData: func(k string, v []byte) error {
 			received[k] = []byte(v)
 			return nil
 		},
-		ProvideData: func(name string) ([]byte, error) {
-			v := received[name]
+		ProvideData: func(k string) ([]byte, error) {
+			v := received[k]
 			return v, nil
 		},
 	}
@@ -90,7 +89,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	}
 	// send the messages to the receiver
 	time.Sleep(time.Second)
-	sender := Sender{
+	sd := Sender{
 		Address: "127.0.0.1:9876", CryptoKey: cryptoKey, Config: cf,
 	}
 	makeKV := func(i int) (string, []byte) {
@@ -101,7 +100,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	}
 	for i := 0; i < N; i++ {
 		k, v := makeKV(i)
-		err := sender.Send(k, []byte(v))
+		err := sd.Send(k, []byte(v))
 		if err != nil {
 			t.Error("0xEA8C61", "failed sending "+k+":", err)
 		}
@@ -122,7 +121,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		cf.LogFunc = LogPrint
 		cf.VerboseSender = true
 		cf.VerboseReceiver = true
-		sender.LogStats()
+		sd.LogStats()
 	}
 	time.Sleep(time.Second)
 } //                                                                testTransfer

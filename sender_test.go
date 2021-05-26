@@ -20,7 +20,7 @@ import (
 // -----------------------------------------------------------------------------
 // # Main Methods (sd *Sender)
 
-// (sd *Sender) Send(name string, data []byte) error
+// (sd *Sender) Send(k string, v []byte) error
 //
 // go test -run Test_Sender_Send_
 //
@@ -75,7 +75,7 @@ func Test_Sender_Send_(t *testing.T) {
 	}
 } //                                                           Test_Sender_Send_
 
-// (sd *Sender) SendString(name string, s string) error
+// (sd *Sender) SendString(k, v string) error
 //
 // go test -run Test_Sender_SendString_
 //

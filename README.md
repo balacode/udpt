@@ -54,20 +54,20 @@ func main() {
         Config:    cf,
         //
         // receives fully-transferred data items sent to the receiver
-        ReceiveData: func(name string, data []byte) error {
-            received = string(data)
+        ReceiveData: func(k string, v []byte) error {
+            received = string(v)
             div := strings.Repeat("##", 40)
             fmt.Println(tag, div)
             fmt.Println(tag, "You should see a 'Hello World!' message below:")
             fmt.Println(tag, div)
             fmt.Println(tag, "Receiver's ReceiveData received",
-                "name:", name, "data:", received)
+                "k:", k, "v:", received)
             fmt.Println(tag, div)
             return nil
         },
         // provides existing data items for hashing by the Receiver. Only the
         // hash will be sent back to the sender, to confirm the transfer.
-        ProvideData: func(name string) ([]byte, error) {
+        ProvideData: func(k string) ([]byte, error) {
             fmt.Println(tag, "Receiver's ProvideData()")
             return []byte(received), nil
         },
