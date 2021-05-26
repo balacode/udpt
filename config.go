@@ -149,7 +149,7 @@ func NewDefaultConfig() *Configuration {
 // Validate checks if all configuration parameters
 // are set within acceptable limits.
 //
-// Returns nil if there is no problem, or the error value.
+// Returns nil if there is no problem, or the error instance.
 //
 func (cf *Configuration) Validate() error {
 	//

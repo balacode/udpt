@@ -15,7 +15,7 @@ import (
 
 // main demo
 func main() {
-	// encryption key shared by the sender and receiver
+	// secret encryption key shared by the Sender and Receiver
 	cryptoKey := []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
 	//
 	cf := udpt.NewDebugConfig() // verbose logging

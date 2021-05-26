@@ -22,10 +22,10 @@ type aesCipher struct {
 	gcm       cipher.AEAD
 } //                                                                   aesCipher
 
-// ValidateKey checks if 'key' is acceptable for use with the cipher.
+// ValidateKey checks if an encryption key is suitable for use with the cipher.
 // For example it must be of the right size.
 //
-// For AES-256, the key must be exactly 32 bytes long.
+// For AES-256, the encryption key must be exactly 32 bytes long.
 //
 func (ac *aesCipher) ValidateKey(key []byte) error {
 	if len(key) != 32 {
@@ -34,7 +34,7 @@ func (ac *aesCipher) ValidateKey(key []byte) error {
 	return nil
 } //                                                                 ValidateKey
 
-// SetKey initializes the cipher with the specified secret key.
+// SetKey initializes the cipher with the specified encryption key.
 //
 // If the cipher is already initialized with the given key, does nothing.
 // The same key is used for encryption and decryption.
@@ -70,8 +70,8 @@ func (ac *aesCipher) setKeyDI(
 	return nil
 } //                                                                    setKeyDI
 
-// Encrypt encrypts plaintext using the key given to SetKey and
-// returns the encrypted ciphertext, using AES-256 symmetric cipher.
+// Encrypt encrypts plaintext using the encryption key given to SetKey
+// and returns the encrypted ciphertext, using AES-256 symmetric cipher.
 //
 // You need to call SetKey at least once before you call Encrypt.
 //
@@ -106,8 +106,8 @@ func (ac *aesCipher) encryptDI(
 	return ciphertext, nil
 } //                                                                   encryptDI
 
-// Decrypt decrypts ciphertext using the key given to SetKey and
-// returns the decrypted plaintext, using AES-256 symmetric cipher.
+// Decrypt decrypts ciphertext using the encryption key given to SetKey
+// and returns the decrypted plaintext, using AES-256 symmetric cipher.
 //
 // You need to call SetKey at least once before you call Decrypt.
 //

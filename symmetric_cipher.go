@@ -14,7 +14,7 @@ type SymmetricCipher interface {
 	// For example it must be of the right size.
 	ValidateKey(key []byte) error
 
-	// SetKey initializes the cipher with the specified secret key.
+	// SetKey initializes the cipher with the specified encryption key.
 	//
 	// If the cipher is already initialized with the given key, does nothing.
 	// The same key is used for encryption and decryption.

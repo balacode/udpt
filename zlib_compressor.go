@@ -17,7 +17,7 @@ import (
 type zlibCompressor struct{}
 
 // Compress compresses 'data' using zlib and returns the compressed bytes.
-// If there was an error, returns nil and the error value.
+// If there was an error, returns nil and the error instance.
 func (zc *zlibCompressor) Compress(data []byte) ([]byte, error) {
 	var cbuf bytes.Buffer
 	var wr io.WriteCloser = zlib.NewWriter(&cbuf)
@@ -51,7 +51,7 @@ func (*zlibCompressor) compressDI(
 } //                                                                  compressDI
 
 // Uncompress uncompresses bytes using zlib and returns the uncompressed bytes.
-// If there was an error, returns nil and the error value.
+// If there was an error, returns nil and the error instance.
 func (zc *zlibCompressor) Uncompress(comp []byte) ([]byte, error) {
 	return zc.uncompressDI(comp, zlib.NewReader)
 } //                                                                  Uncompress

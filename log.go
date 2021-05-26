@@ -29,7 +29,7 @@ var logTimeNow = time.Now
 // This is a convenience function that provides default logging
 // output for this package while developing or debugging.
 //
-// You can assign it to Sender.LogFunc and Receiver.LogFunc.
+// You can assign it to Config.LogFunc
 //
 func LogPrint(a ...interface{}) {
 	const printMsg = true
@@ -42,7 +42,7 @@ func LogPrint(a ...interface{}) {
 // This is a convenience function that provides default logging
 // output for this package, for use while developing or debugging.
 //
-// You can assign this function to Sender.LogFunc and Receiver.LogFunc:
+// You can assign this function to Config.LogFunc:
 // E.g. sender.LogFunc = MakeLogFunc(true, "udpt.log")
 //
 // printMsg determines if each message should be printed to standard output.

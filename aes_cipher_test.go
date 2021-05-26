@@ -44,7 +44,7 @@ func Test_aesCipher_ValidateKey_(t *testing.T) {
 //
 func Test_aesCipher_SetKey_(t *testing.T) {
 	//
-	// must succeed; key is 32 bytes long:
+	// must succeed; encryption key is 32 bytes long:
 	var cphr aesCipher
 	const goodKey = "BE30FB257682466ABA9071755E780344"
 	err := cphr.SetKey([]byte(goodKey))
@@ -68,7 +68,7 @@ func Test_aesCipher_SetKey_(t *testing.T) {
 	if createdCipher {
 		t.Error("0xEF12FB")
 	}
-	// must fail; key is not 32 bytes long:
+	// must fail; encryption key is not 32 bytes long:
 	err = cphr.SetKey(nil)
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE9DF0F", "wrong error:", err)
@@ -128,7 +128,7 @@ func Test_aesCipher_Encrypt_1(t *testing.T) {
 	}
 } //                                                    Test_aesCipher_Encrypt_1
 
-// must fail encrypting because there is no key specified:
+// must fail encrypting because there is no encryption key specified:
 func Test_aesCipher_Encrypt_2(t *testing.T) {
 	var cphr aesCipher
 	ciphertext, err := cphr.Encrypt([]byte("abc"))
@@ -175,7 +175,7 @@ func Test_aesCipher_Decrypt_1(t *testing.T) {
 	}
 } //                                                    Test_aesCipher_Decrypt_1
 
-// must fail decrypting because there is no key specified:
+// must fail decrypting because there is no encryption key specified:
 func Test_aesCipher_Decrypt_2(t *testing.T) {
 	var cphr aesCipher
 	plaintext, err := cphr.Decrypt(nil)

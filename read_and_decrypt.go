@@ -67,7 +67,7 @@ func readAndDecrypt(
 } //                                                              readAndDecrypt
 
 // netError filters out network errors for readAndDecrypt() and returns
-// them as distinct error values like errClosed and errTimeout.
+// them as distinct error instances like errClosed and errTimeout.
 //
 // For other errors, it just calls makeError().
 //
