@@ -17,6 +17,41 @@ import (
 // to run all tests in this file:
 // go test -v -run Test_Sender_*
 
+// SendString(addr string, k, v string, cryptoKey []byte,
+//     config ...*Configuration,
+// ) error
+//
+// go test -run Test_SendString_
+//
+func Test_SendString_(t *testing.T) {
+	//
+	received := map[string][]byte{} // collects received keys and values
+	cryptoKey := []byte("3z5EdC485Ex9Wy0AsY4Apu6930Bx57Z0")
+	cf := NewDefaultConfig()
+	cf.ReplyTimeout = 250 * time.Millisecond
+	cf.WriteTimeout = 250 * time.Millisecond
+	//
+	// set-up and run the receiver
+	rc := Receiver{Port: 9876, CryptoKey: cryptoKey, Config: cf,
+		ReceiveData: func(k string, v []byte) error {
+			received[k] = []byte(v)
+			return nil
+		},
+		ProvideData: func(k string) ([]byte, error) {
+			v := received[k]
+			return v, nil
+		},
+	}
+	go func() { _ = rc.Run() }()
+	defer func() { rc.Stop() }()
+	//
+	//                addr              k      v         cryptoKey  config
+	err := SendString("127.0.0.1:9876", "msg", "Hello!", cryptoKey, cf)
+	if err != nil {
+		t.Error("0xE4A1ED", err)
+	}
+} //                                                            Test_SendString_
+
 // -----------------------------------------------------------------------------
 // # Main Methods (sd *Sender)
 

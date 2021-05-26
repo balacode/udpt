@@ -43,6 +43,72 @@ import (
 	"time"
 )
 
+// Send creates a Sender and uses it to transfer a key-value
+// pair to the Receiver specified by address 'addr'.
+//
+// addr specifies the host and port number of the Receiver,
+// for example "website.com:9876" or "127.0.0.1:9876"
+//
+// k is any string you want to use as the key. It can be blank if not needed.
+// It could be a filename, timestamp, UUID, or some other metadata that
+// gives context to the value being sent.
+//
+// v is the value being sent as a sequence of bytes. It can be as large
+// as the free memory available on the Sender's and Receiver's machine.
+//
+// cryptoKey is the symmetric encryption key shared by the Sender
+// and Receiver and used to encrypt the sent message.
+//
+// config is an optional Configuration you can customize. If you leave it out,
+// Send() will use the configuration returned by NewDefaultConfig().
+//
+func Send(
+	addr string,
+	k string,
+	v []byte,
+	cryptoKey []byte,
+	config ...*Configuration,
+) error {
+	if len(config) > 1 {
+		makeError(0xE8C0D4, "too many 'config' arguments")
+	}
+	var cf *Configuration
+	if len(config) == 1 {
+		cf = config[0]
+	}
+	if cf == nil {
+		cf = NewDefaultConfig()
+	}
+	sender := Sender{Address: addr, CryptoKey: cryptoKey, Config: cf}
+	err := sender.Send(k, v)
+	return err
+} //                                                                        Send
+
+// SendString creates a Sender and uses it to transfer a key-value
+// pair of strings to the Receiver specified by address 'addr'.
+//
+// addr specifies the host and port number of the Receiver,
+// for example "website.com:9876" or "127.0.0.1:9876"
+//
+// k is any string you want to use as the key. It can be blank if not needed.
+// It could be a filename, timestamp, UUID, or some other metadata that
+// gives context to the value being sent.
+//
+// v is the value being sent as a string. It can be as large as the
+// free memory available on the Sender's and Receiver's machine.
+//
+// cryptoKey is the symmetric encryption key shared by the Sender
+// and Receiver and used to encrypt the sent message.
+//
+// config is an optional Configuration you can customize. If you leave it out,
+// SendString() will use the configuration returned by NewDefaultConfig().
+//
+func SendString(addr string, k, v string, cryptoKey []byte,
+	config ...*Configuration,
+) error {
+	return Send(addr, k, []byte(v), cryptoKey, config...)
+} //                                                                  SendString
+
 // -----------------------------------------------------------------------------
 // # Sender Class
 
