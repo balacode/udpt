@@ -31,6 +31,7 @@ package udpt
 //   ) LogStats()
 //
 // # Internal Lifecycle Methods (sd *Sender)
+//   ) beginSend(k string, v []byte) (hash []byte, err error)
 //   ) requestDataItemHash(k string) []byte
 //   ) makePackets(k string, comp []byte) error
 //   ) connect() (netUDPConn, error)
@@ -39,6 +40,7 @@ package udpt
 //   ) collectConfirmations()
 //   ) waitForAllConfirmations()
 //   ) close()
+//   ) endSend(k string, hash []byte) error
 //
 // # Internal Helper Methods (sd *Sender)
 //   ) logError(id uint32, a ...interface{}) error
@@ -204,42 +206,8 @@ func (sd *Sender) Send(k string, v []byte) error {
 	if sd.Config == nil {
 		sd.Config = NewDefaultConfig()
 	}
-	// setup cipher
-	if sd.Config.Cipher == nil {
-		return sd.logError(0xE83D07, "nil Sender.Config.Cipher")
-	}
-	err := sd.Config.Cipher.SetKey(sd.CryptoKey)
-	if err != nil {
-		return sd.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
-	}
-	// check settings
-	err = sd.Config.Validate()
-	if err != nil {
-		return sd.logError(0xE5D92D, "invalid Sender.Config:", err)
-	}
-	err = sd.validateAddress()
-	if err != nil {
-		return sd.logError(0xE5A04A, err)
-	}
-	// prepare for transfer
-	hash := getHash(v)
-	if sd.Config.VerboseSender {
-		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
-			fmt.Sprintf("Send key: %s size: %d hash: %X",
-				k, len(v), hash))
-	}
-	remoteHash := sd.requestDataItemHash(k)
-	if bytes.Equal(hash, remoteHash) {
-		return nil
-	}
-	comp, err := sd.Config.Compressor.Compress(v)
-	if err != nil {
-		return sd.logError(0xE2EB59, err)
-	}
-	sd.dataHash = hash
-	sd.startTime = time.Now()
-	err = sd.makePackets(k, comp)
-	if err != nil {
+	hash, err := sd.beginSend(k, v)
+	if hash == nil {
 		return err
 	}
 	newConn, err := sd.connect()
@@ -261,17 +229,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 		time.Sleep(sd.Config.SendRetryInterval)
 	}
 	sd.close()
-	if !sd.DeliveredAllParts() {
-		return sd.logError(0xE1C3A7, "undelivered packets")
-	}
-	remoteHash = sd.requestDataItemHash(k)
-	if !bytes.Equal(hash, remoteHash) {
-		return sd.logError(0xE1F101, "hash mismatch")
-	}
-	if sd.Config.VerboseSender {
-		sd.LogStats()
-	}
-	return nil
+	return sd.endSend(k, hash)
 } //                                                                        Send
 
 // SendString transfers a key and value string
@@ -395,6 +353,49 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (sd *Sender)
+
+// beginSend checks if the sender is properly configured before sending
+func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
+	//
+	// setup cipher
+	if sd.Config.Cipher == nil {
+		return nil, sd.logError(0xE83D07, "nil Sender.Config.Cipher")
+	}
+	err = sd.Config.Cipher.SetKey(sd.CryptoKey)
+	if err != nil {
+		return nil, sd.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
+	}
+	// check settings
+	err = sd.Config.Validate()
+	if err != nil {
+		return nil, sd.logError(0xE5D92D, "invalid Sender.Config:", err)
+	}
+	err = sd.validateAddress()
+	if err != nil {
+		return nil, sd.logError(0xE5A04A, err)
+	}
+	hash = getHash(v)
+	if sd.Config.VerboseSender {
+		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
+			fmt.Sprintf("Send key: %s size: %d hash: %X",
+				k, len(v), hash))
+	}
+	remoteHash := sd.requestDataItemHash(k)
+	if bytes.Equal(hash, remoteHash) {
+		return nil, nil
+	}
+	comp, err := sd.Config.Compressor.Compress(v)
+	if err != nil {
+		return nil, sd.logError(0xE2EB59, err)
+	}
+	sd.dataHash = hash
+	sd.startTime = time.Now()
+	err = sd.makePackets(k, comp)
+	if err != nil {
+		return nil, err
+	}
+	return hash, nil
+} //                                                                   beginSend
 
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by key 'k'. If the receiver
@@ -617,6 +618,22 @@ func (sd *Sender) close() {
 		_ = sd.logError(0xEA7D7E, err)
 	}
 } //                                                                       close
+
+// endSend finializes the Send() by checking if the message was successfully
+// delivered by requesting a confirmation from the Receiver.
+func (sd *Sender) endSend(k string, hash []byte) error {
+	if !sd.DeliveredAllParts() {
+		return sd.logError(0xE1C3A7, "undelivered packets")
+	}
+	remoteHash := sd.requestDataItemHash(k)
+	if !bytes.Equal(hash, remoteHash) {
+		return sd.logError(0xE1F101, "hash mismatch")
+	}
+	if sd.Config.VerboseSender {
+		sd.LogStats()
+	}
+	return nil
+} //                                                                     endSend
 
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (sd *Sender)
