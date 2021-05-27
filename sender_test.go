@@ -298,26 +298,46 @@ func Test_Sender_connect_5(t *testing.T) {
 	}
 } //                                                       Test_Sender_connect_5
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (sd *Sender) close() error
 //
-// go test -run Test_Sender_close_
-//
-func Test_Sender_close_(t *testing.T) {
-	var sd Sender
-	err := sd.close()
-	if err != nil {
-		t.Error("0xEE7E05", err)
+// go test -run Test_Sender_close_*
+
+// must succeed
+func Test_Sender_close_1(t *testing.T) {
+	sd := Sender{conn: makeTestConn()}
+	logMsg := ""
+	sd.Config = NewDebugConfig(func(a ...interface{}) {
+		logMsg += fmt.Sprintln(a...)
+	})
+	sd.close()
+	if sd.conn != nil {
+		t.Error("0xE1FE10")
 	}
-	sd.conn = makeTestConn()
-	err = sd.conn.Close()
-	if err != nil {
-		t.Error("0xE3DD56", err)
+	if logMsg != "" {
+		t.Error("0xE0AA32")
 	}
-	err = sd.conn.Close()
-	if !matchError(err, "use of closed network connection") {
-		t.Error("0xE5FE16", "wrong error:", err)
+	sd.close()
+	if sd.conn != nil {
+		t.Error("0xE67DB6")
 	}
-} //                                                          Test_Sender_close_
+	if logMsg != "" {
+		t.Error("0xEA7A80")
+	}
+} //                                                         Test_Sender_close_1
+
+// must write to log when sd.conn.Close() fails
+func Test_Sender_close_2(t *testing.T) {
+	sd := Sender{conn: &mockNetUDPConn{failClose: true}}
+	logMsg := ""
+	sd.Config = NewDebugConfig(func(a ...interface{}) {
+		logMsg += fmt.Sprintln(a...)
+	})
+	sd.close()
+	if !strings.Contains(logMsg, "failed Close") {
+		t.Error("0xEA8D88")
+	}
+} //                                                         Test_Sender_close_2
 
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (sd *Sender)

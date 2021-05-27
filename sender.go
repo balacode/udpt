@@ -26,7 +26,7 @@ package udpt
 //   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
 //   ) waitForAllConfirmations()
-//   ) close() error
+//   ) close()
 //
 // # Internal Helper Methods (sd *Sender)
 //   ) getPacketCount(length int) int
@@ -259,10 +259,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 		err = sd.sendUndeliveredPackets()
 		if err != nil {
 			defer func() {
-				err2 := sd.close()
-				if err2 != nil {
-					_ = sd.logError(0xED94C5, err2)
-				}
+				sd.close()
 			}()
 			return sd.logError(0xE23CE0, err)
 		}
@@ -272,10 +269,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 		}
 		time.Sleep(sd.Config.SendRetryInterval)
 	}
-	err = sd.close()
-	if err != nil {
-		return sd.logError(0xE40A05, err)
-	}
+	sd.close()
 	if !sd.DeliveredAllParts() {
 		return sd.logError(0xE1C3A7, "undelivered packets")
 	}
@@ -587,16 +581,15 @@ func (sd *Sender) waitForAllConfirmations() {
 } //                                                     waitForAllConfirmations
 
 // close closes the UDP connection.
-func (sd *Sender) close() error {
+func (sd *Sender) close() {
 	if sd.conn == nil {
-		return nil
+		return
 	}
 	err := sd.conn.Close()
 	sd.conn = nil
 	if err != nil {
-		return sd.logError(0xEA7D7E, err)
+		_ = sd.logError(0xEA7D7E, err)
 	}
-	return nil
 } //                                                                       close
 
 // -----------------------------------------------------------------------------
