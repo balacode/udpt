@@ -32,6 +32,7 @@ package udpt
 //
 // # Internal Lifecycle Methods (sd *Sender)
 //   ) requestDataItemHash(k string) []byte
+//   ) makePackets(k string, comp []byte) error
 //   ) connect() (netUDPConn, error)
 //   ) connectDI( . . .
 //   ) sendUndeliveredPackets() error
@@ -236,29 +237,11 @@ func (sd *Sender) Send(k string, v []byte) error {
 	if err != nil {
 		return sd.logError(0xE2EB59, err)
 	}
-	packetCount := sd.getPacketCount(len(comp))
 	sd.dataHash = hash
 	sd.startTime = time.Now()
-	sd.packets = make([]senderPacket, packetCount)
-	//
-	// begin transfer
-	for i := range sd.packets {
-		a := i * sd.Config.PacketPayloadSize
-		b := a + sd.Config.PacketPayloadSize
-		if b > len(comp) {
-			b = len(comp)
-		}
-		header := tagFragment + fmt.Sprintf(
-			"key:%s hash:%X sn:%d count:%d\n",
-			k, sd.dataHash, i+1, packetCount,
-		)
-		packet, err2 := sd.makePacket(
-			append([]byte(header), comp[a:b]...),
-		)
-		if err2 != nil {
-			return sd.logError(0xE567A4, err2)
-		}
-		sd.packets[i] = *packet
+	err = sd.makePackets(k, comp)
+	if err != nil {
+		return err
 	}
 	newConn, err := sd.connect()
 	if err != nil {
@@ -460,6 +443,40 @@ func (sd *Sender) requestDataItemHash(k string) []byte {
 	}
 	return hash
 } //                                                         requestDataItemHash
+
+// makePackets creates the packets for sending over UDP,
+// by partitioning compressed message 'comp'
+func (sd *Sender) makePackets(k string, comp []byte) error {
+	length := len(comp)
+	if length == 0 {
+		sd.packets = nil
+		return nil
+	}
+	max := sd.Config.PacketPayloadSize
+	n := length / max
+	if (n * max) < length {
+		n++
+	}
+	packets := make([]senderPacket, n)
+	for i := range packets {
+		a := i * max
+		b := a + max
+		if b > len(comp) {
+			b = len(comp)
+		}
+		header := tagFragment + fmt.Sprintf(
+			"key:%s hash:%X sn:%d count:%d\n",
+			k, sd.dataHash, i+1, n,
+		)
+		packet, err := sd.makePacket(append([]byte(header), comp[a:b]...))
+		if err != nil {
+			return sd.logError(0xE567A4, err)
+		}
+		packets[i] = *packet
+	}
+	sd.packets = packets
+	return nil
+} //                                                                 makePackets
 
 // connect connects to the Receiver at Sender.Address and
 // returns a new UDP connection or nil and an error instance.
