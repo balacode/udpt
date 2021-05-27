@@ -82,14 +82,14 @@ func Test_Sender_Send_(t *testing.T) {
 	//
 	sd.Config.PacketSizeLimit = 65536
 	err = sd.Send("", nil)
-	if !matchError(err, "Sender.Config") {
+	if !matchError(err, "invalid Sender.Config") {
 		t.Error("0xE08E7C", "wrong error:", err)
 	}
 	sd.Config.PacketSizeLimit = 65535 - 8
 	//
 	sd.Address = ""
 	err = sd.Send("", nil)
-	if !matchError(err, "Sender.Address") {
+	if !matchError(err, "missing Sender.Address") {
 		t.Error("0xEC20C3", "wrong error:", err)
 	}
 	//

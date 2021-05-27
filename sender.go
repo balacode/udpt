@@ -138,9 +138,9 @@ type udpStats struct {
 
 // Sender coordinates sending key-value messages to a listening Receiver.
 //
-// You can use standalone Send() and SendString() functions to create a
-// single-use Sender to send a message, but it's more efficient to
-// construct a reusable Sender.
+// You can use standalone Send() and SendString() functions
+// to create a single-use Sender to send a message, but it's
+// more efficient to construct a reusable Sender.
 //
 type Sender struct {
 
@@ -215,7 +215,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 	// check settings
 	err = sd.Config.Validate()
 	if err != nil {
-		return sd.logError(0xE5D92D, "Invalid Sender.Config:", err)
+		return sd.logError(0xE5D92D, "invalid Sender.Config:", err)
 	}
 	err = sd.validateAddress()
 	if err != nil {
@@ -251,9 +251,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 	for retries := 0; retries < sd.Config.SendRetries; retries++ {
 		err = sd.sendUndeliveredPackets()
 		if err != nil {
-			defer func() {
-				sd.close()
-			}()
+			defer func() { sd.close() }()
 			return sd.logError(0xE23CE0, err)
 		}
 		sd.waitForAllConfirmations()
