@@ -17,6 +17,27 @@ import (
 // to run all tests in this file:
 // go test -v -run Test_Sender_*
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// func Send(addr string, k string, v []byte, cryptoKey []byte,
+//     config ...*Configuration,
+// ) error
+//
+// go test -run Test_Send_*
+
+// must fail because there are too many 'config' arguments
+func Test_Send_(t *testing.T) {
+	cryptoKey := []byte("3z5EdC485Ex9Wy0AsY4Apu6930Bx57Z0")
+	var cf *Configuration
+	//
+	//                addr              k      v        cryptoKey  config
+	err := SendString("127.0.0.1:9876", "msg", "test!", cryptoKey, cf, cf)
+	if !matchError(err, "too many 'config' arguments") {
+		t.Error("0xEE06B6", err)
+	}
+} //                                                                  Test_Send_
+
+// -----------------------------------------------------------------------------
+
 // SendString(addr string, k, v string, cryptoKey []byte,
 //     config ...*Configuration,
 // ) error
@@ -25,30 +46,26 @@ import (
 //
 func Test_SendString_(t *testing.T) {
 	//
-	received := map[string][]byte{} // collects received keys and values
 	cryptoKey := []byte("3z5EdC485Ex9Wy0AsY4Apu6930Bx57Z0")
-	cf := NewDefaultConfig()
-	cf.ReplyTimeout = 250 * time.Millisecond
-	cf.WriteTimeout = 250 * time.Millisecond
 	//
 	// set-up and run the receiver
-	rc := Receiver{Port: 9876, CryptoKey: cryptoKey, Config: cf,
-		ReceiveData: func(k string, v []byte) error {
-			received[k] = []byte(v)
-			return nil
-		},
-		ProvideData: func(k string) ([]byte, error) {
-			v := received[k]
-			return v, nil
-		},
-	}
+	received := map[string][]byte{} // collects received keys and values
+	_, rc := makeConfigAndReceiver(cryptoKey, &received)
 	go func() { _ = rc.Run() }()
 	defer func() { rc.Stop() }()
+	time.Sleep(200 * time.Millisecond)
 	//
-	//                addr              k      v         cryptoKey  config
-	err := SendString("127.0.0.1:9876", "msg", "Hello!", cryptoKey, cf)
+	err := SendString("127.0.0.1:9876", "_k_", "_v_", cryptoKey, nil)
 	if err != nil {
 		t.Error("0xE4A1ED", err)
+	}
+	if len(received) != 1 {
+		t.Error("0xED5B82", err)
+	}
+	for k, v := range received {
+		if k != "_k_" || string(v) != "_v_" {
+			t.Error("0xEE56FE", err)
+		}
 	}
 } //                                                            Test_SendString_
 
@@ -443,5 +460,28 @@ func Test_Sender_validateAddress_4(t *testing.T) {
 		t.Error("0xE45F34")
 	}
 }
+
+// -----------------------------------------------------------------------------
+
+// makeConfigAndReceiver creates and returns a
+// Configuration and Receiver for testing Sender.
+func makeConfigAndReceiver(cryptoKey []byte, received *map[string][]byte,
+) (*Configuration, *Receiver) {
+	cf := NewDefaultConfig()
+	cf.ReplyTimeout = 250 * time.Millisecond
+	cf.WriteTimeout = 250 * time.Millisecond
+	//
+	rc := Receiver{Port: 9876, CryptoKey: cryptoKey, Config: cf,
+		ReceiveData: func(k string, v []byte) error {
+			(*received)[k] = []byte(v)
+			return nil
+		},
+		ProvideData: func(k string) ([]byte, error) {
+			v := (*received)[k]
+			return v, nil
+		},
+	}
+	return cf, &rc
+} //                                                       makeConfigAndReceiver
 
 // end
