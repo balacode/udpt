@@ -70,7 +70,7 @@ func Send(
 	config ...*Configuration,
 ) error {
 	if len(config) > 1 {
-		makeError(0xE8C0D4, "too many 'config' arguments")
+		return makeError(0xE8C0D4, "too many 'config' arguments")
 	}
 	var cf *Configuration
 	if len(config) == 1 {
