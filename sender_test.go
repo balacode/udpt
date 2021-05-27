@@ -342,34 +342,6 @@ func Test_Sender_close_2(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (sd *Sender)
 
-// (sd *Sender) getPacketCount(length int) int
-//
-// go test -run Test_Sender_getPacketCount_
-//
-func Test_Sender_getPacketCount_(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig()}
-	sd.Config.PacketPayloadSize = 1000
-	//
-	if sd.getPacketCount(0) != 0 {
-		t.Error("0xE6C4D4")
-	}
-	if sd.getPacketCount(-100000) != 0 {
-		t.Error("0xE81D08")
-	}
-	if sd.getPacketCount(1) != 1 {
-		t.Error("0xE55EB9")
-	}
-	if sd.getPacketCount(1000) != 1 {
-		t.Error("0xE87CB1")
-	}
-	if sd.getPacketCount(1001) != 2 {
-		t.Error("0xE25DD0")
-	}
-	if sd.getPacketCount(10000) != 10 {
-		t.Error("0xEE5EF4")
-	}
-} //                                                 Test_Sender_getPacketCount_
-
 // (sd *Sender) logError(id uint32, a ...interface{}) error
 //
 // go test -run Test_Sender_logError_
