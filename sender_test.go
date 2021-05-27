@@ -431,4 +431,45 @@ func Test_Sender_makePacket_2(t *testing.T) {
 	}
 } //                                                    Test_Sender_makePacket_2
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// (sd *Sender) validateAddress() error
+//
+// go test -run Test_Sender_validateAddress_*
+
+// must return nil when Address is valid
+func Test_Sender_validateAddress_1(t *testing.T) {
+	sd := Sender{Address: "127.0.0.1:9876"}
+	err := sd.validateAddress()
+	if err != nil {
+		t.Error("0xEC9A5E")
+	}
+}
+
+// must return error "missing Sender.Address" when Address is ""
+func Test_Sender_validateAddress_2(t *testing.T) {
+	sd := Sender{Address: ""}
+	err := sd.validateAddress()
+	if !matchError(err, "missing Sender.Address") {
+		t.Error("0xEF8A89")
+	}
+}
+
+// must return error "missing Sender.Address" when Address is "\r \n"
+func Test_Sender_validateAddress_3(t *testing.T) {
+	sd := Sender{Address: "\r \n"}
+	err := sd.validateAddress()
+	if !matchError(err, "missing Sender.Address") {
+		t.Error("0xEB66F3")
+	}
+}
+
+// must return error "missing Sender.Address" when port is not specified
+func Test_Sender_validateAddress_4(t *testing.T) {
+	sd := Sender{Address: "127.0.0.1"}
+	err := sd.validateAddress()
+	if !matchError(err, "invalid port in Sender.Address") {
+		t.Error("0xE45F34")
+	}
+}
+
 // end

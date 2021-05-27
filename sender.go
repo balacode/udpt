@@ -44,10 +44,12 @@ package udpt
 //   ) logError(id uint32, a ...interface{}) error
 //   ) logInfo(a ...interface{})
 //   ) makePacket(data []byte) (*senderPacket, error)
+//   ) validateAddress() error
 
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -215,15 +217,9 @@ func (sd *Sender) Send(k string, v []byte) error {
 	if err != nil {
 		return sd.logError(0xE5D92D, "Invalid Sender.Config:", err)
 	}
-	if strings.TrimSpace(sd.Address) == "" {
-		return sd.logError(0xE5A04A, "missing Sender.Address")
-	}
-	var port int
-	if i := strings.Index(sd.Address, ":"); i != -1 {
-		port, _ = strconv.Atoi(sd.Address[i+1:])
-	}
-	if port < 1 || port > 65535 {
-		return sd.logError(0xE20BB9, "invalid port in Sender.Address")
+	err = sd.validateAddress()
+	if err != nil {
+		return sd.logError(0xE5A04A, err)
 	}
 	// prepare for transfer
 	hash := getHash(v)
@@ -661,5 +657,22 @@ func (sd *Sender) makePacket(data []byte) (*senderPacket, error) {
 	}
 	return &packet, nil
 } //                                                                  makePacket
+
+// validateAddress returns nil if Address is valid, or an error otherwise.
+// Presently it only checks if the address contains a valid port number.
+func (sd *Sender) validateAddress() error {
+	ad := sd.Address
+	if strings.TrimSpace(ad) == "" {
+		return errors.New("missing Sender.Address")
+	}
+	var port int
+	if i := strings.Index(ad, ":"); i != -1 {
+		port, _ = strconv.Atoi(ad[i+1:])
+	}
+	if port < 1 || port > 65535 {
+		return errors.New("invalid port in Sender.Address")
+	}
+	return nil
+} //                                                             validateAddress
 
 // end
