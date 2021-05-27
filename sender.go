@@ -5,7 +5,17 @@
 
 package udpt
 
-// # Sender Class
+// # Functions
+//
+//   Send(addr string, k string, v []byte, cryptoKey []byte,
+//       config ...*Configuration,
+//   ) error
+//
+//   SendString(addr string, k, v string, cryptoKey []byte,
+//       config ...*Configuration,
+//   ) error
+//
+// # Sender Type
 //   Sender struct
 //
 // # Main Methods (sd *Sender)
@@ -22,7 +32,8 @@ package udpt
 //
 // # Internal Lifecycle Methods (sd *Sender)
 //   ) requestDataItemHash(k string) []byte
-//   ) connect() error
+//   ) connect() (netUDPConn, error)
+//   ) connectDI( . . .
 //   ) sendUndeliveredPackets() error
 //   ) collectConfirmations()
 //   ) waitForAllConfirmations()
@@ -30,6 +41,8 @@ package udpt
 //
 // # Internal Helper Methods (sd *Sender)
 //   ) getPacketCount(length int) int
+//   ) logError(id uint32, a ...interface{}) error
+//   ) logInfo(a ...interface{})
 //   ) makePacket(data []byte) (*senderPacket, error)
 
 import (
@@ -42,6 +55,9 @@ import (
 	"sync"
 	"time"
 )
+
+// -----------------------------------------------------------------------------
+// # Functions
 
 // Send creates a Sender and uses it to transfer a key-value
 // pair to the Receiver specified by address 'addr'.
@@ -62,11 +78,7 @@ import (
 // config is an optional Configuration you can customize. If you leave it out,
 // Send() will use the configuration returned by NewDefaultConfig().
 //
-func Send(
-	addr string,
-	k string,
-	v []byte,
-	cryptoKey []byte,
+func Send(addr string, k string, v []byte, cryptoKey []byte,
 	config ...*Configuration,
 ) error {
 	if len(config) > 1 {
@@ -110,7 +122,7 @@ func SendString(addr string, k, v string, cryptoKey []byte,
 } //                                                                  SendString
 
 // -----------------------------------------------------------------------------
-// # Sender Class
+// # Sender Type
 
 // udpStats contains UDP transfer statistics, such as the transfer
 // speed and the number of packets delivered and lost.
@@ -122,8 +134,11 @@ type udpStats struct {
 	transferTime     time.Duration
 } //                                                                    udpStats
 
-// Sender is an internal class that coordinates sending
-// a sequence of bytes to a listening Receiver.
+// Sender coordinates sending key-value messages to a listening Receiver.
+//
+// You can use standalone Send() and SendString() functions to create a
+// single-use Sender to send a message, but it's more efficient to
+// construct a reusable Sender.
 //
 type Sender struct {
 
@@ -405,39 +420,6 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (sd *Sender)
 
-// connect connects to the Receiver at Sender.Address and
-// returns a new UDP connection or nil and an error instance.
-//
-// Note that it doesn't change the value of Sender.conn
-//
-func (sd *Sender) connect() (netUDPConn, error) {
-	return sd.connectDI(
-		func(network string, laddr *net.UDPAddr, raddr *net.UDPAddr,
-		) (netUDPConn, error) {
-			return net.DialUDP(network, laddr, raddr)
-		},
-	)
-} //                                                                     connect
-
-func (sd *Sender) connectDI(
-	netDialUDP func(string, *net.UDPAddr, *net.UDPAddr) (netUDPConn, error),
-) (netUDPConn, error) {
-	udpAddr, err := net.ResolveUDPAddr("udp", sd.Address)
-	if err != nil {
-		return nil, sd.logError(0xEC7C6B, "ResolveUDPAddr:", err)
-	}
-	var conn netUDPConn
-	conn, err = netDialUDP("udp", nil, udpAddr)
-	if err != nil {
-		return nil, sd.logError(0xE15CE1, err)
-	}
-	err = conn.SetWriteBuffer(sd.Config.SendBufferSize)
-	if err != nil {
-		return nil, sd.logError(0xE5F9C7, err)
-	}
-	return conn, nil
-} //                                                                   connectDI
-
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by key 'k'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
@@ -482,6 +464,40 @@ func (sd *Sender) requestDataItemHash(k string) []byte {
 	}
 	return hash
 } //                                                         requestDataItemHash
+
+// connect connects to the Receiver at Sender.Address and
+// returns a new UDP connection or nil and an error instance.
+//
+// Note that it doesn't change the value of Sender.conn
+//
+func (sd *Sender) connect() (netUDPConn, error) {
+	fn := func(network string, laddr *net.UDPAddr, raddr *net.UDPAddr,
+	) (netUDPConn, error) {
+		return net.DialUDP(network, laddr, raddr)
+	}
+	return sd.connectDI(fn)
+} //                                                                     connect
+
+// connectDI is only used by connect() and provides a parameter
+// for dependency injection, to enable mocking during testing.
+func (sd *Sender) connectDI(
+	netDialUDP func(string, *net.UDPAddr, *net.UDPAddr) (netUDPConn, error),
+) (netUDPConn, error) {
+	udpAddr, err := net.ResolveUDPAddr("udp", sd.Address)
+	if err != nil {
+		return nil, sd.logError(0xEC7C6B, "ResolveUDPAddr:", err)
+	}
+	var conn netUDPConn
+	conn, err = netDialUDP("udp", nil, udpAddr)
+	if err != nil {
+		return nil, sd.logError(0xE15CE1, err)
+	}
+	err = conn.SetWriteBuffer(sd.Config.SendBufferSize)
+	if err != nil {
+		return nil, sd.logError(0xE5F9C7, err)
+	}
+	return conn, nil
+} //                                                                   connectDI
 
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
