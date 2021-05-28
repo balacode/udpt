@@ -267,55 +267,20 @@ func (rc *Receiver) readFragmentHeader(recv []byte) (*fragmentHeader, error) {
 // receiveFragment handles a tagFragment packet sent by a Sender, and
 // sends back a confirmation packet (tagConfirmation) to the Sender.
 func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
-	if !bytes.HasPrefix(recv, []byte(tagFragment)) {
-		return nil, rc.logError(0xE4F3C5, "missing header")
-	}
-	err := rc.Config.Validate()
+	h, err := rc.readFragmentHeader(recv)
 	if err != nil {
-		return nil, rc.logError(0xE9B5C7, err)
-	}
-	dataOffset := bytes.Index(recv, []byte("\n"))
-	if dataOffset == -1 {
-		return nil, rc.logError(0xE6CF52, "newline not found")
-	}
-	dataOffset++ // skip newline
-	var (
-		header  = string(recv[len(tagFragment):dataOffset])
-		key     = getPart(header, "key:", " ")
-		hexHash = getPart(header, "hash:", " ")
-		sn      = getPart(header, "sn:", " ")
-		count   = getPart(header, "count:", "\n")
-	)
-	packetCount, err := strconv.Atoi(count)
-	if err != nil || packetCount < 1 {
-		return nil, rc.logError(0xE18A95, "bad 'count'")
-	}
-	index, err := strconv.Atoi(sn)
-	if err != nil {
-		return nil, rc.logError(0xEF27F8, "bad 'sn':", sn)
-	}
-	if index < 1 || index > packetCount {
-		return nil, rc.logError(0xE8CF4D,
-			"'sn'", index, "out of range 1 -", packetCount)
-	}
-	index--
-	hash, err := hex.DecodeString(hexHash)
-	if err != nil {
-		return nil, rc.logError(0xE5CA62, err)
-	}
-	if len(hash) != 32 {
-		return nil, rc.logError(0xEB6CB7, "bad hash size")
+		return nil, err
 	}
 	it := &rc.receivingDataItem
-	it.Retain(key, hash, packetCount)
-	compressedData := recv[dataOffset:]
+	it.Retain(h.key, h.hash, h.packetCount)
+	compressedData := recv[h.dataOffset:]
 	if len(compressedData) < 1 {
 		return nil, rc.logError(0xE92B0F, "received no data")
 	}
 	// store the current piece
-	if len(it.CompressedPieces[index]) == 0 {
-		it.CompressedPieces[index] = compressedData
-	} else if !bytes.Equal(compressedData, it.CompressedPieces[index]) {
+	if len(it.CompressedPieces[h.index]) == 0 {
+		it.CompressedPieces[h.index] = compressedData
+	} else if !bytes.Equal(compressedData, it.CompressedPieces[h.index]) {
 		return nil, rc.logError(0xE1A99A, "unknown packet alteration")
 	}
 	if it.IsLoaded() {
