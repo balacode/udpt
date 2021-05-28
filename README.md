@@ -78,8 +78,6 @@ This is a new project and its use of cryptography has not been reviewed by exper
 This project is in its DRAFT stage: very unstable. At this point it works, but the API may change rapidly.
 
 ## Ideas:
-- Write unit tests
 - Create a drop-in replacement for TCP and TLS connections
 - Implement some form of transfer control
 - Improve performance
-- Allow multiple Senders and Receivers that use different Address and Port values.
