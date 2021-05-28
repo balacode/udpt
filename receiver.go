@@ -5,6 +5,28 @@
 
 package udpt
 
+// type Receiver struct
+//
+// # Public Methods
+//   ) Run() error
+//   ) Stop()
+//
+// # Run() Internals
+//   ) initRun() error
+//   ) initRunDI(
+//   ) buildReply(recv []byte) (reply []byte, err error)
+//   ) sendReply(conn netUDPConn, addr net.Addr, reply []byte)
+//
+// # Packet Handlers
+//   type fragmentHeader struct
+//   ) readFragmentHeader(recv []byte) (*fragmentHeader, error)
+//   ) receiveFragment(recv []byte) ([]byte, error)
+//   ) sendDataItemHash(req []byte) ([]byte, error)
+//
+// # Logging Methods
+//   ) logError(id uint32, a ...interface{}) error
+//   ) logInfo(a ...interface{})
+
 import (
 	"bytes"
 	"encoding/hex"
@@ -141,7 +163,7 @@ func (rc *Receiver) Stop() {
 } //                                                                        Stop
 
 // -----------------------------------------------------------------------------
-// # Run() Helpers
+// # Run() Internals
 
 // initRun checks if the receiver is properly configured
 // and starts listening on the configured UDP address.
@@ -192,10 +214,13 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	switch {
 	case len(recv) == 0:
 		_ = rc.logError(0xE6B3BA, "received no data")
+		//
 	case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
 		reply, err = rc.sendDataItemHash(recv)
+		//
 	case bytes.HasPrefix(recv, []byte(tagFragment)):
 		reply, err = rc.receiveFragment(recv)
+		//
 	default:
 		reply = []byte("invalid_packet_header")
 		err = rc.logError(0xE985CC, "invalid packet header")
