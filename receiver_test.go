@@ -186,6 +186,38 @@ func Test_Receiver_Stop_2(t *testing.T) {
 
 // must succeed
 func Test_Receiver_initRun_1(t *testing.T) {
+	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
+		return nil, nil
+	}
+	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
+		return &net.UDPConn{}, nil
+	}
+	rc := newRunnableReceiver()
+	cons := ""
+	rc.Config.VerboseReceiver = true
+	rc.Config.LogFunc = func(a ...interface{}) {
+		cons += fmt.Sprintln(a...)
+	}
+	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	if rc.Config == nil {
+		t.Error("0xE9A35E")
+	}
+	if err != nil {
+		t.Error("0xE0A70B", err)
+	}
+	if !reflect.DeepEqual(rc.conn, &net.UDPConn{}) {
+		t.Error("0xEC5C19")
+	}
+	if !strings.Contains(cons, strings.Repeat("-", 80)) {
+		t.Error("0xEA76F8")
+	}
+	if !strings.Contains(cons, "Receiver listening...") {
+		t.Error("0xEE15D5")
+	}
+}
+
+// must succeed
+func Test_Receiver_initRun_2(t *testing.T) {
 	var c1, c2 bool
 	netResolveUDPAddr :=
 		func(network string, addr string) (*net.UDPAddr, error) {
@@ -217,65 +249,70 @@ func Test_Receiver_initRun_1(t *testing.T) {
 	rc.Config.LogFunc = func(a ...interface{}) {
 		cons += fmt.Sprintln(a...)
 	}
-	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
-	if rc.Config == nil {
-		t.Error("0xE9A35E")
-	}
-	if err != nil {
-		t.Error("0xE0A70B", err)
-	}
+	rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !c1 {
 		t.Error("0xE31BE4")
 	}
 	if !c2 {
 		t.Error("0xE73C32")
 	}
-	if !reflect.DeepEqual(rc.conn, &net.UDPConn{}) {
-		t.Error("0xEC5C19")
-	}
-	if !strings.Contains(cons, strings.Repeat("-", 80)) {
-		t.Error("0xEA76F8")
-	}
-	if !strings.Contains(cons, "Receiver listening...") {
-		t.Error("0xEE15D5")
-	}
-} //                                                     Test_Receiver_initRun_1
+}
 
-// must fail when the configuration is invalid
-func Test_Receiver_initRun_2(t *testing.T) {
-	var c1, c2 bool
-	netResolveUDPAddr :=
-		func(network string, addr string) (*net.UDPAddr, error) {
-			c1 = true
-			return nil, nil
-		}
-	netListenUDP :=
-		func(network string, laddr *net.UDPAddr) (*net.UDPConn, error) {
-			c2 = true
-			return nil, nil
-		}
-	// fail because Config is not set
+// fail because Config is not set
+func Test_Receiver_initRun_3(t *testing.T) {
 	rc := Receiver{Config: &Configuration{}}
 	err := rc.initRun()
 	if err == nil {
 		t.Error("0xEA74DE", "err must not be nil")
 	}
-	rc.Config = NewDefaultConfig()
-	//
-	// fail because Config is not valid
+}
+
+// fail because Config is not valid
+func Test_Receiver_initRun_4(t *testing.T) {
+	var c1, c2 bool
+	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
+		c1 = true
+		return nil, nil
+	}
+	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
+		c2 = true
+		return nil, nil
+	}
+	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.PacketSizeLimit = -1
-	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "invalid Configuration.PacketSizeLimit") {
 		t.Error("0xED9BC3", "wrong error:", err)
 	}
+	// at this point, none of the net functions must have been called
+	if c1 {
+		t.Error("0xE22A08")
+	}
+	if c2 {
+		t.Error("0xE26B1E")
+	}
+}
+
+// must fail because Receiver.Port is wrong
+func Test_Receiver_initRun_5(t *testing.T) {
+	var c1, c2 bool
+	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
+		c1 = true
+		return nil, nil
+	}
+	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
+		c2 = true
+		return nil, nil
+	}
+	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.PacketSizeLimit = 2048
 	//
-	// fail because Port is not set
-	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	// Port is not set
+	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xEE7BF2", "wrong error:", err)
 	}
-	// fail because Port is out of range
+	// Port is out of range
 	rc.Port = -789
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xEF50CF", "wrong error:", err)
@@ -284,20 +321,41 @@ func Test_Receiver_initRun_2(t *testing.T) {
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xEE72E1", "wrong error:", err)
 	}
+	// at this point, none of the net functions must have been called
+	if c1 {
+		t.Error("0xEE4CD2")
+	}
+	if c2 {
+		t.Error("0xEA0C85")
+	}
+}
+
+// must fail because CryptoKey is wrong
+func Test_Receiver_initRun_6(t *testing.T) {
+	var c1, c2 bool
+	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
+		c1 = true
+		return nil, nil
+	}
+	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
+		c2 = true
+		return nil, nil
+	}
+	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Port = 9876
 	//
-	// fail because CryptoKey is not set
-	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	// CryptoKey is not set
+	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "Receiver.CryptoKey") {
 		t.Error("0xEF28D6", "wrong error:", err)
 	}
-	//
-	// fail because CryptoKey is wrong size
+	// CryptoKey is too short
 	rc.CryptoKey = []byte{1, 2, 3}
 	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "Receiver.CryptoKey") {
 		t.Error("0xED60C9", "wrong error:", err)
 	}
+	// CryptoKey is too long
 	rc.CryptoKey = []byte{
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
@@ -306,12 +364,34 @@ func Test_Receiver_initRun_2(t *testing.T) {
 	if !matchError(err, "Receiver.CryptoKey") {
 		t.Error("0xE6BF78", "wrong error:", err)
 	}
+	// at this point, none of the net functions must have been called
+	if c1 {
+		t.Error("0xE78C71")
+	}
+	if c2 {
+		t.Error("0xE6AC5D")
+	}
+}
+
+// must fail because ReceiveData or ProvideData is not assigned
+func Test_Receiver_initRun_7(t *testing.T) {
+	var c1, c2 bool
+	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
+		c1 = true
+		return nil, nil
+	}
+	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
+		c2 = true
+		return nil, nil
+	}
+	rc := Receiver{Config: NewDefaultConfig()}
+	rc.Port = 9876
 	rc.CryptoKey = []byte{
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
 	}
 	// fail because ReceiveData is not assigned
-	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if !matchError(err, "nil Receiver.ReceiveData") {
 		t.Error("0xE2F00D", "wrong error:", err)
 	}
@@ -331,10 +411,10 @@ func Test_Receiver_initRun_2(t *testing.T) {
 	if c2 {
 		t.Error("0xE1B17E")
 	}
-} //                                                     Test_Receiver_initRun_2
+}
 
 // must fail when netResolveUDPAddr fails
-func Test_Receiver_initRun_3(t *testing.T) {
+func Test_Receiver_initRun_8(t *testing.T) {
 	netResolveUDPAddr :=
 		func(network string, addr string) (*net.UDPAddr, error) {
 			return nil, makeError(0xE2F60A, "failed netResolveUDPAddr")
@@ -347,10 +427,10 @@ func Test_Receiver_initRun_3(t *testing.T) {
 	if !matchError(err, "failed netResolveUDPAddr") {
 		t.Error("0xE44EF9", "wrong error:", err)
 	}
-} //                                                     Test_Receiver_initRun_3
+}
 
 // must fail when netListenUDP fails
-func Test_Receiver_initRun_4(t *testing.T) {
+func Test_Receiver_initRun_9(t *testing.T) {
 	netListenUDP :=
 		func(network string, laddr *net.UDPAddr) (*net.UDPConn, error) {
 			return nil, makeError(0xE2F33D, "failed netListenUDP")
@@ -363,7 +443,7 @@ func Test_Receiver_initRun_4(t *testing.T) {
 	if !matchError(err, "failed netListenUDP") {
 		t.Error("0xE9D64F", "wrong error:", err)
 	}
-} //                                                     Test_Receiver_initRun_4
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) buildReply(recv []byte) (reply []byte, err error)
