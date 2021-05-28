@@ -223,6 +223,47 @@ func (rc *Receiver) sendReply(conn netUDPConn, addr net.Addr, reply []byte) {
 // -----------------------------------------------------------------------------
 // # Packet Handlers
 
+// fragmentHeader contains details read from a received fragment
+type fragmentHeader struct {
+	dataOffset  int    // position of compressed data (part of the value)
+	key         string // key 'k' of the key-value message
+	hash        []byte // hash of entire key-value message
+	index       int    // 0-based index of this fragment
+	packetCount int    // total number of fragments (i.e. packets) in message
+}
+
+// readFragmentHeader reads the header from a received fragment packet
+func (rc *Receiver) readFragmentHeader(recv []byte) (*fragmentHeader, error) {
+	if !bytes.HasPrefix(recv, []byte(tagFragment)) {
+		return nil, rc.logError(0xE4F3C5, "missing header")
+	}
+	var h fragmentHeader
+	h.dataOffset = bytes.Index(recv, []byte("\n"))
+	if h.dataOffset == -1 {
+		return nil, rc.logError(0xE6CF52, "newline not found")
+	}
+	h.dataOffset++ // skip newline
+	//
+	s := string(recv[len(tagFragment):h.dataOffset])
+	h.key = getPart(s, "key:", " ")
+	//
+	var err error
+	h.hash, err = hex.DecodeString(getPart(s, "hash:", " "))
+	if err != nil || len(h.hash) != 32 {
+		return nil, rc.logError(0xEB6CB7, "bad hash")
+	}
+	h.packetCount, _ = strconv.Atoi(getPart(s, "count:", "\n"))
+	if h.packetCount < 1 {
+		return nil, rc.logError(0xE18A95, "bad 'count'")
+	}
+	h.index, _ = strconv.Atoi(getPart(s, "sn:", " "))
+	if h.index < 1 || h.index > h.packetCount {
+		return nil, rc.logError(0xEF27F8, "bad 'sn'")
+	}
+	h.index--
+	return &h, nil
+} //                                                          readFragmentHeader
+
 // receiveFragment handles a tagFragment packet sent by a Sender, and
 // sends back a confirmation packet (tagConfirmation) to the Sender.
 func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
