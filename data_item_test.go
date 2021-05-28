@@ -35,7 +35,7 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 	if dataItem2.IsLoaded() != true {
 		t.Error("0xE25AC1")
 	}
-} //                                                     Test_dataItem_IsLoaded_
+}
 
 // -----------------------------------------------------------------------------
 // # Methods
@@ -82,7 +82,7 @@ func Test_dataItem_LogStats_(t *testing.T) {
 	}
 	test(fmtPrintln)
 	test(logPrintln)
-} //                                                     Test_dataItem_LogStats_
+}
 
 // (di *dataItem) Reset()
 //
@@ -112,7 +112,7 @@ func Test_dataItem_Reset_(t *testing.T) {
 	if di.UncompressedSizeInfo != 0 {
 		t.Error("0xE22CD6", "UncompressedSizeInfo not reset")
 	}
-} //                                                        Test_dataItem_Reset_
+}
 
 // (di *dataItem) Retain(k string, hash []byte, packetCount int)
 //
@@ -185,7 +185,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 		UncompressedSizeInfo: 0,
 	}
 	test("OtherName", []byte{4, 5, 6}, 3, expect)
-} //                                                       Test_dataItem_Retain_
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (di *dataItem) UnpackBytes(compressor Compression) ([]byte, error)
@@ -202,7 +202,7 @@ func Test_dataItem_UnpackBytes_1(t *testing.T) {
 	if !matchError(err, "data item is incomplete") {
 		t.Error("0xEE0C63", "wrong error:", err)
 	}
-} //                                                 Test_dataItem_UnpackBytes_1
+}
 
 func Test_dataItem_UnpackBytes_2(t *testing.T) {
 	source := []byte(strings.Repeat(
@@ -246,7 +246,7 @@ func Test_dataItem_UnpackBytes_2(t *testing.T) {
 	if dataItem1.UncompressedSizeInfo != len(source) {
 		t.Error("0xEC1E61", "wrong UncompressedSizeInfo")
 	}
-} //                                                 Test_dataItem_UnpackBytes_2
+}
 
 func Test_dataItem_UnpackBytes_3(t *testing.T) {
 	source := []byte(strings.Repeat(
@@ -282,7 +282,7 @@ func Test_dataItem_UnpackBytes_3(t *testing.T) {
 	if !matchError(err, "hash mismatch") {
 		t.Error("0xEA19E1", "wrong error:", err)
 	}
-} //                                                 Test_dataItem_UnpackBytes_3
+}
 
 func Test_dataItem_UnpackBytes_4(t *testing.T) {
 	//
@@ -302,6 +302,6 @@ func Test_dataItem_UnpackBytes_4(t *testing.T) {
 	if !matchError(err, "zlib") {
 		t.Error("0xEF8DE2", "wrong error:", err)
 	}
-} //                                                 Test_dataItem_UnpackBytes_4
+}
 
 // end

@@ -34,7 +34,7 @@ func Test_Send_(t *testing.T) {
 	if !matchError(err, "too many 'config' arguments") {
 		t.Error("0xEE06B6", err)
 	}
-} //                                                                  Test_Send_
+}
 
 // -----------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ func Test_SendString_(t *testing.T) {
 			t.Error("0xEE56FE", err)
 		}
 	}
-} //                                                            Test_SendString_
+}
 
 // -----------------------------------------------------------------------------
 // # Main Methods (sd *Sender)
@@ -125,7 +125,7 @@ func Test_Sender_Send_(t *testing.T) {
 	if !matchError(err, "undelivered packets") {
 		t.Error("0xEB8B96", "wrong error:", err)
 	}
-} //                                                           Test_Sender_Send_
+}
 
 // (sd *Sender) SendString(k, v string) error
 //
@@ -150,7 +150,7 @@ func Test_Sender_SendString_(t *testing.T) {
 	if !matchError(err, "undelivered packets") {
 		t.Error("0xEE8E8D", "wrong error:", err)
 	}
-} //                                                     Test_Sender_SendString_
+}
 
 // -----------------------------------------------------------------------------
 // # Informatory Properties (sd *Sender)
@@ -169,7 +169,7 @@ func Test_Sender_AverageResponseMs_(t *testing.T) {
 	if n := sd.AverageResponseMs(); n < 0.1 || n > 0.1 {
 		t.Error("0xE01B5F")
 	}
-} //                                              Test_Sender_AverageResponseMs_
+}
 
 // (sd *Sender) TransferSpeedKBpS() float64
 //
@@ -185,7 +185,7 @@ func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
 	if n := sd.TransferSpeedKBpS(); n < 88 || n > 88 {
 		t.Error("0xED0BD8")
 	}
-} //                                              Test_Sender_TransferSpeedKBpS_
+}
 
 // -----------------------------------------------------------------------------
 // # Informatory Methods (sd *Sender)
@@ -235,7 +235,7 @@ func Test_Sender_LogStats_(t *testing.T) {
 	test(nil)
 	test(logPrintln)
 	test(fmtPrintln)
-} //                                                       Test_Sender_LogStats_
+}
 
 // -----------------------------------------------------------------------------
 // # Internal Lifecycle Methods (sd *Sender)
@@ -259,7 +259,7 @@ func Test_Sender_connect_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xEF79EB", err)
 	}
-} //                                                       Test_Sender_connect_1
+}
 
 // must fail because the host in the address is invalid
 func Test_Sender_connect_2(t *testing.T) {
@@ -271,7 +271,7 @@ func Test_Sender_connect_2(t *testing.T) {
 	if !matchError(err, "ResolveUDPAddr:") {
 		t.Error("0xEC2E79")
 	}
-} //                                                       Test_Sender_connect_2
+}
 
 // must fail because the port in the address is invalid
 func Test_Sender_connect_3(t *testing.T) {
@@ -283,7 +283,7 @@ func Test_Sender_connect_3(t *testing.T) {
 	if !matchError(err, "invalid port") {
 		t.Error("0xEA15E2", "wrong error:", err)
 	}
-} //                                                       Test_Sender_connect_3
+}
 
 // must fail when net.DialUDP() fails
 func Test_Sender_connect_4(t *testing.T) {
@@ -298,7 +298,7 @@ func Test_Sender_connect_4(t *testing.T) {
 	if !matchError(err, "failed netDialUDP") {
 		t.Error("0xE2FE6C", "wrong error:", err)
 	}
-} //                                                       Test_Sender_connect_4
+}
 
 // must fail when conn.SetWriteBuffer() fails
 func Test_Sender_connect_5(t *testing.T) {
@@ -313,7 +313,7 @@ func Test_Sender_connect_5(t *testing.T) {
 	if !matchError(err, "failed SetWriteBuffer") {
 		t.Error("0xED84F9", "wrong error:", err)
 	}
-} //                                                       Test_Sender_connect_5
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (sd *Sender) close() error
@@ -341,7 +341,7 @@ func Test_Sender_close_1(t *testing.T) {
 	if logMsg != "" {
 		t.Error("0xEA7A80")
 	}
-} //                                                         Test_Sender_close_1
+}
 
 // must write to log when sd.conn.Close() fails
 func Test_Sender_close_2(t *testing.T) {
@@ -354,7 +354,7 @@ func Test_Sender_close_2(t *testing.T) {
 	if !strings.Contains(logMsg, "failed Close") {
 		t.Error("0xEA8D88")
 	}
-} //                                                         Test_Sender_close_2
+}
 
 // -----------------------------------------------------------------------------
 // # Internal Helper Methods (sd *Sender)
@@ -373,7 +373,7 @@ func Test_Sender_logError_(t *testing.T) {
 	if msg != "ERROR 0xE12345: abc 123\n" {
 		t.Error("0xE5CB5D")
 	}
-} //                                                       Test_Sender_logError_
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (sd *Sender) makePacket(data []byte) (*senderPacket, error)
@@ -405,7 +405,7 @@ func Test_Sender_makePacket_1(t *testing.T) {
 	if !packet.confirmedTime.IsZero() {
 		t.Error("0xE21EB4")
 	}
-} //                                                    Test_Sender_makePacket_1
+}
 
 // must fail to create a packet larger than Config.PacketSizeLimit
 func Test_Sender_makePacket_2(t *testing.T) {
@@ -418,7 +418,7 @@ func Test_Sender_makePacket_2(t *testing.T) {
 	if !matchError(err, "PacketSizeLimit") {
 		t.Error("0xE69EA5", "wrong error:", err)
 	}
-} //                                                    Test_Sender_makePacket_2
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (sd *Sender) validateAddress() error
@@ -482,6 +482,6 @@ func makeConfigAndReceiver(cryptoKey []byte, received *map[string][]byte,
 		},
 	}
 	return cf, &rc
-} //                                                       makeConfigAndReceiver
+}
 
 // end

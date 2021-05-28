@@ -35,7 +35,7 @@ func Test_makeError_1(t *testing.T) {
 				it.id, it.a, it.expect, got)
 		}
 	}
-} //                                                            Test_makeError_1
+}
 
 func Test_makeError_(t *testing.T) {
 	a := makeError(0xEE5D1E, "the error message")
@@ -45,6 +45,6 @@ func Test_makeError_(t *testing.T) {
 	if got != "ERROR 0x"+"ED10D5: the error message" {
 		t.Error("0xEE38BE")
 	}
-} //                                                            Test_makeError_2
+}
 
 // end

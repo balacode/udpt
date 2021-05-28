@@ -34,7 +34,7 @@ func Test_readAndDecrypt_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xEA21C0", err)
 	}
-} //                                                       Test_readAndDecrypt_1
+}
 
 // must fail because connection is nil, before any other checks
 func Test_readAndDecrypt_2(t *testing.T) {
@@ -53,7 +53,7 @@ func Test_readAndDecrypt_2(t *testing.T) {
 	if !matchError(err, "nil connection") {
 		t.Error("0xE7B3EA", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_2
+}
 
 // must fail because decryptor is nil
 func Test_readAndDecrypt_3(t *testing.T) {
@@ -72,7 +72,7 @@ func Test_readAndDecrypt_3(t *testing.T) {
 	if !matchError(err, "nil decryptor") {
 		t.Error("0xED13F3", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_3
+}
 
 // must fail because tempBuf is nil
 func Test_readAndDecrypt_4(t *testing.T) {
@@ -91,7 +91,7 @@ func Test_readAndDecrypt_4(t *testing.T) {
 	if !matchError(err, "nil tempBuf") {
 		t.Error("0xE12E41", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_4
+}
 
 // must fail when conn.SetReadDeadline() fails
 func Test_readAndDecrypt_5(t *testing.T) {
@@ -110,7 +110,7 @@ func Test_readAndDecrypt_5(t *testing.T) {
 	if !matchError(err, "failed SetReadDeadline") {
 		t.Error("0xEE04B0", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_5
+}
 
 // must fail when conn.ReadFrom() fails
 func Test_readAndDecrypt_6(t *testing.T) {
@@ -129,7 +129,7 @@ func Test_readAndDecrypt_6(t *testing.T) {
 	if !matchError(err, "failed SetReadDeadline") {
 		t.Error("0xE3E57D", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_6
+}
 
 // must fail because ciphertext is garbage
 func Test_readAndDecrypt_7(t *testing.T) {
@@ -148,7 +148,7 @@ func Test_readAndDecrypt_7(t *testing.T) {
 	if !matchError(err, "invalid ciphertext") {
 		t.Error("0xEA53B8", "wrong error:", err)
 	}
-} //                                                       Test_readAndDecrypt_7
+}
 
 // -----------------------------------------------------------------------------
 
@@ -173,6 +173,6 @@ func Test_netError_(t *testing.T) {
 	if !matchError(err, "some other error") {
 		t.Error("0xE6F1BB", "wrong error:", err)
 	}
-} //                                                              Test_netError_
+}
 
 // end

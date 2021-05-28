@@ -22,7 +22,7 @@ func Test_getHash_1(t *testing.T) {
 		"27AE41E4649B934CA495991B7852B855" {
 		t.Error("0xE00CE9")
 	}
-} //                                                              Test_getHash_1
+}
 
 func Test_getHash_2(t *testing.T) {
 	func() {
@@ -35,7 +35,7 @@ func Test_getHash_2(t *testing.T) {
 		_ = getHashDI(nil, &mockHash{failWrite: true})
 		t.Error("0xE20F56") // previous line should panic and never reach here
 	}()
-} //                                                              Test_getHash_2
+}
 
 func Test_getHash_3(t *testing.T) {
 	func() {
@@ -48,7 +48,7 @@ func Test_getHash_3(t *testing.T) {
 		_ = getHashDI([]byte{1, 2, 3}, &mockHash{})
 		t.Error("0xEE2EE8") // previous line should panic and never reach here
 	}()
-} //                                                              Test_getHash_3
+}
 
 // -----------------------------------------------------------------------------
 
@@ -69,6 +69,6 @@ func (mk *mockHash) Write(data []byte) (int, error) {
 		return 0, makeError(0xED9CD4, "failed mockHash.Write")
 	}
 	return len(data), err
-} //                                                                       Write
+}
 
 // end

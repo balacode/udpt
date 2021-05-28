@@ -32,7 +32,7 @@ func Test_senderPacket_IsDelivered_(t *testing.T) {
 	if pk.IsDelivered() != true {
 		t.Error("0xEE46BB")
 	}
-} //                                              Test_senderPacket_IsDelivered_
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (pk *senderPacket) Send(conn *net.UDPConn, cipher SymmetricCipher) error
@@ -49,7 +49,7 @@ func Test_senderPacket_Send_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xED62D8", err)
 	}
-} //                                                    Test_senderPacket_Send_1
+}
 
 // must fail when passed a nil connection
 func Test_senderPacket_Send_2(t *testing.T) {
@@ -58,7 +58,7 @@ func Test_senderPacket_Send_2(t *testing.T) {
 	if !matchError(err, "nil conn") {
 		t.Error("0xE31FF5", "wrong error:", err)
 	}
-} //                                                    Test_senderPacket_Send_2
+}
 
 // must fail when passed an invalid connection
 func Test_senderPacket_Send_3(t *testing.T) {
@@ -71,7 +71,7 @@ func Test_senderPacket_Send_3(t *testing.T) {
 		// TODO: above error description may differ on Linux or Mac OS
 		t.Error("0xE65B73", "wrong error:", err)
 	}
-} //                                                    Test_senderPacket_Send_3
+}
 
 // must fail when passed a nil cipher
 func Test_senderPacket_Send_4(t *testing.T) {
@@ -81,7 +81,7 @@ func Test_senderPacket_Send_4(t *testing.T) {
 	if !matchError(err, "nil cipher") {
 		t.Error("0xE03CD3", "wrong error:", err)
 	}
-} //                                                    Test_senderPacket_Send_4
+}
 
 // must fail when the encryption key is not set
 func Test_senderPacket_Send_5(t *testing.T) {
@@ -92,7 +92,7 @@ func Test_senderPacket_Send_5(t *testing.T) {
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE12AB8", "wrong error:", err)
 	}
-} //                                                    Test_senderPacket_Send_5
+}
 
 // must fail when the encryption key is invalid
 func Test_senderPacket_Send_6(t *testing.T) {
@@ -103,6 +103,6 @@ func Test_senderPacket_Send_6(t *testing.T) {
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE53A3B", "wrong error:", err)
 	}
-} //                                                    Test_senderPacket_Send_6
+}
 
 // end

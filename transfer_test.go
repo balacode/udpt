@@ -24,7 +24,7 @@ func Test_transfer_1(t *testing.T) {
 	const itemCount = 50
 	const itemSize = 100
 	testTransfer(itemCount, itemSize, t)
-} //                                                             Test_transfer_1
+}
 
 // go test -run Test_transfer_2
 //
@@ -32,7 +32,7 @@ func Test_transfer_2(t *testing.T) {
 	const itemCount = 10
 	const itemSize = 10 * 1024 * 1024 // 10 MiB
 	testTransfer(itemCount, itemSize, t)
-} //                                                             Test_transfer_2
+}
 
 // go test -run Test_transfer_3
 //
@@ -40,7 +40,7 @@ func Test_transfer_3(t *testing.T) {
 	const itemCount = 1
 	const itemSize = 100 * 1024 * 1024 // 100 MiB
 	testTransfer(itemCount, itemSize, t)
-} //                                                             Test_transfer_3
+}
 
 // testTransfer runs a transfer test with different packet counts and sizes.
 //
@@ -124,6 +124,6 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 		sd.LogStats()
 	}
 	time.Sleep(time.Second)
-} //                                                                testTransfer
+}
 
 // end

@@ -57,7 +57,7 @@ func Test_string_getPart_(t *testing.T) {
 				it.s, it.prefix, it.suffix, it.expect, got)
 		}
 	}
-} //                                                        Test_string_getPart_
+}
 
 // joinArgs(tag string, a ...interface{}) string
 //
@@ -86,7 +86,7 @@ func Test_string_joinArgs_(t *testing.T) {
 				it.tag, it.a, it.expect, got)
 		}
 	}
-} //                                                       Test_string_joinArgs_
+}
 
 // padf(minLength int, format string, a ...interface{}) string
 //
@@ -112,6 +112,6 @@ func Test_string_padf_(t *testing.T) {
 				it.minLength, it.format, it.a, it.expect, got)
 		}
 	}
-} //                                                           Test_string_padf_
+}
 
 // end

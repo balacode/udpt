@@ -25,7 +25,7 @@ import (
 //
 func Test_log_pl_(t *testing.T) {
 	pl()
-} //                                                                Test_log_pl_
+}
 
 // LogPrint(a ...interface{})
 //
@@ -33,7 +33,7 @@ func Test_log_pl_(t *testing.T) {
 //
 func Test_log_LogPrint_(t *testing.T) {
 	LogPrint()
-} //                                                          Test_log_LogPrint_
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // MakeLogFunc(printMsg bool, logFile string) func(a ...interface{})
@@ -76,7 +76,7 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 	// cleanup
 	_ = os.Remove(logFile)
 	logTimeNow = time.Now
-} //                                                      Test_log_MakeLogFunc_1
+}
 
 func Test_log_MakeLogFunc_2(t *testing.T) {
 	const testFile = "udpt.Test_log_MakeLogFunc_.tmp"
@@ -90,7 +90,7 @@ func Test_log_MakeLogFunc_2(t *testing.T) {
 		t.Error("0xEC7ED0")
 	}
 	_ = os.Remove(testFile)
-} //                                                      Test_log_MakeLogFunc_2
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (le *logEntry) Output()
@@ -111,7 +111,7 @@ func Test_log_logEntry_Output_1(t *testing.T) {
 		t.Error("0xE58FB6")
 	}
 	_ = os.Remove(logEntryTestFile)
-} //                                                  Test_log_logEntry_Output_1
+}
 
 func Test_log_logEntry_Output_2(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
@@ -129,7 +129,7 @@ func Test_log_logEntry_Output_2(t *testing.T) {
 		t.Error("0xED98CA")
 	}
 	_ = os.Remove(logEntryTestFile)
-} //                                                  Test_log_logEntry_Output_2
+}
 
 func Test_log_logEntry_Output_3(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
@@ -145,7 +145,7 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 		t.Error("0xE7BC99")
 	}
 	_ = os.Remove(logEntryTestFile)
-} //                                                  Test_log_logEntry_Output_3
+}
 
 func Test_log_logEntry_Output_4(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
@@ -172,7 +172,7 @@ func Test_log_logEntry_Output_4(t *testing.T) {
 		t.Error("0xEB38C2")
 	}
 	_ = os.Remove(logEntryTestFile)
-} //                                                  Test_log_logEntry_Output_4
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // openLogFile(filename string, cons io.Writer) io.WriteCloser
@@ -209,7 +209,7 @@ func Test_log_openLogFile_1(t *testing.T) {
 		t.Error("0xE4CE4D")
 	}
 	_ = os.Remove(testfile)
-} //                                                      Test_log_openLogFile_1
+}
 
 // go test -run Test_log_openLogFile_2
 //
@@ -224,7 +224,7 @@ func Test_log_openLogFile_2(t *testing.T) {
 	if !strings.Contains(sb.String(), "ERROR 0x") {
 		t.Error("0xEA1DC3")
 	}
-} //                                                      Test_log_openLogFile_2
+}
 
 // -----------------------------------------------------------------------------
 
@@ -237,7 +237,7 @@ func Test_log_logInit_(t *testing.T) {
 	if logChan == nil {
 		t.Error("0xE39B91", "logChan not initialized")
 	}
-} //                                                           Test_log_logInit_
+}
 
 // logMakeMessage(tm time.Time, a ...interface{}) string
 //
@@ -265,6 +265,6 @@ func Test_log_logMakeMessage_(t *testing.T) {
 				tms, it.a, expect, got)
 		}
 	}
-} //                                                    Test_log_logMakeMessage_
+}
 
 // end

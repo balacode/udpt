@@ -28,7 +28,7 @@ func Test_zlibCompressor_1(t *testing.T) {
 	if !bytes.Equal(zInput(), uncomp) {
 		t.Error("0xEB0E80", "data corrupted")
 	}
-} //                                                       Test_zlibCompressor_1
+}
 
 // uncompressing less than 4 bytes must fail:
 func Test_zlibCompressor_2(t *testing.T) {
@@ -40,7 +40,7 @@ func Test_zlibCompressor_2(t *testing.T) {
 	if !matchError(err, "invalid 'comp'") {
 		t.Error("0xE4AB37", "wrong error:", err)
 	}
-} //                                                       Test_zlibCompressor_2
+}
 
 // uncompressing must fail when wr.Write() fails in compressDI():
 func Test_zlibCompressor_3(t *testing.T) {
@@ -54,7 +54,7 @@ func Test_zlibCompressor_3(t *testing.T) {
 	if !matchError(err, "failed mockWriteCloser.Write") {
 		t.Error("0xEE9C54", "wrong error:", err)
 	}
-} //                                                       Test_zlibCompressor_3
+}
 
 // uncompressing must fail when wr.Close() fails in compressDI():
 func Test_zlibCompressor_4(t *testing.T) {
@@ -68,7 +68,7 @@ func Test_zlibCompressor_4(t *testing.T) {
 	if !matchError(err, "failed mockWriteCloser.Close") {
 		t.Error("0xE4DF92", "wrong error:", err)
 	}
-} //                                                       Test_zlibCompressor_4
+}
 
 // uncompressing must fail when reader.Read or io.Copy fail in uncompressDI():
 func Test_zlibCompressor_5(t *testing.T) {
@@ -83,7 +83,7 @@ func Test_zlibCompressor_5(t *testing.T) {
 	if !matchError(err, "failed mockReadCloser.Read") {
 		t.Error("0xE81C62", "wrong error:", err)
 	}
-} //                                                       Test_zlibCompressor_5
+}
 
 // uncompressing must fail when reader.Close() fails in uncompressDI():
 func Test_zlibCompressor_6(t *testing.T) {
@@ -98,7 +98,7 @@ func Test_zlibCompressor_6(t *testing.T) {
 	if !matchError(err, "failed mockReadCloser.Close") {
 		t.Error("0xEA0F76", "wrong error:", err)
 	}
-} //                                                       Test_zlibCompressor_6
+}
 
 // -----------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ func Test_zlibCompressor_6(t *testing.T) {
 type mockReadCloser struct {
 	failRead  bool
 	failClose bool
-} //                                                              mockReadCloser
+}
 
 // Read is a method of mockReadCloser implementing io.ReadCloser.
 //
@@ -117,7 +117,7 @@ func (mk *mockReadCloser) Read(p []byte) (n int, err error) {
 		return 0, makeError(0xEF8E54, "failed mockReadCloser.Read")
 	}
 	return len(p), nil
-} //                                                                        Read
+}
 
 // Close is a method of mockReadCloser implementing io.ReadCloser.
 //
@@ -128,7 +128,7 @@ func (mk *mockReadCloser) Close() error {
 		return makeError(0xE1FB2C, "failed mockReadCloser.Close")
 	}
 	return nil
-} //                                                                       Close
+}
 
 // -----------------------------------------------------------------------------
 
@@ -141,13 +141,13 @@ func zCompress(t *testing.T) []byte {
 		t.Error("0xE26CD5", err)
 	}
 	return comp
-} //                                                                   zCompress
+}
 
 // zInput: provides a message to compress
 func zInput() []byte {
 	return []byte(
 		strings.Repeat("The quick brown fox jumps over the lazy dog!", 7),
 	)
-} //                                                                      zInput
+}
 
 // end

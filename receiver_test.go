@@ -33,7 +33,7 @@ func newRunnableReceiver() Receiver {
 	ret.Config.ReplyTimeout = 500 * time.Millisecond
 	ret.Config.WriteTimeout = 500 * time.Millisecond
 	return ret
-} //                                                         newRunnableReceiver
+}
 
 // -----------------------------------------------------------------------------
 // (rc *Receiver) Run() error
@@ -55,7 +55,7 @@ func Test_Receiver_Run_01(t *testing.T) {
 	if err != nil {
 		t.Error("0xEF9D95", err)
 	}
-} //                                                        Test_Receiver_Run_01
+}
 
 // must fail to start: Config.Cipher is not specfied
 func Test_Receiver_Run_02(t *testing.T) {
@@ -65,7 +65,7 @@ func Test_Receiver_Run_02(t *testing.T) {
 	if !matchError(err, "nil Configuration.Cipher") {
 		t.Error("0xE4F1AF", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_02
+}
 
 // must fail to start: Config is invalid
 func Test_Receiver_Run_03(t *testing.T) {
@@ -75,7 +75,7 @@ func Test_Receiver_Run_03(t *testing.T) {
 	if !matchError(err, "invalid Configuration.PacketSizeLimit") {
 		t.Error("0xEC1D86", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_03
+}
 
 // must fail to start: CryptoKey is not specfied
 func Test_Receiver_Run_04(t *testing.T) {
@@ -85,7 +85,7 @@ func Test_Receiver_Run_04(t *testing.T) {
 	if !matchError(err, "Receiver.CryptoKey") {
 		t.Error("0xE57F1E", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_04
+}
 
 // must fail to start: CryptoKey is wrong size
 func Test_Receiver_Run_05(t *testing.T) {
@@ -95,7 +95,7 @@ func Test_Receiver_Run_05(t *testing.T) {
 	if !matchError(err, "AES-256 key") {
 		t.Error("0xE19A88", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_05
+}
 
 // must fail to start: Port is not set
 func Test_Receiver_Run_06(t *testing.T) {
@@ -105,7 +105,7 @@ func Test_Receiver_Run_06(t *testing.T) {
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xE21D17", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_06
+}
 
 // must fail to start: Port number is too high
 func Test_Receiver_Run_07(t *testing.T) {
@@ -115,7 +115,7 @@ func Test_Receiver_Run_07(t *testing.T) {
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xE8E6D5", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_07
+}
 
 // must fail to start: Port number is negative
 func Test_Receiver_Run_08(t *testing.T) {
@@ -125,7 +125,7 @@ func Test_Receiver_Run_08(t *testing.T) {
 	if !matchError(err, "Receiver.Port") {
 		t.Error("0xED3AE1", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_08
+}
 
 // must fail to start: ReceiveData is not specified
 func Test_Receiver_Run_09(t *testing.T) {
@@ -135,7 +135,7 @@ func Test_Receiver_Run_09(t *testing.T) {
 	if !matchError(err, "nil Receiver.ReceiveData") {
 		t.Error("0xE7C0AC", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_09
+}
 
 // must fail to start: ProvideData is not specified
 func Test_Receiver_Run_10(t *testing.T) {
@@ -145,7 +145,7 @@ func Test_Receiver_Run_10(t *testing.T) {
 	if !matchError(err, "nil Receiver.ProvideData") {
 		t.Error("0xEF5FF2", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Run_10
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) Stop()
@@ -158,7 +158,7 @@ func Test_Receiver_Stop_1(t *testing.T) {
 	if rc.conn != nil {
 		t.Error("0xE1FC2F")
 	}
-} //                                                        Test_Receiver_Stop_1
+}
 
 func Test_Receiver_Stop_2(t *testing.T) {
 	var err error
@@ -176,7 +176,7 @@ func Test_Receiver_Stop_2(t *testing.T) {
 	if !matchError(err, "failed Close") {
 		t.Error("0xEF17A7", "wrong error:", err)
 	}
-} //                                                        Test_Receiver_Stop_2
+}
 
 // -----------------------------------------------------------------------------
 // # Run() Helpers
@@ -486,7 +486,7 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 	if !strings.Contains(logMsg, "received: test1") {
 		t.Error("0xE70F40", "wrong reply:", logMsg)
 	}
-} //                                                  Test_Receiver_buildReply_1
+}
 
 // must fail because sent data is nil
 func Test_Receiver_buildReply_2(t *testing.T) {
@@ -505,7 +505,7 @@ func Test_Receiver_buildReply_2(t *testing.T) {
 	if !strings.Contains(logErrorMsg, "received no data") {
 		t.Error("0xE75A71", "wrong error:", logErrorMsg)
 	}
-} //                                                  Test_Receiver_buildReply_2
+}
 
 // must fail because packet header is invalid
 func Test_Receiver_buildReply_3(t *testing.T) {
@@ -525,7 +525,7 @@ func Test_Receiver_buildReply_3(t *testing.T) {
 	if !strings.Contains(logErrorMsg, "invalid packet header") {
 		t.Error("0xE53F59", "wrong error:", logErrorMsg)
 	}
-} //                                                  Test_Receiver_buildReply_3
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) sendReply(conn netUDPConn, addr net.Addr, reply []byte)
@@ -567,7 +567,7 @@ func Test_Receiver_sendReply_1(t *testing.T) {
 	if strings.Count(cons, "Receiver wrote 5 bytes to 127.0.0.0:9876") != 2 {
 		t.Error("0xEA1AE3")
 	}
-} //                                                   Test_Receiver_sendReply_1
+}
 
 func Test_Receiver_sendReply_2(t *testing.T) {
 	var (
@@ -582,7 +582,7 @@ func Test_Receiver_sendReply_2(t *testing.T) {
 	if (cn.nSetReadDeadline + cn.nReadFrom + cn.nWriteTo + cn.nClose) != 0 {
 		t.Error("0xED5E71")
 	}
-} //                                                   Test_Receiver_sendReply_2
+}
 
 func Test_Receiver_sendReply_3(t *testing.T) {
 	var (
@@ -600,7 +600,7 @@ func Test_Receiver_sendReply_3(t *testing.T) {
 	if (cn.nSetReadDeadline + cn.nReadFrom + cn.nClose) != 0 {
 		t.Error("0xE87A3F")
 	}
-} //                                                   Test_Receiver_sendReply_3
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) receiveFragment(recv []byte) ([]byte, error)
@@ -616,7 +616,7 @@ func Test_Receiver_receiveFragment_01(t *testing.T) {
 	if !matchError(err, "missing header") {
 		t.Error("0xEF7AE2", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_01
+}
 
 func Test_Receiver_receiveFragment_02(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -628,7 +628,7 @@ func Test_Receiver_receiveFragment_02(t *testing.T) {
 	if !matchError(err, "nil Configuration.Cipher") {
 		t.Error("0xE90F36", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_02
+}
 
 func Test_Receiver_receiveFragment_03(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -639,7 +639,7 @@ func Test_Receiver_receiveFragment_03(t *testing.T) {
 	if !matchError(err, "newline not found") {
 		t.Error("0xE8DC8E", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_03
+}
 
 func Test_Receiver_receiveFragment_04(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -651,7 +651,7 @@ func Test_Receiver_receiveFragment_04(t *testing.T) {
 	if !matchError(err, "bad 'sn'") {
 		t.Error("0xEC2C48", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_04
+}
 
 func Test_Receiver_receiveFragment_05(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -663,7 +663,7 @@ func Test_Receiver_receiveFragment_05(t *testing.T) {
 	if !matchError(err, "bad 'count'") {
 		t.Error("0xEA33B6", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_05
+}
 
 func Test_Receiver_receiveFragment_06(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -675,7 +675,7 @@ func Test_Receiver_receiveFragment_06(t *testing.T) {
 	if !matchError(err, "out of range") {
 		t.Error("0xEB9A96", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_06
+}
 
 func Test_Receiver_receiveFragment_07(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -687,7 +687,7 @@ func Test_Receiver_receiveFragment_07(t *testing.T) {
 	if !matchError(err, "hex") {
 		t.Error("0xE43F0E", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_07
+}
 
 func Test_Receiver_receiveFragment_08(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -699,7 +699,7 @@ func Test_Receiver_receiveFragment_08(t *testing.T) {
 	if !matchError(err, "hex") {
 		t.Error("0xEF4C9B", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_08
+}
 
 func Test_Receiver_receiveFragment_09(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -711,7 +711,7 @@ func Test_Receiver_receiveFragment_09(t *testing.T) {
 	if !matchError(err, "bad hash size") {
 		t.Error("0xEB87BE", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_09
+}
 
 func Test_Receiver_receiveFragment_10(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
@@ -725,7 +725,7 @@ func Test_Receiver_receiveFragment_10(t *testing.T) {
 	if !matchError(err, "received no data") {
 		t.Error("0xE13A6F", "wrong error:", err)
 	}
-} //                                            Test_Receiver_receiveFragment_10
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error)
@@ -741,7 +741,7 @@ func Test_Receiver_sendDataItemHash_1(t *testing.T) {
 	if !matchError(err, "missing header") {
 		t.Error("0xED4B27", "wrong error:", err)
 	}
-} //                                            Test_Receiver_sendDataItemHash_1
+}
 
 func Test_Receiver_sendDataItemHash_2(t *testing.T) {
 	var rc Receiver
@@ -752,7 +752,7 @@ func Test_Receiver_sendDataItemHash_2(t *testing.T) {
 	if !matchError(err, "nil ProvideData") {
 		t.Error("0xE65C25", "wrong error:", err)
 	}
-} //                                            Test_Receiver_sendDataItemHash_2
+}
 
 func Test_Receiver_sendDataItemHash_3(t *testing.T) {
 	var rc Receiver
@@ -766,7 +766,7 @@ func Test_Receiver_sendDataItemHash_3(t *testing.T) {
 	if !matchError(err, "test error") {
 		t.Error("0xEE3C84", "wrong error:", err)
 	}
-} //                                            Test_Receiver_sendDataItemHash_3
+}
 
 func Test_Receiver_sendDataItemHash_4(t *testing.T) {
 	var rc Receiver
@@ -782,7 +782,7 @@ func Test_Receiver_sendDataItemHash_4(t *testing.T) {
 	if err != nil {
 		t.Error("0xE0D7A2", err)
 	}
-} //                                            Test_Receiver_sendDataItemHash_4
+}
 
 func Test_Receiver_sendDataItemHash_5(t *testing.T) {
 	var rc Receiver
@@ -798,7 +798,7 @@ func Test_Receiver_sendDataItemHash_5(t *testing.T) {
 	if err != nil {
 		t.Error("0xEF13C6", err)
 	}
-} //                                            Test_Receiver_sendDataItemHash_5
+}
 
 // -----------------------------------------------------------------------------
 // # Logging Methods
@@ -818,7 +818,7 @@ func Test_Receiver_logError_1(t *testing.T) {
 	if got != "" {
 		t.Error("0xE94FB3")
 	}
-} //                                                    Test_Receiver_logError_1
+}
 
 func Test_Receiver_logError_2(t *testing.T) {
 	var sb strings.Builder
@@ -834,7 +834,7 @@ func Test_Receiver_logError_2(t *testing.T) {
 	if got != "ERROR 0xE12345: error message" {
 		t.Error("0xE0FA6C")
 	}
-} //                                                    Test_Receiver_logError_2
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) logInfo(a ...interface{})
@@ -851,7 +851,7 @@ func Test_Receiver_logInfo_1(t *testing.T) {
 	if got != "" {
 		t.Error("0xEF3F1C")
 	}
-} //                                                     Test_Receiver_logInfo_1
+}
 
 func Test_Receiver_logInfo_2(t *testing.T) {
 	var sb strings.Builder
@@ -867,6 +867,6 @@ func Test_Receiver_logInfo_2(t *testing.T) {
 	if got != "info message" {
 		t.Error("0xE74A75")
 	}
-} //                                                     Test_Receiver_logInfo_2
+}
 
 // end

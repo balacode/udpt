@@ -62,7 +62,7 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 			t.Error("0xEE3AC7")
 		}
 	}
-} //                                                 Test_config_NewDebugConfig_
+}
 
 // (cf *Configuration) Validate() error
 //
@@ -155,6 +155,6 @@ func Test_config_Configuration_Validate_(t *testing.T) {
 			t.Error("0xE0DE62", "wrong error:", err)
 		}
 	}
-} //                                         Test_config_Configuration_Validate_
+}
 
 // end

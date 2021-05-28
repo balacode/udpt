@@ -23,7 +23,7 @@ func makeTestConn() *net.UDPConn {
 		panic(makeError(0xE1E9E7, err).Error())
 	}
 	return conn
-} //                                                                makeTestConn
+}
 
 // matchError retruns true if err contains the specified error message.
 func matchError(err error, msg string) bool {
@@ -31,7 +31,7 @@ func matchError(err error, msg string) bool {
 		return true
 	}
 	return err != nil && strings.Contains(err.Error(), msg)
-} //                                                                  matchError
+}
 
 // -----------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ type mockNetUDPConn struct {
 	sertWriteBufferArg int
 	writeDeadline      time.Time
 	written            []byte
-} //                                                              mockNetUDPConn
+}
 
 func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	mk.nReadFrom++
@@ -80,7 +80,7 @@ func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	}
 	addr := &mockNetAddr{network: "udp", addr: "127.8.9.10:11"}
 	return len(b), addr, nil
-} //                                                                    ReadFrom
+}
 
 func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
 	mk.nWrite++
@@ -89,7 +89,7 @@ func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
 	}
 	mk.written = append(mk.written, b...)
 	return len(b), nil
-} //                                                                       Write
+}
 
 func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	mk.nWriteTo++
@@ -98,7 +98,7 @@ func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	}
 	mk.written = append(mk.written, b...)
 	return len(b), nil
-} //                                                                     WriteTo
+}
 
 func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
 	mk.nSetReadDeadline++
@@ -106,7 +106,7 @@ func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
 		return makeError(0xED5A2C, "failed SetReadDeadline")
 	}
 	return nil
-} //                                                             SetReadDeadline
+}
 
 func (mk *mockNetUDPConn) SetWriteBuffer(bytes int) error {
 	mk.nSetWriteBuffer++
@@ -115,7 +115,7 @@ func (mk *mockNetUDPConn) SetWriteBuffer(bytes int) error {
 	}
 	mk.sertWriteBufferArg = bytes
 	return nil
-} //                                                              SetWriteBuffer
+}
 
 func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
 	mk.nSetWriteDeadline++
@@ -124,7 +124,7 @@ func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
 	}
 	mk.writeDeadline = deadline
 	return nil
-} //                                                            SetWriteDeadline
+}
 
 func (mk *mockNetUDPConn) Close() error {
 	mk.nClose++
@@ -132,7 +132,7 @@ func (mk *mockNetUDPConn) Close() error {
 		return makeError(0xE60D82, "failed Close")
 	}
 	return nil
-} //                                                                       Close
+}
 
 // -----------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ func (mk *mockNetUDPConn) Close() error {
 type mockWriteCloser struct {
 	failWrite bool
 	failClose bool
-} //                                                             mockWriteCloser
+}
 
 // Write is a method of mockWriteCloser implementing io.WriteCloser.
 //
@@ -151,7 +151,7 @@ func (mk *mockWriteCloser) Write(p []byte) (n int, err error) {
 		return 0, makeError(0xEA8F84, "failed mockWriteCloser.Write")
 	}
 	return len(p), nil
-} //                                                                       Write
+}
 
 // Close is a method of mockWriteCloser implementing io.WriteCloser.
 //
@@ -162,13 +162,13 @@ func (mk *mockWriteCloser) Close() error {
 		return makeError(0xEC5E59, "failed mockWriteCloser.Close")
 	}
 	return nil
-} //                                                                       Close
+}
 
 // -----------------------------------------------------------------------------
 
 // go test -run Test_Temp_
 //
 func Test_Temp_(t *testing.T) {
-} //                                                                  Test_Temp_
+}
 
 // end

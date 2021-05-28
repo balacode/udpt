@@ -36,7 +36,7 @@ func Test_aesCipher_ValidateKey_(t *testing.T) {
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE85BC4")
 	}
-} //                                                 Test_aesCipher_ValidateKey_
+}
 
 // (ac *aesCipher) SetKey(cryptoKey []byte) error
 //
@@ -101,7 +101,7 @@ func Test_aesCipher_SetKey_(t *testing.T) {
 	if !matchError(err, "failed cipherNewGCM") {
 		t.Error("0xE4C78A", "wrong error:", err)
 	}
-} //                                                      Test_aesCipher_SetKey_
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (ac *aesCipher) Encrypt(plaintext []byte) (ciphertext []byte, err error)
@@ -126,7 +126,7 @@ func Test_aesCipher_Encrypt_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xE9A2DE", err)
 	}
-} //                                                    Test_aesCipher_Encrypt_1
+}
 
 // must fail encrypting because there is no encryption key specified:
 func Test_aesCipher_Encrypt_2(t *testing.T) {
@@ -138,7 +138,7 @@ func Test_aesCipher_Encrypt_2(t *testing.T) {
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xEF26E8", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Encrypt_2
+}
 
 // must fail encrypting when io.ReadFull() fails:
 func Test_aesCipher_Encrypt_3(t *testing.T) {
@@ -153,7 +153,7 @@ func Test_aesCipher_Encrypt_3(t *testing.T) {
 	if !matchError(err, "failed ioReadFull") {
 		t.Error("0xE9D47D", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Encrypt_3
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (ac *aesCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error)
@@ -173,7 +173,7 @@ func Test_aesCipher_Decrypt_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xE64B43", err)
 	}
-} //                                                    Test_aesCipher_Decrypt_1
+}
 
 // must fail decrypting because there is no encryption key specified:
 func Test_aesCipher_Decrypt_2(t *testing.T) {
@@ -185,7 +185,7 @@ func Test_aesCipher_Decrypt_2(t *testing.T) {
 	if !matchError(err, "AES-256 key must be 32 bytes long") {
 		t.Error("0xE43B12", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Decrypt_2
+}
 
 // must fail decrypting because ciphertext is too short:
 func Test_aesCipher_Decrypt_3(t *testing.T) {
@@ -197,7 +197,7 @@ func Test_aesCipher_Decrypt_3(t *testing.T) {
 	if !matchError(err, "invalid ciphertext") {
 		t.Error("0xEC9F1F", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Decrypt_3
+}
 
 // must fail decrypting because ciphertext is garbage:
 func Test_aesCipher_Decrypt_4(t *testing.T) {
@@ -209,7 +209,7 @@ func Test_aesCipher_Decrypt_4(t *testing.T) {
 	if !matchError(err, "cipher: message authentication failed") {
 		t.Error("0xEE3FD8", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Decrypt_4
+}
 
 // must fail decrypting because ciphertext is tampered:
 func Test_aesCipher_Decrypt_5(t *testing.T) {
@@ -223,7 +223,7 @@ func Test_aesCipher_Decrypt_5(t *testing.T) {
 	if !matchError(err, "cipher: message authentication failed") {
 		t.Error("0xEC44BA", "wrong error:", err)
 	}
-} //                                                    Test_aesCipher_Decrypt_5
+}
 
 // -----------------------------------------------------------------------------
 
@@ -238,7 +238,7 @@ func newTestAESCipher(t *testing.T) *aesCipher {
 		t.Error("0xE15BF6", err)
 	}
 	return &aesCipher{gcm: gcm, cryptoKey: []byte(testAESKey)}
-} //                                                            newTestAESCipher
+}
 
 // newTestAESCiphertext creates ciphertext that can
 // be decrypted into "abc" with testAESKey.
@@ -256,6 +256,6 @@ func newTestAESCiphertext() []byte {
 	// fmt.Printf("%#v", ctext)
 	//
 	// note that each time the ciphertext will differ
-} //                                                        newTestAESCiphertext
+}
 
 // end
