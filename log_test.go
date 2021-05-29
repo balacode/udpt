@@ -19,14 +19,6 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// pl(a ...interface{})
-//
-// go test -run Test_log_pl_
-//
-func Test_log_pl_(t *testing.T) {
-	pl()
-}
-
 // LogPrint(a ...interface{})
 //
 // go test -run Test_log_LogPrint_

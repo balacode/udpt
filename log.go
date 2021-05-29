@@ -13,11 +13,6 @@ import (
 	"time"
 )
 
-// pl is like fmt.Println but returns no values. It is only used for debugging.
-func pl(a ...interface{}) { fmt.Println(a...) }
-
-var _ = pl
-
 // logTimeNow should always be set to time.Now,
 // except when mocking during testing.
 var logTimeNow = time.Now
