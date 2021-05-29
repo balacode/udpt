@@ -195,16 +195,16 @@ func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
 // go test -run Test_Sender_LogStats_
 //
 func Test_Sender_LogStats_(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	fmtPrintln := func(v ...interface{}) (int, error) {
-		sb.WriteString(fmt.Sprintln(v...))
+		tlog.WriteString(fmt.Sprintln(v...))
 		return 0, nil
 	}
 	logPrintln := func(v ...interface{}) {
-		sb.WriteString(fmt.Sprintln(v...))
+		tlog.WriteString(fmt.Sprintln(v...))
 	}
 	test := func(logFunc interface{}) {
-		sb.Reset()
+		tlog.Reset()
 		//
 		sd := Sender{Config: NewDefaultConfig()}
 		sd.Config.LogFunc = logPrintln
@@ -214,8 +214,8 @@ func Test_Sender_LogStats_(t *testing.T) {
 		}}
 		sd.LogStats(logFunc)
 		//
-		got := sb.String()
-		expect := "" +
+		got := tlog.String()
+		want := "" +
 			"SN: 0    T0: 0001-01-01 00:00:00 +000 T1: NONE ✔ 0.0 ms\n" +
 			"B. delivered: 0\n" +
 			"Bytes lost  : 0\n" +
@@ -225,10 +225,9 @@ func Test_Sender_LogStats_(t *testing.T) {
 			"Avg./ Packet: 0.0 ms\n" +
 			"Trans. speed: 0.0 KiB/s\n"
 		//
-		if got != expect {
-			t.Error("0xE63A81" + "\n" +
-				"expect:\n" + expect + "\n" + "got:\n" + got)
-			fmt.Println([]byte(expect))
+		if got != want {
+			t.Error("0xE63A81\n" + "want:\n" + want + "\n" + "got:\n" + got)
+			fmt.Println([]byte(want))
 			fmt.Println([]byte(got))
 		}
 	}
@@ -323,22 +322,22 @@ func Test_Sender_connect_5(t *testing.T) {
 // must succeed
 func Test_Sender_close_1(t *testing.T) {
 	sd := Sender{conn: makeTestConn()}
-	logMsg := ""
+	ts := ""
 	sd.Config = NewDebugConfig(func(a ...interface{}) {
-		logMsg += fmt.Sprintln(a...)
+		ts += fmt.Sprintln(a...)
 	})
 	sd.close()
 	if sd.conn != nil {
 		t.Error("0xE1FE10")
 	}
-	if logMsg != "" {
+	if ts != "" {
 		t.Error("0xE0AA32")
 	}
 	sd.close()
 	if sd.conn != nil {
 		t.Error("0xE67DB6")
 	}
-	if logMsg != "" {
+	if ts != "" {
 		t.Error("0xEA7A80")
 	}
 }
@@ -346,12 +345,12 @@ func Test_Sender_close_1(t *testing.T) {
 // must write to log when sd.conn.Close() fails
 func Test_Sender_close_2(t *testing.T) {
 	sd := Sender{conn: &mockNetUDPConn{failClose: true}}
-	logMsg := ""
+	ts := ""
 	sd.Config = NewDebugConfig(func(a ...interface{}) {
-		logMsg += fmt.Sprintln(a...)
+		ts += fmt.Sprintln(a...)
 	})
 	sd.close()
-	if !strings.Contains(logMsg, "failed Close") {
+	if !strings.Contains(ts, "failed Close") {
 		t.Error("0xEA8D88")
 	}
 }
@@ -364,13 +363,13 @@ func Test_Sender_close_2(t *testing.T) {
 // go test -run Test_Sender_logError_
 //
 func Test_Sender_logError_(t *testing.T) {
-	var msg string
+	var ts string
 	sd := Sender{Config: NewDefaultConfig()}
 	sd.Config.LogFunc = func(a ...interface{}) {
-		msg = fmt.Sprintln(a...)
+		ts = fmt.Sprintln(a...)
 	}
 	sd.logError(0xE12345, "abc", 123)
-	if msg != "ERROR 0xE12345: abc 123\n" {
+	if ts != "ERROR 0xE12345: abc 123\n" {
 		t.Error("0xE5CB5D")
 	}
 }
@@ -383,26 +382,26 @@ func Test_Sender_logError_(t *testing.T) {
 // must succeed creating a packet to send
 func Test_Sender_makePacket_1(t *testing.T) {
 	sd := Sender{Config: NewDefaultConfig()}
-	packet, err := sd.makePacket([]byte{1, 2, 3})
+	pk, err := sd.makePacket([]byte{1, 2, 3})
 	if err != nil {
 		t.Error("0xE0AE90", err)
 	}
-	expectData := []byte{1, 2, 3}
-	if !bytes.Equal(packet.data, expectData) {
+	wantData := []byte{1, 2, 3}
+	if !bytes.Equal(pk.data, wantData) {
 		t.Error("0xEF4E82")
 	}
-	expectSentHash := getHash([]byte{1, 2, 3})
-	if !bytes.Equal(packet.sentHash, expectSentHash) {
+	wantSentHash := getHash([]byte{1, 2, 3})
+	if !bytes.Equal(pk.sentHash, wantSentHash) {
 		t.Error("0xE51B95")
 	}
-	n := time.Since(packet.sentTime)
+	n := time.Since(pk.sentTime)
 	if n > time.Millisecond {
 		t.Error("0xE1FA4B")
 	}
-	if packet.confirmedHash != nil {
+	if pk.confirmedHash != nil {
 		t.Error("0xEA0E4B")
 	}
-	if !packet.confirmedTime.IsZero() {
+	if !pk.confirmedTime.IsZero() {
 		t.Error("0xE21EB4")
 	}
 }
@@ -411,8 +410,8 @@ func Test_Sender_makePacket_1(t *testing.T) {
 func Test_Sender_makePacket_2(t *testing.T) {
 	sd := Sender{Config: NewDefaultConfig()}
 	data := make([]byte, sd.Config.PacketSizeLimit+1)
-	packet, err := sd.makePacket(data)
-	if packet != nil {
+	pk, err := sd.makePacket(data)
+	if pk != nil {
 		t.Error("0xE0FE30")
 	}
 	if !matchError(err, "PacketSizeLimit") {

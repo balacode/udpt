@@ -456,10 +456,10 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 		t.Error("0xE29CE8", err)
 	}
 	rc := Receiver{Config: NewDefaultConfig()}
-	logMsg, recKey, recVal := "", "", ""
+	ts, recKey, recVal := "", "", ""
 	rc.Config.Cipher.SetKey([]byte(testAESKey))
 	rc.Config.LogFunc = func(a ...interface{}) {
-		logMsg += fmt.Sprintln(a...)
+		ts += fmt.Sprintln(a...)
 	}
 	rc.ReceiveData = func(k string, v []byte) error {
 		recKey, recVal = k, string(v)
@@ -483,8 +483,8 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xE06F48")
 	}
-	if !strings.Contains(logMsg, "received: test1") {
-		t.Error("0xE70F40", "wrong reply:", logMsg)
+	if !strings.Contains(ts, "received: test1") {
+		t.Error("0xE70F40", "wrong reply:", ts)
 	}
 }
 
@@ -803,29 +803,29 @@ func Test_Receiver_sendDataItemHash_5(t *testing.T) {
 // go test -run Test_Receiver_logError_*
 
 func Test_Receiver_logError_1(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	var rc Receiver
 	//
 	rc.logError(0xE12345, "error message")
 	//
-	got := sb.String()
+	got := tlog.String()
 	if got != "" {
 		t.Error("0xE94FB3")
 	}
 }
 
 func Test_Receiver_logError_2(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	fn := func(a ...interface{}) {
-		sb.WriteString(fmt.Sprint(a...))
+		tlog.WriteString(fmt.Sprint(a...))
 	}
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.LogFunc = fn
 	//
 	rc.logError(0xE12345, "error message")
 	//
-	got := sb.String()
-	if got != "ERROR 0xE12345: error message" {
+	ts := tlog.String()
+	if ts != "ERROR 0xE12345: error message" {
 		t.Error("0xE0FA6C")
 	}
 }
@@ -836,28 +836,28 @@ func Test_Receiver_logError_2(t *testing.T) {
 // go test -run Test_Receiver_logInfo_*
 
 func Test_Receiver_logInfo_1(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	var rc Receiver
 	//
 	rc.logInfo("info message")
 	//
-	got := sb.String()
-	if got != "" {
+	ts := tlog.String()
+	if ts != "" {
 		t.Error("0xEF3F1C")
 	}
 }
 
 func Test_Receiver_logInfo_2(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	fn := func(a ...interface{}) {
-		sb.WriteString(fmt.Sprint(a...))
+		tlog.WriteString(fmt.Sprint(a...))
 	}
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.LogFunc = fn
 	//
 	rc.logInfo("info message")
 	//
-	got := sb.String()
+	got := tlog.String()
 	if got != "info message" {
 		t.Error("0xE74A75")
 	}

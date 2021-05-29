@@ -18,7 +18,7 @@ func Test_makeError_1(t *testing.T) {
 		id uint32
 		a  []interface{}
 		//
-		expect string
+		want string
 	}{
 		{0, nil, "ERROR 0x000000:"},
 		{1, nil, "ERROR 0x000001:"},
@@ -28,11 +28,11 @@ func Test_makeError_1(t *testing.T) {
 	} {
 		err := makeError(it.id, it.a...)
 		got := err.Error()
-		if got != it.expect {
+		if got != it.want {
 			t.Errorf("0xE60E1A"+" makeError(%X, %#v)"+
-				"\n expect: %#v"+
-				"\n    got: %#v",
-				it.id, it.a, it.expect, got)
+				"\n want: %#v"+
+				"\n  got: %#v",
+				it.id, it.a, it.want, got)
 		}
 	}
 }

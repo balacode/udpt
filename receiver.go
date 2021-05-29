@@ -359,8 +359,8 @@ func (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
 func (rc *Receiver) logError(id uint32, a ...interface{}) error {
 	ret := makeError(id, a...)
 	if rc.Config != nil && rc.Config.LogFunc != nil {
-		msg := ret.Error()
-		rc.Config.LogFunc(msg)
+		s := ret.Error()
+		rc.Config.LogFunc(s)
 	}
 	return ret
 } //                                                                    logError

@@ -37,16 +37,16 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 		//
 		// debug configuration should match the one returned
 		// by NewDefaultConfig() but with logging activated
-		expect := NewDefaultConfig()
-		expect.VerboseSender = true
-		expect.VerboseReceiver = true
-		expect.LogFunc = LogPrint
-		expectS := formatStruct(expect)
+		want := NewDefaultConfig()
+		want.VerboseSender = true
+		want.VerboseReceiver = true
+		want.LogFunc = LogPrint
+		wantS := formatStruct(want)
 		//
-		if gotS != expectS {
+		if gotS != wantS {
 			t.Error("0xEB0A18", "\n",
-				"expect:", expectS, "\n",
-				"   got:", gotS,
+				"want:", wantS, "\n",
+				" got:", gotS,
 			)
 		}
 	}

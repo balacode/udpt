@@ -64,14 +64,14 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 		return
 	}
 	got := string(data)
-	expect := "@tm abc 123 45 de\n"
-	expect = strings.ReplaceAll(expect, "@tm", tm.String()[:19])
+	want := "@tm abc 123 45 de\n"
+	want = strings.ReplaceAll(want, "@tm", tm.String()[:19])
 	//
-	if got != expect {
+	if got != want {
 		t.Errorf("0xEF57A5"+" wrong text in log file "+
-			"\n expect: %#v"+
-			"\n    got: %#v",
-			expect, got)
+			"\n want: %#v"+
+			"\n  got: %#v",
+			want, got)
 	}
 	// cleanup
 	_ = os.Remove(logFile)
@@ -80,13 +80,13 @@ func Test_log_MakeLogFunc_1(t *testing.T) {
 
 func Test_log_MakeLogFunc_2(t *testing.T) {
 	const testFile = "udpt.Test_log_MakeLogFunc_.tmp"
-	const msg = "test message #5067124389"
+	const s = "test message #5067124389"
 	_ = os.Remove(testFile)
 	fn := MakeLogFunc(false, testFile)
-	fn(msg)
+	fn(s)
 	time.Sleep(time.Second)
 	data, err := ioutil.ReadFile(testFile)
-	if !strings.Contains(string(data), msg) || err != nil {
+	if !strings.Contains(string(data), s) || err != nil {
 		t.Error("0xEC7ED0")
 	}
 	_ = os.Remove(testFile)
@@ -103,11 +103,11 @@ func Test_log_logEntry_Output_1(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 	//
 	// test writing to console without logging to a file
-	const msg = "test message #3146250897"
-	l := logEntry{printMsg: true, logFile: "", msg: msg}
-	var sb strings.Builder
-	l.outputDI(&sb, nil)
-	if sb.String() != msg+"\n" {
+	const s = "test message #3146250897"
+	le := logEntry{printMsg: true, logFile: "", msg: s}
+	var tlog strings.Builder
+	le.outputDI(&tlog, nil)
+	if tlog.String() != s+"\n" {
 		t.Error("0xE58FB6")
 	}
 	_ = os.Remove(logEntryTestFile)
@@ -117,15 +117,15 @@ func Test_log_logEntry_Output_2(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 	//
 	// test logging to a file without writing to console
-	const msg = "test message #9473258061"
-	l := logEntry{printMsg: false, logFile: logEntryTestFile, msg: msg}
-	var sb strings.Builder
-	l.outputDI(&sb, openLogFile)
-	if sb.String() != "" {
+	const s = "test message #9473258061"
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
+	var tlog strings.Builder
+	le.outputDI(&tlog, openLogFile)
+	if tlog.String() != "" {
 		t.Error("0xE8BB8F")
 	}
 	data, err := ioutil.ReadFile(logEntryTestFile)
-	if string(data) != msg+"\n" || err != nil {
+	if string(data) != s+"\n" || err != nil {
 		t.Error("0xED98CA")
 	}
 	_ = os.Remove(logEntryTestFile)
@@ -135,11 +135,11 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 	//
 	// test that no file is created when openLogFile() returns nil
-	const msg = "test message #2361498057"
-	l := logEntry{printMsg: false, logFile: logEntryTestFile, msg: msg}
+	const s = "test message #2361498057"
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
 	openLogFile := func(string, io.Writer) io.WriteCloser { return nil }
-	var sb strings.Builder
-	l.outputDI(&sb, openLogFile)
+	var tlog strings.Builder
+	le.outputDI(&tlog, openLogFile)
 	data, err := ioutil.ReadFile(logEntryTestFile)
 	if data != nil || !os.IsNotExist(err) {
 		t.Error("0xE7BC99")
@@ -151,16 +151,16 @@ func Test_log_logEntry_Output_4(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 	//
 	// test that errors are written to console when Write() and Close() fail
-	const msg = "test message #1540938672"
-	l := logEntry{printMsg: false, logFile: logEntryTestFile, msg: msg}
+	const s = "test message #1540938672"
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
 	openLogFile := func(string, io.Writer) io.WriteCloser {
 		return &mockWriteCloser{failWrite: true, failClose: true}
 	}
-	var sb strings.Builder
-	l.outputDI(&sb, openLogFile)
+	var tlog strings.Builder
+	le.outputDI(&tlog, openLogFile)
 	//
 	// console must contain two error messages
-	cons := sb.String()
+	cons := tlog.String()
 	if !strings.Contains(cons, "ERROR 0x") ||
 		!strings.Contains(cons, "failed mockWriteCloser.Write") ||
 		!strings.Contains(cons, "failed mockWriteCloser.Close") {
@@ -184,16 +184,16 @@ func Test_log_openLogFile_1(t *testing.T) {
 	// must succeed opening a file and writing to it two times
 	const testfile = "udpt.Test_log_openLogFile_.tmp"
 	_ = os.Remove(testfile)
-	var sb strings.Builder
+	var tlog strings.Builder
 	now := time.Now().String()
 	msg1 := now + " msg1\n"
 	msg2 := now + " msg2\n"
 	//
-	wrc := openLogFile(testfile, &sb)
+	wrc := openLogFile(testfile, &tlog)
 	wrc.Write([]byte(msg1))
 	wrc.Close()
 	//
-	wrc = openLogFile(testfile, &sb)
+	wrc = openLogFile(testfile, &tlog)
 	wrc.Write([]byte(msg2))
 	wrc.Close()
 	//
@@ -205,7 +205,7 @@ func Test_log_openLogFile_1(t *testing.T) {
 	if content != msg1+msg2 {
 		t.Error("0xE24C06")
 	}
-	if sb.String() != "" {
+	if tlog.String() != "" {
 		t.Error("0xE4CE4D")
 	}
 	_ = os.Remove(testfile)
@@ -216,12 +216,12 @@ func Test_log_openLogFile_1(t *testing.T) {
 func Test_log_openLogFile_2(t *testing.T) {
 	//
 	// must fail to open a file with an invalid name
-	var sb strings.Builder
-	wrc := openLogFile("\\:/", &sb)
+	var tlog strings.Builder
+	wrc := openLogFile("\\:/", &tlog)
 	if wrc != nil {
 		t.Error("0xEC8BA1")
 	}
-	if !strings.Contains(sb.String(), "ERROR 0x") {
+	if !strings.Contains(tlog.String(), "ERROR 0x") {
 		t.Error("0xEA1DC3")
 	}
 }
@@ -245,24 +245,24 @@ func Test_log_logInit_(t *testing.T) {
 //
 func Test_log_logMakeMessage_(t *testing.T) {
 	for _, it := range []struct {
-		a      []interface{}
-		expect string
+		a    []interface{}
+		want string
 	}{
 		{nil, "@tm "},
 		{[]interface{}{"line1\nline2"}, "@tm line1\n@tm line2"},
 		{[]interface{}{"abc", 123, "de", 34}, "@tm abc 123 de 34"},
 	} {
 		var (
-			tm     = time.Now()
-			tms    = tm.String()[:19]
-			got    = logMakeMessage(tm, it.a...)
-			expect = strings.ReplaceAll(it.expect, "@tm", tms)
+			tm   = time.Now()
+			tms  = tm.String()[:19]
+			got  = logMakeMessage(tm, it.a...)
+			want = strings.ReplaceAll(it.want, "@tm", tms)
 		)
-		if got != expect {
+		if got != want {
 			t.Errorf("0xEB14AF"+" logMakeMessage(<%s>, %#v)"+
-				"\n expect: %#v"+
-				"\n    got: %#v",
-				tms, it.a, expect, got)
+				"\n want: %#v"+
+				"\n  got: %#v",
+				tms, it.a, want, got)
 		}
 	}
 }

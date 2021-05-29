@@ -24,7 +24,7 @@ func Test_string_getPart_(t *testing.T) {
 		prefix string
 		suffix string
 		//
-		expect string
+		want string
 	}{
 		{"", "", "", ""},
 		//
@@ -50,11 +50,11 @@ func Test_string_getPart_(t *testing.T) {
 		{"xyz class::sum; 123", "class::", ";", "sum"},
 	} {
 		got := getPart(it.s, it.prefix, it.suffix)
-		if got != it.expect {
+		if got != it.want {
 			t.Errorf("0xE2C73F"+" getPart(%#v, %#v, %#v)"+
-				"\n expect: %#v"+
-				"\n    got: %#v",
-				it.s, it.prefix, it.suffix, it.expect, got)
+				"\n want: %#v"+
+				"\n  got: %#v",
+				it.s, it.prefix, it.suffix, it.want, got)
 		}
 	}
 }
@@ -68,7 +68,7 @@ func Test_string_joinArgs_(t *testing.T) {
 		tag string
 		a   []interface{}
 		//
-		expect string
+		want string
 	}{
 		{"", nil, ""},
 		{" ", nil, ""},
@@ -79,11 +79,11 @@ func Test_string_joinArgs_(t *testing.T) {
 		{"", []interface{}{"abc", 123, "de", 34}, "abc 123 de 34"},
 	} {
 		got := joinArgs(it.tag, it.a...)
-		if got != it.expect {
+		if got != it.want {
 			t.Errorf("0xE7B77D"+" joinArgs(%#v, %#v)"+
-				"\n expect: %#v"+
-				"\n    got: %#v",
-				it.tag, it.a, it.expect, got)
+				"\n want: %#v"+
+				"\n  got: %#v",
+				it.tag, it.a, it.want, got)
 		}
 	}
 }
@@ -98,18 +98,18 @@ func Test_string_padf_(t *testing.T) {
 		format    string
 		a         []interface{}
 		//
-		expect string
+		want string
 	}{
 		{0, "", nil, ""},
 		{0, "%s", []interface{}{"abc"}, "abc"},
 		{6, "%s", []interface{}{"abc"}, "abc   "},
 	} {
 		got := padf(it.minLength, it.format, it.a...)
-		if got != it.expect {
+		if got != it.want {
 			t.Errorf("0xEA7E4F"+" padf(%#v, %#v, %#v)"+
-				"\n expect: %#v"+
-				"\n    got: %#v",
-				it.minLength, it.format, it.a, it.expect, got)
+				"\n want: %#v"+
+				"\n  got: %#v",
+				it.minLength, it.format, it.a, it.want, got)
 		}
 	}
 }

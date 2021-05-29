@@ -27,8 +27,8 @@ func Test_getHash_1(t *testing.T) {
 func Test_getHash_2(t *testing.T) {
 	func() {
 		defer func() {
-			msg := fmt.Sprint(recover())
-			if !strings.Contains(msg, "failed mockHash.Write") {
+			s := fmt.Sprint(recover())
+			if !strings.Contains(s, "failed mockHash.Write") {
 				t.Error("0xE1A10A")
 			}
 		}()
@@ -40,8 +40,8 @@ func Test_getHash_2(t *testing.T) {
 func Test_getHash_3(t *testing.T) {
 	func() {
 		defer func() {
-			msg := fmt.Sprint(recover())
-			if !strings.Contains(msg, "invalid hash size") {
+			s := fmt.Sprint(recover())
+			if !strings.Contains(s, "invalid hash size") {
 				t.Error("0xE4A45E")
 			}
 		}()

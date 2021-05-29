@@ -134,7 +134,7 @@ type udpStats struct {
 	bytesDelivered   int64
 	bytesLost        int64
 	packetsDelivered int64
-	packsLost        int64
+	packetsLost      int64
 	transferTime     time.Duration
 } //                                                                    udpStats
 
@@ -268,8 +268,8 @@ func (sd *Sender) AverageResponseMs() float64 {
 // have been sent, resent if needed, and confirmed.
 func (sd *Sender) DeliveredAllParts() bool {
 	ret := true
-	for _, packet := range sd.packets {
-		if !bytes.Equal(packet.sentHash, packet.confirmedHash) {
+	for _, pk := range sd.packets {
+		if !bytes.Equal(pk.sentHash, pk.confirmedHash) {
 			ret = false
 			break
 		}
@@ -312,23 +312,23 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 		}
 	}
 	tItem := time.Duration(0)
-	for i, pack := range sd.packets {
+	for i, pk := range sd.packets {
 		tPack, status := time.Duration(0), "✔"
-		if pack.IsDelivered() {
-			if !pack.confirmedTime.IsZero() {
-				tPack = pack.confirmedTime.Sub(pack.sentTime)
+		if pk.IsDelivered() {
+			if !pk.confirmedTime.IsZero() {
+				tPack = pk.confirmedTime.Sub(pk.sentTime)
 			}
 		} else {
 			status = "LOST"
 		}
 		var (
 			sn = padf(4, "%d", i)
-			t0 = pack.sentTime.String()[:24]
-			t1 = pack.confirmedTime.String()[:24]
+			t0 = pk.sentTime.String()[:24]
+			t1 = pk.confirmedTime.String()[:24]
 			ms = fmt.Sprintf("%0.1f ms",
 				float64(tPack)/float64(time.Millisecond))
 		)
-		if pack.confirmedTime.IsZero() {
+		if pk.confirmedTime.IsZero() {
 			t1 = "NONE"
 		}
 		log("SN:", sn, "T0:", t0, "T1:", t1, status, ms)
@@ -345,7 +345,7 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 	prt("B. delivered:", "%d", sd.stats.bytesDelivered)
 	prt("Bytes lost  :", "%d", sd.stats.bytesLost)
 	prt("P. delivered:", "%d", sd.stats.packetsDelivered)
-	prt("Packets lost:", "%d", sd.stats.packsLost)
+	prt("Packets lost:", "%d", sd.stats.packetsLost)
 	prt("Time in item:", "%0.1f s", sec)
 	prt("Avg./ Packet:", "%0.1f ms", avg)
 	prt("Trans. speed:", "%0.1f KiB/s", speed)
@@ -406,12 +406,12 @@ func (sd *Sender) requestDataItemHash(k string) []byte {
 		_ = sd.logError(0xE7DF8B, err)
 		return nil
 	}
-	packet, err := sd.makePacket([]byte(tagDataItemHash + k))
+	pk, err := sd.makePacket([]byte(tagDataItemHash + k))
 	if err != nil {
 		_ = sd.logError(0xE34A8E, err)
 		return nil
 	}
-	err = packet.Send(tempConn, sd.Config.Cipher)
+	err = pk.Send(tempConn, sd.Config.Cipher)
 	if err != nil {
 		_ = sd.logError(0xE89B11, err)
 		return nil
@@ -466,11 +466,11 @@ func (sd *Sender) makePackets(k string, comp []byte) error {
 			"key:%s hash:%X sn:%d count:%d\n",
 			k, sd.dataHash, i+1, n,
 		)
-		packet, err := sd.makePacket(append([]byte(header), comp[a:b]...))
+		pk, err := sd.makePacket(append([]byte(header), comp[a:b]...))
 		if err != nil {
 			return sd.logError(0xE567A4, err)
 		}
-		packets[i] = *packet
+		packets[i] = *pk
 	}
 	sd.packets = packets
 	return nil
@@ -515,14 +515,14 @@ func (sd *Sender) connectDI(
 func (sd *Sender) sendUndeliveredPackets() error {
 	n := len(sd.packets)
 	for i := 0; i < n; i++ {
-		packet := &sd.packets[i]
-		if packet.IsDelivered() {
+		pk := &sd.packets[i]
+		if pk.IsDelivered() {
 			continue
 		}
 		time.Sleep(sd.Config.SendPacketInterval)
 		sd.wg.Add(1)
 		go func() {
-			err := packet.Send(sd.conn, sd.Config.Cipher)
+			err := pk.Send(sd.conn, sd.Config.Cipher)
 			if err != nil {
 				_ = sd.logError(0xE67BA4, err)
 			}
@@ -559,8 +559,8 @@ func (sd *Sender) collectConfirmations() {
 			sd.logInfo("Sender received", len(recv), "bytes from", addr)
 		}
 		go func(confirmedHash []byte) {
-			for i, packet := range sd.packets {
-				if bytes.Equal(packet.sentHash, confirmedHash) {
+			for i, pk := range sd.packets {
+				if bytes.Equal(pk.sentHash, confirmedHash) {
 					sd.packets[i].confirmedTime = time.Now()
 					sd.packets[i].confirmedHash = confirmedHash
 					break
@@ -593,13 +593,13 @@ func (sd *Sender) waitForAllConfirmations() {
 			break
 		}
 	}
-	for _, packet := range sd.packets {
-		if packet.IsDelivered() {
-			sd.stats.bytesDelivered += int64(len(packet.data))
+	for _, pk := range sd.packets {
+		if pk.IsDelivered() {
+			sd.stats.bytesDelivered += int64(len(pk.data))
 			sd.stats.packetsDelivered++
 		} else {
-			sd.stats.bytesLost += int64(len(packet.data))
-			sd.stats.packsLost++
+			sd.stats.bytesLost += int64(len(pk.data))
+			sd.stats.packetsLost++
 		}
 	}
 	if sd.Config.VerboseSender {
@@ -643,8 +643,8 @@ func (sd *Sender) endSend(k string, hash []byte) error {
 func (sd *Sender) logError(id uint32, a ...interface{}) error {
 	ret := makeError(id, a...)
 	if sd.Config != nil && sd.Config.LogFunc != nil {
-		msg := ret.Error()
-		sd.Config.LogFunc(msg)
+		s := ret.Error()
+		sd.Config.LogFunc(s)
 	}
 	return ret
 } //                                                                    logError
@@ -667,13 +667,13 @@ func (sd *Sender) makePacket(data []byte) (*senderPacket, error) {
 			"> Config.PacketSizeLimit", sd.Config.PacketSizeLimit)
 	}
 	sentHash := getHash(data)
-	packet := senderPacket{
+	pk := senderPacket{
 		data:     data,
 		sentHash: sentHash,
 		sentTime: time.Now(),
 		// confirmedHash, confirmedTime: zero value
 	}
-	return &packet, nil
+	return &pk, nil
 } //                                                                  makePacket
 
 // validateAddress returns nil if Address is valid, or an error otherwise.

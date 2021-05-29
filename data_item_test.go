@@ -45,13 +45,13 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // go test -run Test_dataItem_LogStats_
 //
 func Test_dataItem_LogStats_(t *testing.T) {
-	var sb strings.Builder
+	var tlog strings.Builder
 	fmtPrintln := func(v ...interface{}) (int, error) {
-		sb.WriteString(fmt.Sprintln(v...))
+		tlog.WriteString(fmt.Sprintln(v...))
 		return 0, nil
 	}
 	logPrintln := func(v ...interface{}) {
-		sb.WriteString(fmt.Sprintln(v...))
+		tlog.WriteString(fmt.Sprintln(v...))
 	}
 	test := func(logFunc interface{}) {
 		var di = dataItem{
@@ -61,23 +61,23 @@ func Test_dataItem_LogStats_(t *testing.T) {
 			CompressedSizeInfo:   20,
 			UncompressedSizeInfo: 50,
 		}
-		sb.Reset()
-		di.LogStats("xyz", &sb)
-		got := sb.String()
+		tlog.Reset()
+		di.LogStats("xyz", &tlog)
+		got := tlog.String()
 		//
-		expect := "" +
+		want := "" +
 			"xyz  key: ItemName\n" +
 			"xyz hash: 0102030405\n" +
 			"xyz pcs.: 3\n" +
 			"xyz comp: 20 bytes\n" +
 			"xyz size: 50 bytes\n"
 		//
-		if got != expect {
+		if got != want {
 			t.Error("0xE85AA7",
-				"\n"+"expect:\n", expect,
-				"\n"+"   got:\n", got)
-			fmt.Println("expect bytes:", []byte(expect))
-			fmt.Println("   got bytes:", []byte(got))
+				"\n"+"want:\n", want,
+				"\n"+" got:\n", got)
+			fmt.Println("want bytes:", []byte(want))
+			fmt.Println(" got bytes:", []byte(got))
 		}
 	}
 	test(fmtPrintln)
@@ -128,7 +128,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 			UncompressedSizeInfo: 50,
 		}
 	}
-	test := func(k string, hash []byte, packetCount int, expect dataItem) {
+	test := func(k string, hash []byte, packetCount int, want dataItem) {
 		var di = initDataItem()
 		di.Retain(k, hash, packetCount)
 		str := func(di dataItem) string {
@@ -137,54 +137,54 @@ func Test_dataItem_Retain_(t *testing.T) {
 			ret = strings.ReplaceAll(ret, "udpt.dataItem", "")
 			return ret
 		}
-		if !reflect.DeepEqual(di, expect) {
+		if !reflect.DeepEqual(di, want) {
 			t.Error("0xED7D54", "\n",
-				"expect:", str(expect), "\n",
-				"   got:", str(di))
+				"want:", str(want), "\n",
+				" got:", str(di))
 		}
 	}
 	// nothing changed
 	test("ItemName", []byte{1, 2, 3}, 2, initDataItem())
 	//
 	// 'k' parameter changed
-	expect := dataItem{
+	want := dataItem{
 		Key:                  "DiffName",
 		Hash:                 []byte{1, 2, 3},
 		CompressedPieces:     [][]byte{nil, nil},
 		CompressedSizeInfo:   0,
 		UncompressedSizeInfo: 0,
 	}
-	test("DiffName", []byte{1, 2, 3}, 2, expect)
+	test("DiffName", []byte{1, 2, 3}, 2, want)
 	//
 	// 'hash' parameter changed
-	expect = dataItem{
+	want = dataItem{
 		Key:                  "ItemName",
 		Hash:                 []byte{6, 7, 8},
 		CompressedPieces:     [][]byte{nil, nil},
 		CompressedSizeInfo:   0,
 		UncompressedSizeInfo: 0,
 	}
-	test("ItemName", []byte{6, 7, 8}, 2, expect)
+	test("ItemName", []byte{6, 7, 8}, 2, want)
 	//
 	// 'packetCount' parameter changed
-	expect = dataItem{
+	want = dataItem{
 		Key:                  "ItemName",
 		Hash:                 []byte{1, 2, 3},
 		CompressedPieces:     [][]byte{nil},
 		CompressedSizeInfo:   0,
 		UncompressedSizeInfo: 0,
 	}
-	test("ItemName", []byte{1, 2, 3}, 1, expect)
+	test("ItemName", []byte{1, 2, 3}, 1, want)
 	//
 	// all 3 parameters changed
-	expect = dataItem{
+	want = dataItem{
 		Key:                  "OtherName",
 		Hash:                 []byte{4, 5, 6},
 		CompressedPieces:     [][]byte{nil, nil, nil},
 		CompressedSizeInfo:   0,
 		UncompressedSizeInfo: 0,
 	}
-	test("OtherName", []byte{4, 5, 6}, 3, expect)
+	test("OtherName", []byte{4, 5, 6}, 3, want)
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
