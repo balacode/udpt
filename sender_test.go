@@ -132,20 +132,7 @@ func Test_Sender_Send_(t *testing.T) {
 // go test -run Test_Sender_SendString_
 //
 func Test_Sender_SendString_(t *testing.T) {
-	sd := Sender{
-		Address:   "127.0.0.0:9876",
-		CryptoKey: []byte("12345678901234567890123456789012"),
-		Config: &Configuration{
-			Cipher:            &aesCipher{},
-			Compressor:        &zlibCompressor{},
-			PacketSizeLimit:   1024,
-			PacketPayloadSize: 512,
-			VerboseSender:     true,
-			SendRetries:       2,
-			ReplyTimeout:      500 * time.Millisecond,
-			WriteTimeout:      500 * time.Millisecond,
-		},
-	}
+	sd := makeTestSender()
 	err := sd.SendString("greeting", "Hello World!")
 	if !matchError(err, "undelivered packets") {
 		t.Error("0xEE8E8D", "wrong error:", err)
@@ -262,7 +249,8 @@ func Test_Sender_connect_1(t *testing.T) {
 
 // must fail because the host in the address is invalid
 func Test_Sender_connect_2(t *testing.T) {
-	sd := Sender{Address: "257.258.259.260:9876"}
+	sd := makeTestSender()
+	sd.Address = "257.258.259.260:9876"
 	udpConn, err := sd.connect()
 	if udpConn != nil {
 		t.Error("0xEF8F6B")
@@ -274,7 +262,8 @@ func Test_Sender_connect_2(t *testing.T) {
 
 // must fail because the port in the address is invalid
 func Test_Sender_connect_3(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1:65536"}
+	sd := makeTestSender()
+	sd.Address = "127.0.0.1:65536"
 	udpConn, err := sd.connect()
 	if udpConn != nil {
 		t.Error("0xE6FA25")
@@ -286,7 +275,8 @@ func Test_Sender_connect_3(t *testing.T) {
 
 // must fail when net.DialUDP() fails
 func Test_Sender_connect_4(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1:9876"}
+	sd := makeTestSender()
+	sd.Address = "127.0.0.1:9876"
 	netDialUDP := func(_ string, _, _ *net.UDPAddr) (netUDPConn, error) {
 		return nil, makeError(0xEC10B4, "failed netDialUDP")
 	}
@@ -301,7 +291,8 @@ func Test_Sender_connect_4(t *testing.T) {
 
 // must fail when conn.SetWriteBuffer() fails
 func Test_Sender_connect_5(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1:9876"}
+	sd := makeTestSender()
+	sd.Address = "127.0.0.1:9876"
 	netDialUDP := func(_ string, _, _ *net.UDPAddr) (netUDPConn, error) {
 		return &mockNetUDPConn{failSetWriteBuffer: true}, nil
 	}
@@ -321,7 +312,7 @@ func Test_Sender_connect_5(t *testing.T) {
 
 // must succeed
 func Test_Sender_close_1(t *testing.T) {
-	sd := Sender{conn: makeTestConn()}
+	sd := makeTestSender()
 	ts := ""
 	sd.Config = NewDebugConfig(func(a ...interface{}) {
 		ts += fmt.Sprintln(a...)
@@ -344,7 +335,8 @@ func Test_Sender_close_1(t *testing.T) {
 
 // must write to log when sd.conn.Close() fails
 func Test_Sender_close_2(t *testing.T) {
-	sd := Sender{conn: &mockNetUDPConn{failClose: true}}
+	sd := makeTestSender()
+	sd.conn = &mockNetUDPConn{failClose: true}
 	ts := ""
 	sd.Config = NewDebugConfig(func(a ...interface{}) {
 		ts += fmt.Sprintln(a...)
@@ -364,7 +356,7 @@ func Test_Sender_close_2(t *testing.T) {
 //
 func Test_Sender_logError_(t *testing.T) {
 	var ts string
-	sd := Sender{Config: NewDefaultConfig()}
+	sd := makeTestSender()
 	sd.Config.LogFunc = func(a ...interface{}) {
 		ts = fmt.Sprintln(a...)
 	}
@@ -381,7 +373,7 @@ func Test_Sender_logError_(t *testing.T) {
 
 // must succeed creating a packet to send
 func Test_Sender_makePacket_1(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig()}
+	sd := makeTestSender()
 	pk, err := sd.makePacket([]byte{1, 2, 3})
 	if err != nil {
 		t.Error("0xE0AE90", err)
@@ -408,7 +400,7 @@ func Test_Sender_makePacket_1(t *testing.T) {
 
 // must fail to create a packet larger than Config.PacketSizeLimit
 func Test_Sender_makePacket_2(t *testing.T) {
-	sd := Sender{Config: NewDefaultConfig()}
+	sd := makeTestSender()
 	data := make([]byte, sd.Config.PacketSizeLimit+1)
 	pk, err := sd.makePacket(data)
 	if pk != nil {
@@ -426,7 +418,8 @@ func Test_Sender_makePacket_2(t *testing.T) {
 
 // must return nil when Address is valid
 func Test_Sender_validateAddress_1(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1:9876"}
+	sd := makeTestSender()
+	sd.Address = "127.0.0.1:9876"
 	err := sd.validateAddress()
 	if err != nil {
 		t.Error("0xEC9A5E")
@@ -435,7 +428,8 @@ func Test_Sender_validateAddress_1(t *testing.T) {
 
 // must return error "missing Sender.Address" when Address is ""
 func Test_Sender_validateAddress_2(t *testing.T) {
-	sd := Sender{Address: ""}
+	sd := makeTestSender()
+	sd.Address = ""
 	err := sd.validateAddress()
 	if !matchError(err, "missing Sender.Address") {
 		t.Error("0xEF8A89")
@@ -444,7 +438,8 @@ func Test_Sender_validateAddress_2(t *testing.T) {
 
 // must return error "missing Sender.Address" when Address is "\r \n"
 func Test_Sender_validateAddress_3(t *testing.T) {
-	sd := Sender{Address: "\r \n"}
+	sd := makeTestSender()
+	sd.Address = "\r \n"
 	err := sd.validateAddress()
 	if !matchError(err, "missing Sender.Address") {
 		t.Error("0xEB66F3")
@@ -453,7 +448,8 @@ func Test_Sender_validateAddress_3(t *testing.T) {
 
 // must return error "missing Sender.Address" when port is not specified
 func Test_Sender_validateAddress_4(t *testing.T) {
-	sd := Sender{Address: "127.0.0.1"}
+	sd := makeTestSender()
+	sd.Address = "127.0.0.1"
 	err := sd.validateAddress()
 	if !matchError(err, "invalid port in Sender.Address") {
 		t.Error("0xE45F34")
@@ -481,6 +477,27 @@ func makeConfigAndReceiver(cryptoKey []byte, received *map[string][]byte,
 		},
 	}
 	return cf, &rc
+}
+
+// makeTestSender creates a properly-configured Sender for testing.
+func makeTestSender() *Sender {
+	cf := Configuration{
+		Cipher:            &aesCipher{},
+		Compressor:        &zlibCompressor{},
+		PacketSizeLimit:   1024,
+		PacketPayloadSize: 512,
+		VerboseSender:     true,
+		SendRetries:       2,
+		ReplyTimeout:      500 * time.Millisecond,
+		WriteTimeout:      500 * time.Millisecond,
+	}
+	sd := Sender{
+		Address:   "127.0.0.0:9876",
+		CryptoKey: []byte("12345678901234567890123456789012"),
+		Config:    &cf,
+	}
+	cf.Cipher.SetKey(sd.CryptoKey)
+	return &sd
 }
 
 // end
