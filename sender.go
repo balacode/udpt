@@ -206,6 +206,15 @@ type Sender struct {
 // as the free memory available on the Sender's and Receiver's machine.
 //
 func (sd *Sender) Send(k string, v []byte) error {
+	return sd.sendDI(k, v, sd.connect, sd.sendUndeliveredPackets)
+} //                                                                        Send
+
+// sendDI is only used by Send() and provides parameters for
+// dependency injection, to enable mocking during testing.
+func (sd *Sender) sendDI(k string, v []byte,
+	connect func() (netUDPConn, error),
+	sendUndeliveredPackets func() error,
+) error {
 	if sd.Config == nil {
 		sd.Config = NewDefaultConfig()
 	}
@@ -213,14 +222,14 @@ func (sd *Sender) Send(k string, v []byte) error {
 	if hash == nil {
 		return err
 	}
-	newConn, err := sd.connect()
+	newConn, err := connect()
 	if err != nil {
 		return sd.logError(0xE8B8D0, err)
 	}
 	sd.conn = newConn
 	go sd.collectConfirmations() // exits when conn becomes nil
 	for retries := 0; retries < sd.Config.SendRetries; retries++ {
-		err = sd.sendUndeliveredPackets()
+		err = sendUndeliveredPackets()
 		if err != nil {
 			defer func() { sd.close() }()
 			return sd.logError(0xE23CE0, err)
@@ -233,7 +242,7 @@ func (sd *Sender) Send(k string, v []byte) error {
 	}
 	sd.close()
 	return sd.endSend(k, hash)
-} //                                                                        Send
+} //                                                                      sendDI
 
 // SendString transfers a key and value string
 // to the Receiver specified by Sender.Address.
