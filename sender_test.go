@@ -73,11 +73,12 @@ func Test_SendString_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Main Methods (sd *Sender)
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (sd *Sender) Send(k string, v []byte) error
 //
-// go test -run Test_Sender_Send_
-//
-func Test_Sender_Send_(t *testing.T) {
+// go test -run Test_Sender_Send_*
+
+func Test_Sender_Send_1(t *testing.T) {
 	var sd Sender
 	err := sd.Send("", nil)
 	if sd.Config == nil {
@@ -127,6 +128,32 @@ func Test_Sender_Send_(t *testing.T) {
 		t.Error("0xEB8B96", "wrong error:", err)
 	}
 }
+
+func Test_Sender_Send_2(t *testing.T) {
+	connect := func() (netUDPConn, error) {
+		return nil, makeError(0xEF2DC4, "failed connect")
+	}
+	sd := makeTestSender()
+	err := sd.sendDI("greeting", []byte("Hello!"),
+		connect, sd.sendUndeliveredPackets)
+	if !matchError(err, "failed connect") {
+		t.Error("0xEA93AF")
+	}
+}
+
+func Test_Sender_Send_3(t *testing.T) {
+	sendUndeliveredPackets := func() error {
+		return makeError(0xE9AF68, "failed sendUndeliveredPackets")
+	}
+	sd := makeTestSender()
+	err := sd.sendDI("greeting", []byte("Hello!"),
+		sd.connect, sendUndeliveredPackets)
+	if !matchError(err, "failed sendUndeliveredPackets") {
+		t.Error("0xED9E31")
+	}
+}
+
+// -----------------------------------------------------------------------------
 
 // (sd *Sender) SendString(k, v string) error
 //
@@ -228,7 +255,7 @@ func Test_Sender_LogStats_(t *testing.T) {
 // # Internal Lifecycle Methods (sd *Sender)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// (sd *Sender) connect() (*net.UDPConn, error)
+// (sd *Sender) connect() (netUDPConn, error)
 //
 // go test -run Test_Sender_connect_*
 
