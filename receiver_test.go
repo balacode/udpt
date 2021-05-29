@@ -607,7 +607,7 @@ func Test_Receiver_sendReply_3(t *testing.T) {
 //
 // go test -run Test_Receiver_receiveFragment_*
 
-func Test_Receiver_receiveFragment_01(t *testing.T) {
+func Test_Receiver_receiveFragment_1(t *testing.T) {
 	var rc Receiver
 	data, err := rc.receiveFragment([]byte{})
 	if data != nil {
@@ -618,19 +618,8 @@ func Test_Receiver_receiveFragment_01(t *testing.T) {
 	}
 }
 
-func Test_Receiver_receiveFragment_02(t *testing.T) {
-	rc := Receiver{Config: NewDefaultConfig()}
-	rc.Config.Cipher = nil
-	data, err := rc.receiveFragment([]byte(tagFragment))
-	if data != nil {
-		t.Error("0xE6F51D")
-	}
-	if !matchError(err, "nil Configuration.Cipher") {
-		t.Error("0xE90F36", "wrong error:", err)
-	}
-}
-
-func Test_Receiver_receiveFragment_03(t *testing.T) {
+// must fail because there is no newline found (it must terminate the header)
+func Test_Receiver_receiveFragment_2(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment))
 	if data != nil {
@@ -641,10 +630,13 @@ func Test_Receiver_receiveFragment_03(t *testing.T) {
 	}
 }
 
-func Test_Receiver_receiveFragment_04(t *testing.T) {
+const testHash = "B4E7119D881C4877" + "C9E2BC95B182C542" +
+	"281217587BCF75A5" + "435E8F9F72AB4E62"
+
+func Test_Receiver_receiveFragment_3(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"key:abc hash:0 sn:bad count:1\n"))
+		"key:abc hash:" + testHash + " sn:bad count:1\n"))
 	if data != nil {
 		t.Error("0xEA0B81")
 	}
@@ -653,10 +645,10 @@ func Test_Receiver_receiveFragment_04(t *testing.T) {
 	}
 }
 
-func Test_Receiver_receiveFragment_05(t *testing.T) {
+func Test_Receiver_receiveFragment_4(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"key:abc hash:0 sn:1 count:bad\n"))
+		"key:abc hash:" + testHash + " sn:1 count:bad\n"))
 	if data != nil {
 		t.Error("0xEA9D01")
 	}
@@ -665,60 +657,62 @@ func Test_Receiver_receiveFragment_05(t *testing.T) {
 	}
 }
 
-func Test_Receiver_receiveFragment_06(t *testing.T) {
+func Test_Receiver_receiveFragment_5(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"key:abc hash:0 sn:2 count:1\n"))
+		"key:abc hash:" + testHash + " sn:2 count:1\n"))
 	if data != nil {
 		t.Error("0xEB21B0")
 	}
-	if !matchError(err, "out of range") {
+	if !matchError(err, "bad 'sn'") {
 		t.Error("0xEB9A96", "wrong error:", err)
 	}
 }
 
-func Test_Receiver_receiveFragment_07(t *testing.T) {
+// must fail because hash in header contains odd number of hex digits
+func Test_Receiver_receiveFragment_6(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"key:abc hash:0 sn:1 count:1\n"))
+		"key:abc hash:321 sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xE11DF3")
 	}
-	if !matchError(err, "hex") {
+	if !matchError(err, "bad hash") {
 		t.Error("0xE43F0E", "wrong error:", err)
 	}
 }
 
-func Test_Receiver_receiveFragment_08(t *testing.T) {
+// must fail because hash in header contains non-hex characters
+func Test_Receiver_receiveFragment_7(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
 		"key:abc hash:GG sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xEF09EC")
 	}
-	if !matchError(err, "hex") {
+	if !matchError(err, "bad hash") {
 		t.Error("0xEF4C9B", "wrong error:", err)
 	}
 }
 
-func Test_Receiver_receiveFragment_09(t *testing.T) {
+// must fail because hash in header is too short
+func Test_Receiver_receiveFragment_8(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
 		"key:abc hash:FF sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xE24F86")
 	}
-	if !matchError(err, "bad hash size") {
+	if !matchError(err, "bad hash") {
 		t.Error("0xEB87BE", "wrong error:", err)
 	}
 }
 
-func Test_Receiver_receiveFragment_10(t *testing.T) {
+// must fail because there is no data to uncompress after the header
+func Test_Receiver_receiveFragment_9(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
-		"key:abc hash:" +
-		"12345678123456781234567812345678" +
-		"12345678123456781234567812345678 sn:1 count:1\n"))
+		"key:abc hash:" + testHash + " sn:1 count:1\n"))
 	if data != nil {
 		t.Error("0xE85E88")
 	}
