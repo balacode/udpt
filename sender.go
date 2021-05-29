@@ -32,7 +32,10 @@ package udpt
 //
 // # Internal Lifecycle Methods (sd *Sender)
 //   ) beginSend(k string, v []byte) (hash []byte, err error)
-//   ) requestDataItemHash(k string) []byte
+//   ) requestDataItemHash(
+//         k string,
+//         connect func() (netUDPConn, error),
+//     ) []byte
 //   ) makePackets(k string, comp []byte) error
 //   ) connect() (netUDPConn, error)
 //   ) connectDI( . . .
@@ -380,7 +383,7 @@ func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
 			fmt.Sprintf("Send key: %s size: %d hash: %X",
 				k, len(v), hash))
 	}
-	remoteHash := sd.requestDataItemHash(k)
+	remoteHash := sd.requestDataItemHash(k, sd.connect)
 	if bytes.Equal(hash, remoteHash) {
 		return nil, nil
 	}
@@ -400,13 +403,16 @@ func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
 // requestDataItemHash requests and waits for the listening receiver to
 // return the hash of the data item identified by key 'k'. If the receiver
 // can locate the data item, it returns its hash, otherwise it returns nil.
-func (sd *Sender) requestDataItemHash(k string) []byte {
-	tempConn, err := sd.connect()
+func (sd *Sender) requestDataItemHash(
+	k string,
+	connect func() (netUDPConn, error),
+) []byte {
+	pk, err := sd.makePacket([]byte(tagDataItemHash + k))
 	if err != nil {
 		_ = sd.logError(0xE7DF8B, err)
 		return nil
 	}
-	pk, err := sd.makePacket([]byte(tagDataItemHash + k))
+	tempConn, err := connect()
 	if err != nil {
 		_ = sd.logError(0xE34A8E, err)
 		return nil
@@ -625,7 +631,7 @@ func (sd *Sender) endSend(k string, hash []byte) error {
 	if !sd.DeliveredAllParts() {
 		return sd.logError(0xE1C3A7, "undelivered packets")
 	}
-	remoteHash := sd.requestDataItemHash(k)
+	remoteHash := sd.requestDataItemHash(k, sd.connect)
 	if !bytes.Equal(hash, remoteHash) {
 		return sd.logError(0xE1F101, "hash mismatch")
 	}
