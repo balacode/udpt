@@ -71,6 +71,7 @@ type mockNetUDPConn struct {
 	sertWriteBufferArg int
 	writeDeadline      time.Time
 	written            []byte
+	readFromData       []byte
 }
 
 func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
@@ -78,8 +79,13 @@ func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	if mk.failReadFrom {
 		return 0, nil, makeError(0xED19BF, "failed SetReadDeadline")
 	}
+	n := len(b)
+	if len(mk.readFromData) > 0 {
+		copy(b, mk.readFromData)
+		n = len(mk.readFromData)
+	}
 	addr := &mockNetAddr{network: "udp", addr: "127.8.9.10:11"}
-	return len(b), addr, nil
+	return n, addr, nil
 }
 
 func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
