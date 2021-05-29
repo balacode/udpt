@@ -426,7 +426,7 @@ func (sd *Sender) requestDataItemHash(k string) []byte {
 	var hash []byte
 	if len(reply) > 0 {
 		if !bytes.HasPrefix(reply, []byte(tagDataItemHash)) {
-			_ = sd.logError(0xE08AD4, "invalid reply:", reply)
+			_ = sd.logError(0xE08AD4, "invalid tag in reply")
 			return nil
 		}
 		hexHash := string(reply[len(tagDataItemHash):])
@@ -435,7 +435,7 @@ func (sd *Sender) requestDataItemHash(k string) []byte {
 		}
 		hash, err = hex.DecodeString(hexHash)
 		if err != nil {
-			_ = sd.logError(0xE6E7A9, err)
+			_ = sd.logError(0xE6E7A9, "bad hash")
 			return nil
 		}
 	}
@@ -663,8 +663,7 @@ func (sd *Sender) logInfo(a ...interface{}) {
 //
 func (sd *Sender) makePacket(data []byte) (*senderPacket, error) {
 	if len(data) > sd.Config.PacketSizeLimit {
-		return nil, sd.logError(0xE71F9B, "len(data)", len(data),
-			"> Config.PacketSizeLimit", sd.Config.PacketSizeLimit)
+		return nil, sd.logError(0xE71F9B, "len(data) > Config.PacketSizeLimit")
 	}
 	sentHash := getHash(data)
 	pk := senderPacket{
