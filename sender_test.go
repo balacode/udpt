@@ -7,6 +7,7 @@ package udpt
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"strings"
@@ -302,6 +303,198 @@ func Test_Sender_connect_5(t *testing.T) {
 	}
 	if !matchError(err, "failed SetWriteBuffer") {
 		t.Error("0xED84F9", "wrong error:", err)
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// (sd *Sender) requestDataItemHash(
+//         k string,
+//         connect func() (netUDPConn, error),
+//     ) []byte
+//
+// go test -run Test_Sender_requestDataItemHash_*
+
+// must return a valid hash
+func Test_Sender_requestDataItemHash_1(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:" + testHash))
+	if err != nil {
+		t.Error("0xEA6DF7")
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{readFromData: b}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if strings.ToUpper(hex.EncodeToString(got)) != testHash {
+		t.Error("0xEC1AC0")
+	}
+	if ts != "" {
+		t.Error("0xEC3FC7")
+	}
+}
+
+// must return nil because request size is greater than PacketSizeLimit
+func Test_Sender_requestDataItemHash_2(t *testing.T) {
+	sd := makeTestSender()
+	sd.Config.PacketSizeLimit = 1
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	// -------------------------------------------
+	got := sd.requestDataItemHash("k", sd.connect)
+	// -------------------------------------------
+	if got != nil {
+		t.Error("0xE3EF70")
+	}
+	if !strings.Contains(ts, "len(data) > Config.PacketSizeLimit") {
+		t.Error("0xED4F64")
+	}
+}
+
+// must return nil because connect() failed
+func Test_Sender_requestDataItemHash_3(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	connect := func() (netUDPConn, error) {
+		err := makeError(0xE73D61, "failed connect")
+		sd.logError(0xEA9E44, "failed connect")
+		return nil, err
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEC8C88")
+	}
+	if !strings.Contains(ts, "failed connect") {
+		t.Error("0xEF0D0A")
+	}
+}
+
+// must return nil because sending packet failed
+func Test_Sender_requestDataItemHash_4(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{failWrite: true}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEE16D2")
+	}
+	if !strings.Contains(ts, "failed Write") {
+		t.Error("0xEC14C8")
+	}
+}
+
+// must return nil because reply could not be decrypted
+func Test_Sender_requestDataItemHash_5(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEA0DD5")
+	}
+	if !strings.Contains(ts, "message authentication failed") {
+		t.Error("0xEE45D4")
+	}
+}
+
+// must return nil because reply has the wrong prefix
+func Test_Sender_requestDataItemHash_6(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	b, err := sd.Config.Cipher.Encrypt([]byte("bad_tag"))
+	if err != nil {
+		t.Error("0xED4CC0")
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{readFromData: b}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEC36EE")
+	}
+	if !strings.Contains(ts, "invalid tag in reply") {
+		t.Error("0xEB64E1")
+	}
+}
+
+// must return nil because the reply is "not_found"
+func Test_Sender_requestDataItemHash_7(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:not_found"))
+	if err != nil {
+		t.Error("0xEE1CB6")
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{readFromData: b}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEA20BE")
+	}
+	if ts != "" {
+		t.Error("0xEC24D1")
+	}
+}
+
+// must return nil because the hash in the reply is invalid
+func Test_Sender_requestDataItemHash_8(t *testing.T) {
+	sd := makeTestSender()
+	ts := ""
+	sd.Config.LogFunc = func(a ...interface{}) {
+		ts += fmt.Sprintln(a...)
+	}
+	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:XYZ12"))
+	if err != nil {
+		t.Error("0xEF37EA")
+	}
+	connect := func() (netUDPConn, error) {
+		return &mockNetUDPConn{readFromData: b}, nil
+	}
+	// ----------------------------------------
+	got := sd.requestDataItemHash("k", connect)
+	// ----------------------------------------
+	if got != nil {
+		t.Error("0xEA2A2B")
+	}
+	if !strings.Contains(ts, "bad hash") {
+		t.Error("0xEE9F42")
 	}
 }
 
