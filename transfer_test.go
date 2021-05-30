@@ -117,12 +117,6 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 				"len(vR):", len(vR))
 		}
 	}
-	if false {
-		cf.LogFunc = LogPrint
-		cf.VerboseSender = true
-		cf.VerboseReceiver = true
-		sd.LogStats()
-	}
 	time.Sleep(time.Second)
 }
 

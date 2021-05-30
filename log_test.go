@@ -91,29 +91,33 @@ func Test_log_MakeLogFunc_2(t *testing.T) {
 
 const logEntryTestFile = "udpt.logEntryTestFile.tmp"
 
+// test writing to console without logging to a file
 func Test_log_logEntry_Output_1(t *testing.T) {
-	_ = os.Remove(logEntryTestFile)
-	//
-	// test writing to console without logging to a file
-	const s = "test message #3146250897"
-	le := logEntry{printMsg: true, logFile: "", msg: s}
 	var tlog strings.Builder
+	_ = os.Remove(logEntryTestFile)
+	const s = "test entry #3146250897"
+	le := logEntry{printMsg: true, logFile: "", msg: s}
+	//
 	le.outputDI(&tlog, nil)
-	if tlog.String() != s+"\n" {
+	//
+	ts := tlog.String()
+	if ts != s+"\n" {
 		t.Error("0xE58FB6")
 	}
 	_ = os.Remove(logEntryTestFile)
 }
 
+// test logging to a file without writing to console
 func Test_log_logEntry_Output_2(t *testing.T) {
-	_ = os.Remove(logEntryTestFile)
-	//
-	// test logging to a file without writing to console
-	const s = "test message #9473258061"
-	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
 	var tlog strings.Builder
+	_ = os.Remove(logEntryTestFile)
+	const s = "test entry #9473258061"
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
+	//
 	le.outputDI(&tlog, openLogFile)
-	if tlog.String() != "" {
+	//
+	ts := tlog.String()
+	if ts != "" {
 		t.Error("0xE8BB8F")
 	}
 	data, err := ioutil.ReadFile(logEntryTestFile)
@@ -123,15 +127,18 @@ func Test_log_logEntry_Output_2(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 }
 
+// test that no file is created when openLogFile() returns nil
 func Test_log_logEntry_Output_3(t *testing.T) {
-	_ = os.Remove(logEntryTestFile)
-	//
-	// test that no file is created when openLogFile() returns nil
-	const s = "test message #2361498057"
-	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
-	openLogFile := func(string, io.Writer) io.WriteCloser { return nil }
 	var tlog strings.Builder
+	_ = os.Remove(logEntryTestFile)
+	const s = "test entry #2361498057"
+	openLogFile := func(string, io.Writer) io.WriteCloser {
+		return nil
+	}
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
+	//
 	le.outputDI(&tlog, openLogFile)
+	//
 	data, err := ioutil.ReadFile(logEntryTestFile)
 	if data != nil || !os.IsNotExist(err) {
 		t.Error("0xE7BC99")
@@ -139,23 +146,22 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 }
 
+// test that errors are written to console when Write() and Close() fail
 func Test_log_logEntry_Output_4(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
-	//
-	// test that errors are written to console when Write() and Close() fail
-	const s = "test message #1540938672"
-	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
+	const s = "test entry #1540938672"
 	openLogFile := func(string, io.Writer) io.WriteCloser {
 		return &mockWriteCloser{failWrite: true, failClose: true}
 	}
 	var tlog strings.Builder
+	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
 	le.outputDI(&tlog, openLogFile)
 	//
-	// console must contain two error messages
-	cons := tlog.String()
-	if !strings.Contains(cons, "ERROR 0x") ||
-		!strings.Contains(cons, "failed mockWriteCloser.Write") ||
-		!strings.Contains(cons, "failed mockWriteCloser.Close") {
+	// log must contain two error descriptions
+	ts := tlog.String()
+	if !strings.Contains(ts, "ERROR 0x") ||
+		!strings.Contains(ts, "failed mockWriteCloser.Write") ||
+		!strings.Contains(ts, "failed mockWriteCloser.Close") {
 		t.Error("0xEA1B28")
 	}
 	// must not create/write to file
@@ -167,13 +173,13 @@ func Test_log_logEntry_Output_4(t *testing.T) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// openLogFile(filename string, cons io.Writer) io.WriteCloser
-
-// go test -run Test_log_openLogFile_1
+// openLogFile(filename string, logErrorTo io.Writer) io.WriteCloser
 //
+// go test -run Test_log_openLogFile_*
+
+// must succeed opening a file and writing to it two times
 func Test_log_openLogFile_1(t *testing.T) {
 	//
-	// must succeed opening a file and writing to it two times
 	const testfile = "udpt.Test_log_openLogFile_.tmp"
 	_ = os.Remove(testfile)
 	var tlog strings.Builder
@@ -197,23 +203,22 @@ func Test_log_openLogFile_1(t *testing.T) {
 	if content != msg1+msg2 {
 		t.Error("0xE24C06")
 	}
-	if tlog.String() != "" {
+	ts := tlog.String()
+	if ts != "" {
 		t.Error("0xE4CE4D")
 	}
 	_ = os.Remove(testfile)
 }
 
-// go test -run Test_log_openLogFile_2
-//
+// must fail to open a file with an invalid name
 func Test_log_openLogFile_2(t *testing.T) {
-	//
-	// must fail to open a file with an invalid name
 	var tlog strings.Builder
 	wrc := openLogFile("\\:/", &tlog)
 	if wrc != nil {
 		t.Error("0xEC8BA1")
 	}
-	if !strings.Contains(tlog.String(), "ERROR 0x") {
+	ts := tlog.String()
+	if !strings.Contains(ts, "ERROR 0x") {
 		t.Error("0xEA1DC3")
 	}
 }

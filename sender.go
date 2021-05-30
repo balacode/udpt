@@ -79,8 +79,8 @@ import (
 // v is the value being sent as a sequence of bytes. It can be as large
 // as the free memory available on the Sender's and Receiver's machine.
 //
-// cryptoKey is the symmetric encryption key shared by the Sender
-// and Receiver and used to encrypt the sent message.
+// cryptoKey is the symmetric encryption key shared by the
+// Sender and Receiver and used to encrypt the sent message.
 //
 // config is an optional Configuration you can customize. If you leave it out,
 // Send() will use the configuration returned by NewDefaultConfig().
@@ -325,10 +325,10 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 	}
 	tItem := time.Duration(0)
 	for i, pk := range sd.packets {
-		tPack, status := time.Duration(0), "✔"
+		tPacket, status := time.Duration(0), "✔"
 		if pk.IsDelivered() {
 			if !pk.confirmedTime.IsZero() {
-				tPack = pk.confirmedTime.Sub(pk.sentTime)
+				tPacket = pk.confirmedTime.Sub(pk.sentTime)
 			}
 		} else {
 			status = "LOST"
@@ -338,13 +338,13 @@ func (sd *Sender) LogStats(logFunc ...interface{}) {
 			t0 = pk.sentTime.String()[:24]
 			t1 = pk.confirmedTime.String()[:24]
 			ms = fmt.Sprintf("%0.1f ms",
-				float64(tPack)/float64(time.Millisecond))
+				float64(tPacket)/float64(time.Millisecond))
 		)
 		if pk.confirmedTime.IsZero() {
 			t1 = "NONE"
 		}
 		log("SN:", sn, "T0:", t0, "T1:", t1, status, ms)
-		tItem += tPack
+		tItem += tPacket
 	}
 	var (
 		sec   = sd.stats.transferTime.Seconds()

@@ -822,10 +822,10 @@ func Test_Receiver_logError_2(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.LogFunc = fn
 	//
-	rc.logError(0xE12345, "error message")
+	rc.logError(0xE12345, "error text")
 	//
 	ts := tlog.String()
-	if ts != "ERROR 0xE12345: error message" {
+	if ts != "ERROR 0xE12345: error text" {
 		t.Error("0xE0FA6C")
 	}
 }
@@ -839,7 +839,7 @@ func Test_Receiver_logInfo_1(t *testing.T) {
 	var tlog strings.Builder
 	var rc Receiver
 	//
-	rc.logInfo("info message")
+	rc.logInfo("info text")
 	//
 	ts := tlog.String()
 	if ts != "" {
@@ -855,10 +855,10 @@ func Test_Receiver_logInfo_2(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.LogFunc = fn
 	//
-	rc.logInfo("info message")
+	rc.logInfo("info text")
 	//
 	got := tlog.String()
-	if got != "info message" {
+	if got != "info text" {
 		t.Error("0xE74A75")
 	}
 }

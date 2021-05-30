@@ -132,7 +132,7 @@ func (mk *mockReadCloser) Close() error {
 
 // -----------------------------------------------------------------------------
 
-// zCompress compresses the message from zInput(): must always succeed
+// zCompress compresses the string from zInput(): must always succeed
 func zCompress(t *testing.T) []byte {
 	zc := zlibCompressor{}
 	input := zInput()
@@ -143,7 +143,7 @@ func zCompress(t *testing.T) []byte {
 	return comp
 }
 
-// zInput: provides a message to compress
+// zInput: provides a string to compress
 func zInput() []byte {
 	return []byte(
 		strings.Repeat("The quick brown fox jumps over the lazy dog!", 7),

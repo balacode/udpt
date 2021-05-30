@@ -25,7 +25,7 @@ func makeTestConn() *net.UDPConn {
 	return conn
 }
 
-// matchError retruns true if err contains the specified error message.
+// matchError retruns true if err contains the specified error description.
 func matchError(err error, msg string) bool {
 	if err == nil && (msg == "" || msg == "nil" || msg == "<nil>") {
 		return true

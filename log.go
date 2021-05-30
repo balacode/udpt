@@ -79,35 +79,35 @@ func (le *logEntry) Output() {
 // outputDI is only used by Output() and provides parameters
 // for dependency injection, to enable mocking during testing.
 func (le *logEntry) outputDI(
-	cons io.Writer,
-	openLogFile func(filename string, cons io.Writer) io.WriteCloser,
+	dest io.Writer,
+	openLogFile func(filename string, logErrorTo io.Writer) io.WriteCloser,
 ) {
 	if le.printMsg {
-		fmt.Fprintln(cons, le.msg)
+		fmt.Fprintln(dest, le.msg)
 	}
 	path := le.logFile
 	if path == "" {
 		return
 	}
-	wr := openLogFile(path, cons)
+	wr := openLogFile(path, dest)
 	if wr == nil {
 		return
 	}
 	n, err := wr.Write([]byte(le.msg + "\n"))
 	if n == 0 || err != nil {
-		fmt.Fprintln(cons, "ERROR 0xE81F3D:", err)
+		fmt.Fprintln(dest, "ERROR 0xE81F3D:", err)
 	}
 	err = wr.Close()
 	if err != nil {
-		fmt.Fprintln(cons, "ERROR 0xE50F96:", err)
+		fmt.Fprintln(dest, "ERROR 0xE50F96:", err)
 	}
 } //                                                                    outputDI
 
 // openLogFile opens a file for outputDI().
-func openLogFile(filename string, cons io.Writer) io.WriteCloser {
+func openLogFile(filename string, logErrorTo io.Writer) io.WriteCloser {
 	fl, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		fmt.Fprintln(cons, "ERROR 0xE2DA59:", err)
+		fmt.Fprintln(logErrorTo, "ERROR 0xE2DA59:", err)
 		return nil
 	}
 	return fl
