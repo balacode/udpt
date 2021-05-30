@@ -132,8 +132,8 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 	var tlog strings.Builder
 	_ = os.Remove(logEntryTestFile)
 	const s = "test entry #2361498057"
-	openLogFile := func(string, io.Writer) io.WriteCloser {
-		return nil
+	openLogFile := func(string) (io.WriteCloser, error) {
+		return nil, makeError(0xEE05A5, "failed openLogFile")
 	}
 	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
 	//
@@ -150,8 +150,8 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 func Test_log_logEntry_Output_4(t *testing.T) {
 	_ = os.Remove(logEntryTestFile)
 	const s = "test entry #1540938672"
-	openLogFile := func(string, io.Writer) io.WriteCloser {
-		return &mockWriteCloser{failWrite: true, failClose: true}
+	openLogFile := func(string) (io.WriteCloser, error) {
+		return &mockWriteCloser{failWrite: true, failClose: true}, nil
 	}
 	var tlog strings.Builder
 	le := logEntry{printMsg: false, logFile: logEntryTestFile, msg: s}
@@ -187,11 +187,17 @@ func Test_log_openLogFile_1(t *testing.T) {
 	msg1 := now + " msg1\n"
 	msg2 := now + " msg2\n"
 	//
-	wrc := openLogFile(testfile, &tlog)
+	wrc, err := openLogFile(testfile)
+	if err != nil {
+		t.Error("0xEA03F4", err)
+	}
 	wrc.Write([]byte(msg1))
 	wrc.Close()
 	//
-	wrc = openLogFile(testfile, &tlog)
+	wrc, err = openLogFile(testfile)
+	if err != nil {
+		t.Error("0xED8C37", err)
+	}
 	wrc.Write([]byte(msg2))
 	wrc.Close()
 	//
@@ -212,14 +218,12 @@ func Test_log_openLogFile_1(t *testing.T) {
 
 // must fail to open a file with an invalid name
 func Test_log_openLogFile_2(t *testing.T) {
-	var tlog strings.Builder
-	wrc := openLogFile("\\:/", &tlog)
+	wrc, err := openLogFile("\\:/")
 	if wrc != nil {
 		t.Error("0xEC8BA1")
 	}
-	ts := tlog.String()
-	if !strings.Contains(ts, "ERROR 0x") {
-		t.Error("0xEA1DC3")
+	if !matchError(err, "ERROR 0x") {
+		t.Error("0xEE9DE4", "wrong error:", err)
 	}
 }
 

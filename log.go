@@ -80,7 +80,7 @@ func (le *logEntry) Output() {
 // for dependency injection, to enable mocking during testing.
 func (le *logEntry) outputDI(
 	dest io.Writer,
-	openLogFile func(filename string, logErrorTo io.Writer) io.WriteCloser,
+	openLogFile func(filename string) (io.WriteCloser, error),
 ) {
 	if le.printMsg {
 		fmt.Fprintln(dest, le.msg)
@@ -89,7 +89,11 @@ func (le *logEntry) outputDI(
 	if path == "" {
 		return
 	}
-	wr := openLogFile(path, dest)
+	wr, err := openLogFile(path)
+	if err != nil {
+		fmt.Fprintln(dest, err)
+		return
+	}
 	if wr == nil {
 		return
 	}
@@ -104,13 +108,12 @@ func (le *logEntry) outputDI(
 } //                                                                    outputDI
 
 // openLogFile opens a file for outputDI().
-func openLogFile(filename string, logErrorTo io.Writer) io.WriteCloser {
+func openLogFile(filename string) (io.WriteCloser, error) {
 	fl, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		fmt.Fprintln(logErrorTo, "ERROR 0xE2DA59:", err)
-		return nil
+		return nil, makeError(0xE2DA59, err)
 	}
-	return fl
+	return fl, nil
 } //                                                                 openLogFile
 
 // -----------------------------------------------------------------------------
