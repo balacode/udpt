@@ -8,7 +8,6 @@ package udpt
 import (
 	"bytes"
 	"encoding/hex"
-	"fmt"
 	"net"
 	"strings"
 	"testing"
@@ -26,7 +25,7 @@ import (
 // go test -run Test_Send_*
 
 // must fail because there are too many 'config' arguments
-func Test_Send_(t *testing.T) {
+func Test_Send_A(t *testing.T) {
 	cryptoKey := []byte("3z5EdC485Ex9Wy0AsY4Apu6930Bx57Z0")
 	var cf *Configuration
 	//
@@ -205,50 +204,44 @@ func Test_Sender_TransferSpeedKBpS_(t *testing.T) {
 // -----------------------------------------------------------------------------
 // # Informatory Methods (sd *Sender)
 
-// (sd *Sender) LogStats(logFunc ...interface{})
+// (sd *Sender) LogStats(w io.Writer)
 //
 // go test -run Test_Sender_LogStats_
 //
 func Test_Sender_LogStats_(t *testing.T) {
 	var tlog strings.Builder
-	fmtPrintln := func(v ...interface{}) (int, error) {
-		tlog.WriteString(fmt.Sprintln(v...))
-		return 0, nil
+	//
+	sd := Sender{Config: NewDefaultConfig()}
+	sd.Config.LogWriter = &tlog
+	sd.packets = []senderPacket{
+		{sentHash: []byte{0x0}, confirmedHash: []byte{0x0}},
+		{sentHash: []byte{0x1}, confirmedHash: []byte{0x0}},
 	}
-	logPrintln := func(v ...interface{}) {
-		tlog.WriteString(fmt.Sprintln(v...))
+	sd.stats.bytesDelivered = 123000
+	sd.stats.bytesLost = 456
+	sd.stats.packetsDelivered = 10
+	sd.stats.packetsLost = 1
+	sd.stats.transferTime = 300 * time.Millisecond
+	// -----------------
+	sd.LogStats(&tlog)
+	// -----------------
+	want := "" +
+		"SN: 0    T0: 0001-01-01 00:00:00 +000 T1: NONE ✔ 0.0 ms\n" +
+		"SN: 1    T0: 0001-01-01 00:00:00 +000 T1: NONE LOST 0.0 ms\n" +
+		"B. delivered: 123000\n" +
+		"Bytes lost  : 456\n" +
+		"P. delivered: 10\n" +
+		"Packets lost: 1\n" +
+		"Time in item: 0.3 s\n" +
+		"Avg./ Packet: 30.0 ms\n" +
+		"Trans. speed: 400.0 KiB/s\n"
+	//
+	got := tlog.String()
+	if got != want {
+		t.Error("0xE63A81\n" + "want:\n" + want + "\n" + "got:\n" + got)
+		// fmt.Println("want bytes:", []byte(want))
+		// fmt.Println(" got bytes:", []byte(got))
 	}
-	test := func(logFunc interface{}) {
-		tlog.Reset()
-		//
-		sd := Sender{Config: NewDefaultConfig()}
-		sd.Config.LogFunc = logPrintln
-		sd.packets = []senderPacket{{
-			sentHash:      []byte{0},
-			confirmedHash: []byte{0},
-		}}
-		sd.LogStats(logFunc)
-		//
-		got := tlog.String()
-		want := "" +
-			"SN: 0    T0: 0001-01-01 00:00:00 +000 T1: NONE ✔ 0.0 ms\n" +
-			"B. delivered: 0\n" +
-			"Bytes lost  : 0\n" +
-			"P. delivered: 0\n" +
-			"Packets lost: 0\n" +
-			"Time in item: 0.0 s\n" +
-			"Avg./ Packet: 0.0 ms\n" +
-			"Trans. speed: 0.0 KiB/s\n"
-		//
-		if got != want {
-			t.Error("0xE63A81\n" + "want:\n" + want + "\n" + "got:\n" + got)
-			fmt.Println([]byte(want))
-			fmt.Println([]byte(got))
-		}
-	}
-	test(nil)
-	test(logPrintln)
-	test(fmtPrintln)
 }
 
 // -----------------------------------------------------------------------------
@@ -344,10 +337,8 @@ func Test_Sender_connect_5(t *testing.T) {
 // must return a valid hash
 func Test_Sender_requestDataItemHash_1(t *testing.T) {
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	var tlog strings.Builder
+	sd.Config.LogWriter = &tlog
 	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:" + testHash))
 	if err != nil {
 		t.Error("0xEA6DF7")
@@ -361,6 +352,7 @@ func Test_Sender_requestDataItemHash_1(t *testing.T) {
 	if strings.ToUpper(hex.EncodeToString(got)) != testHash {
 		t.Error("0xEC1AC0")
 	}
+	ts := tlog.String()
 	if ts != "" {
 		t.Error("0xEC3FC7")
 	}
@@ -368,18 +360,17 @@ func Test_Sender_requestDataItemHash_1(t *testing.T) {
 
 // must return nil because request size is greater than PacketSizeLimit
 func Test_Sender_requestDataItemHash_2(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
 	sd.Config.PacketSizeLimit = 1
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	// -------------------------------------------
 	got := sd.requestDataItemHash("k", sd.connect)
 	// -------------------------------------------
 	if got != nil {
 		t.Error("0xE3EF70")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "len(data) > Config.PacketSizeLimit") {
 		t.Error("0xED4F64")
 	}
@@ -387,11 +378,9 @@ func Test_Sender_requestDataItemHash_2(t *testing.T) {
 
 // must return nil because connect() failed
 func Test_Sender_requestDataItemHash_3(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	connect := func() (netUDPConn, error) {
 		err := makeError(0xE73D61, "failed connect")
 		sd.logError(0xEA9E44, "failed connect")
@@ -403,6 +392,7 @@ func Test_Sender_requestDataItemHash_3(t *testing.T) {
 	if got != nil {
 		t.Error("0xEC8C88")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "failed connect") {
 		t.Error("0xEF0D0A")
 	}
@@ -410,11 +400,9 @@ func Test_Sender_requestDataItemHash_3(t *testing.T) {
 
 // must return nil because sending packet failed
 func Test_Sender_requestDataItemHash_4(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	connect := func() (netUDPConn, error) {
 		return &mockNetUDPConn{failWrite: true}, nil
 	}
@@ -424,6 +412,7 @@ func Test_Sender_requestDataItemHash_4(t *testing.T) {
 	if got != nil {
 		t.Error("0xEE16D2")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "failed Write") {
 		t.Error("0xEC14C8")
 	}
@@ -431,11 +420,9 @@ func Test_Sender_requestDataItemHash_4(t *testing.T) {
 
 // must return nil because reply could not be decrypted
 func Test_Sender_requestDataItemHash_5(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	connect := func() (netUDPConn, error) {
 		return &mockNetUDPConn{}, nil
 	}
@@ -445,6 +432,7 @@ func Test_Sender_requestDataItemHash_5(t *testing.T) {
 	if got != nil {
 		t.Error("0xEA0DD5")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "message authentication failed") {
 		t.Error("0xEE45D4")
 	}
@@ -452,11 +440,9 @@ func Test_Sender_requestDataItemHash_5(t *testing.T) {
 
 // must return nil because reply has the wrong prefix
 func Test_Sender_requestDataItemHash_6(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	b, err := sd.Config.Cipher.Encrypt([]byte("bad_tag"))
 	if err != nil {
 		t.Error("0xED4CC0")
@@ -470,6 +456,7 @@ func Test_Sender_requestDataItemHash_6(t *testing.T) {
 	if got != nil {
 		t.Error("0xEC36EE")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "invalid tag in reply") {
 		t.Error("0xEB64E1")
 	}
@@ -477,11 +464,9 @@ func Test_Sender_requestDataItemHash_6(t *testing.T) {
 
 // must return nil because the reply is "not_found"
 func Test_Sender_requestDataItemHash_7(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:not_found"))
 	if err != nil {
 		t.Error("0xEE1CB6")
@@ -495,6 +480,7 @@ func Test_Sender_requestDataItemHash_7(t *testing.T) {
 	if got != nil {
 		t.Error("0xEA20BE")
 	}
+	ts := tlog.String()
 	if ts != "" {
 		t.Error("0xEC24D1")
 	}
@@ -502,11 +488,9 @@ func Test_Sender_requestDataItemHash_7(t *testing.T) {
 
 // must return nil because the hash in the reply is invalid
 func Test_Sender_requestDataItemHash_8(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	b, err := sd.Config.Cipher.Encrypt([]byte("HASH:XYZ12"))
 	if err != nil {
 		t.Error("0xEF37EA")
@@ -520,6 +504,7 @@ func Test_Sender_requestDataItemHash_8(t *testing.T) {
 	if got != nil {
 		t.Error("0xEA2A2B")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "bad hash") {
 		t.Error("0xEE9F42")
 	}
@@ -532,15 +517,14 @@ func Test_Sender_requestDataItemHash_8(t *testing.T) {
 
 // must succeed
 func Test_Sender_close_1(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
-	ts := ""
-	sd.Config = NewDebugConfig(func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	})
+	sd.Config = NewDebugConfig(&tlog)
 	sd.close()
 	if sd.conn != nil {
 		t.Error("0xE1FE10")
 	}
+	ts := tlog.String()
 	if ts != "" {
 		t.Error("0xE0AA32")
 	}
@@ -548,6 +532,7 @@ func Test_Sender_close_1(t *testing.T) {
 	if sd.conn != nil {
 		t.Error("0xE67DB6")
 	}
+	ts = tlog.String()
 	if ts != "" {
 		t.Error("0xEA7A80")
 	}
@@ -555,13 +540,12 @@ func Test_Sender_close_1(t *testing.T) {
 
 // must write to log when sd.conn.Close() fails
 func Test_Sender_close_2(t *testing.T) {
+	var tlog strings.Builder
 	sd := makeTestSender()
 	sd.conn = &mockNetUDPConn{failClose: true}
-	ts := ""
-	sd.Config = NewDebugConfig(func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	})
+	sd.Config = NewDebugConfig(&tlog)
 	sd.close()
+	ts := tlog.String()
 	if !strings.Contains(ts, "failed Close") {
 		t.Error("0xEA8D88")
 	}
@@ -575,12 +559,12 @@ func Test_Sender_close_2(t *testing.T) {
 // go test -run Test_Sender_logError_
 //
 func Test_Sender_logError_(t *testing.T) {
-	var ts string
+	var tlog strings.Builder
 	sd := makeTestSender()
-	sd.Config.LogFunc = func(a ...interface{}) {
-		ts = fmt.Sprintln(a...)
-	}
+	sd.Config.LogWriter = &tlog
 	sd.logError(0xE12345, "abc", 123)
+	//
+	ts := tlog.String()
 	if ts != "ERROR 0xE12345: abc 123\n" {
 		t.Error("0xE5CB5D")
 	}

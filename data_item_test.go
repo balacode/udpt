@@ -45,43 +45,31 @@ func Test_dataItem_IsLoaded_(t *testing.T) {
 // go test -run Test_dataItem_LogStats_
 //
 func Test_dataItem_LogStats_(t *testing.T) {
+	var di = dataItem{
+		Key:                  "ItemName",
+		Hash:                 []byte{1, 2, 3, 4, 5},
+		CompressedPieces:     [][]byte{{6}, {7, 8}, {9, 10, 11}},
+		CompressedSizeInfo:   20,
+		UncompressedSizeInfo: 50,
+	}
 	var tlog strings.Builder
-	fmtPrintln := func(v ...interface{}) (int, error) {
-		tlog.WriteString(fmt.Sprintln(v...))
-		return 0, nil
+	di.LogStats("xyz", &tlog)
+	//
+	want := "" +
+		"xyz  key: ItemName\n" +
+		"xyz hash: 0102030405\n" +
+		"xyz pcs.: 3\n" +
+		"xyz comp: 20 bytes\n" +
+		"xyz size: 50 bytes\n"
+	//
+	got := tlog.String()
+	if got != want {
+		t.Error("0xE85AA7",
+			"\n"+"want:\n", want,
+			"\n"+" got:\n", got)
+		// fmt.Println("want bytes:", []byte(want))
+		// fmt.Println(" got bytes:", []byte(got))
 	}
-	logPrintln := func(v ...interface{}) {
-		tlog.WriteString(fmt.Sprintln(v...))
-	}
-	test := func(logFunc interface{}) {
-		var di = dataItem{
-			Key:                  "ItemName",
-			Hash:                 []byte{1, 2, 3, 4, 5},
-			CompressedPieces:     [][]byte{{6}, {7, 8}, {9, 10, 11}},
-			CompressedSizeInfo:   20,
-			UncompressedSizeInfo: 50,
-		}
-		tlog.Reset()
-		di.LogStats("xyz", &tlog)
-		got := tlog.String()
-		//
-		want := "" +
-			"xyz  key: ItemName\n" +
-			"xyz hash: 0102030405\n" +
-			"xyz pcs.: 3\n" +
-			"xyz comp: 20 bytes\n" +
-			"xyz size: 50 bytes\n"
-		//
-		if got != want {
-			t.Error("0xE85AA7",
-				"\n"+"want:\n", want,
-				"\n"+" got:\n", got)
-			fmt.Println("want bytes:", []byte(want))
-			fmt.Println(" got bytes:", []byte(got))
-		}
-	}
-	test(fmtPrintln)
-	test(logPrintln)
 }
 
 // (di *dataItem) Reset()

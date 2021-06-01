@@ -8,7 +8,6 @@ package udpt
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"net"
 	"reflect"
 	"strings"
@@ -161,20 +160,18 @@ func Test_Receiver_Stop_1(t *testing.T) {
 }
 
 func Test_Receiver_Stop_2(t *testing.T) {
-	var err error
-	fn := func(a ...interface{}) {
-		err = makeError(0xEC8A02, a...)
-	}
+	var tlog strings.Builder
 	rc := Receiver{
-		Config: NewDebugConfig(fn),
+		Config: NewDebugConfig(&tlog),
 		conn:   &mockNetUDPConn{failClose: true},
 	}
 	rc.Stop()
 	if rc.conn != nil {
 		t.Error("0xE5D85F")
 	}
-	if !matchError(err, "failed Close") {
-		t.Error("0xEF17A7", "wrong error:", err)
+	ts := tlog.String()
+	if !strings.Contains(ts, "failed Close") {
+		t.Error("0xEF17A7", "wrong error:", ts)
 	}
 }
 
@@ -192,12 +189,10 @@ func Test_Receiver_initRun_1(t *testing.T) {
 	netListenUDP := func(string, *net.UDPAddr) (*net.UDPConn, error) {
 		return &net.UDPConn{}, nil
 	}
+	var tlog strings.Builder
 	rc := newRunnableReceiver()
-	cons := ""
 	rc.Config.VerboseReceiver = true
-	rc.Config.LogFunc = func(a ...interface{}) {
-		cons += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
 	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
 	if rc.Config == nil {
 		t.Error("0xE9A35E")
@@ -208,10 +203,11 @@ func Test_Receiver_initRun_1(t *testing.T) {
 	if !reflect.DeepEqual(rc.conn, &net.UDPConn{}) {
 		t.Error("0xEC5C19")
 	}
-	if !strings.Contains(cons, strings.Repeat("-", 80)) {
+	ts := tlog.String()
+	if !strings.Contains(ts, strings.Repeat("-", 80)) {
 		t.Error("0xEA76F8")
 	}
-	if !strings.Contains(cons, "Receiver listening...") {
+	if !strings.Contains(ts, "Receiver listening...") {
 		t.Error("0xEE15D5")
 	}
 }
@@ -243,13 +239,12 @@ func Test_Receiver_initRun_2(t *testing.T) {
 			}
 			return &net.UDPConn{}, nil
 		}
+	var tlog strings.Builder
 	rc := newRunnableReceiver()
-	cons := ""
 	rc.Config.VerboseReceiver = true
-	rc.Config.LogFunc = func(a ...interface{}) {
-		cons += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
 	rc.initRunDI(netResolveUDPAddr, netListenUDP)
+	////// CHECK WHAT'S IN tlog
 	if !c1 {
 		t.Error("0xE31BE4")
 	}
@@ -455,12 +450,11 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xE29CE8", err)
 	}
+	var tlog strings.Builder
 	rc := Receiver{Config: NewDefaultConfig()}
-	ts, recKey, recVal := "", "", ""
 	rc.Config.Cipher.SetKey([]byte(testAESKey))
-	rc.Config.LogFunc = func(a ...interface{}) {
-		ts += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
+	recKey, recVal := "", ""
 	rc.ReceiveData = func(k string, v []byte) error {
 		recKey, recVal = k, string(v)
 		return nil
@@ -483,6 +477,7 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 	if err != nil {
 		t.Error("0xE06F48")
 	}
+	ts := tlog.String()
 	if !strings.Contains(ts, "received: test1") {
 		t.Error("0xE70F40", "wrong reply:", ts)
 	}
@@ -490,11 +485,9 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 
 // must fail because sent data is nil
 func Test_Receiver_buildReply_2(t *testing.T) {
-	logErrorMsg := ""
+	var tlog strings.Builder
 	rc := Receiver{Config: NewDefaultConfig()}
-	rc.Config.LogFunc = func(a ...interface{}) {
-		logErrorMsg += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
 	reply, err := rc.buildReply(nil)
 	if reply != nil {
 		t.Error("0xE18DB7")
@@ -502,19 +495,18 @@ func Test_Receiver_buildReply_2(t *testing.T) {
 	if err != nil {
 		t.Error("0xEC58A7")
 	}
-	if !strings.Contains(logErrorMsg, "received no data") {
-		t.Error("0xE75A71", "wrong error:", logErrorMsg)
+	ts := tlog.String()
+	if !strings.Contains(ts, "received no data") {
+		t.Error("0xE75A71", "wrong error:", ts)
 	}
 }
 
 // must fail because packet header is invalid
 func Test_Receiver_buildReply_3(t *testing.T) {
-	logErrorMsg := ""
+	var tlog strings.Builder
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.Cipher.SetKey([]byte(testAESKey))
-	rc.Config.LogFunc = func(a ...interface{}) {
-		logErrorMsg += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
 	reply, err := rc.buildReply([]byte("XYZ: ..."))
 	if string(reply) != "invalid_packet_header" {
 		t.Error("0xE2CA90")
@@ -522,8 +514,9 @@ func Test_Receiver_buildReply_3(t *testing.T) {
 	if !matchError(err, "invalid packet header") {
 		t.Error("0xEC3D21", "wrong error:", err)
 	}
-	if !strings.Contains(logErrorMsg, "invalid packet header") {
-		t.Error("0xE53F59", "wrong error:", logErrorMsg)
+	ts := tlog.String()
+	if !strings.Contains(ts, "invalid packet header") {
+		t.Error("0xE53F59", "wrong error:", ts)
 	}
 }
 
@@ -535,13 +528,11 @@ func Test_Receiver_sendReply_1(t *testing.T) {
 		rc   = Receiver{Config: NewDefaultConfig()}
 		cn   = &mockNetUDPConn{}
 		addr = &net.UDPAddr{IP: []byte{127, 0, 0, 0}, Port: 9876}
-		cons = ""
 	)
+	var tlog strings.Builder
 	rc.Config.VerboseReceiver = true
 	rc.Config.WriteTimeout = 7 * time.Millisecond
-	rc.Config.LogFunc = func(a ...interface{}) {
-		cons += fmt.Sprintln(a...)
-	}
+	rc.Config.LogWriter = &tlog
 	deadline := time.Now().Add(7 * time.Millisecond)
 	//
 	rc.sendReply(cn, addr, []byte{1, 2, 3, 4, 5})
@@ -564,7 +555,8 @@ func Test_Receiver_sendReply_1(t *testing.T) {
 	if !bytes.Equal(cn.written, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}) {
 		t.Error("0xE07FA9")
 	}
-	if strings.Count(cons, "Receiver wrote 5 bytes to 127.0.0.0:9876") != 2 {
+	ts := tlog.String()
+	if strings.Count(ts, "Receiver wrote 5 bytes to 127.0.0.0:9876") != 2 {
 		t.Error("0xEA1AE3")
 	}
 }
@@ -800,30 +792,15 @@ func Test_Receiver_sendDataItemHash_5(t *testing.T) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) logError(a ...interface{})
 //
-// go test -run Test_Receiver_logError_*
-
-func Test_Receiver_logError_1(t *testing.T) {
+// go test -run Test_Receiver_logError_
+//
+func Test_Receiver_logError_(t *testing.T) {
 	var tlog strings.Builder
-	var rc Receiver
-	//
-	rc.logError(0xE12345, "error message")
-	//
-	got := tlog.String()
-	if got != "" {
-		t.Error("0xE94FB3")
-	}
-}
-
-func Test_Receiver_logError_2(t *testing.T) {
-	var tlog strings.Builder
-	fn := func(a ...interface{}) {
-		tlog.WriteString(fmt.Sprint(a...))
-	}
 	rc := Receiver{Config: NewDefaultConfig()}
-	rc.Config.LogFunc = fn
-	//
+	rc.Config.LogWriter = &tlog
+	// --------------------------------------------
 	rc.logError(0xE12345, "error text")
-	//
+	// --------------------------------------------
 	ts := tlog.String()
 	if ts != "ERROR 0xE12345: error text" {
 		t.Error("0xE0FA6C")
@@ -849,16 +826,13 @@ func Test_Receiver_logInfo_1(t *testing.T) {
 
 func Test_Receiver_logInfo_2(t *testing.T) {
 	var tlog strings.Builder
-	fn := func(a ...interface{}) {
-		tlog.WriteString(fmt.Sprint(a...))
-	}
 	rc := Receiver{Config: NewDefaultConfig()}
-	rc.Config.LogFunc = fn
+	rc.Config.LogWriter = &tlog
 	//
 	rc.logInfo("info text")
 	//
-	got := tlog.String()
-	if got != "info text" {
+	ts := tlog.String()
+	if ts != "info text\n" {
 		t.Error("0xE74A75")
 	}
 }

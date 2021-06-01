@@ -6,6 +6,8 @@
 package udpt
 
 import (
+	"io"
+	"os"
 	"time"
 )
 
@@ -83,40 +85,32 @@ type Configuration struct {
 	// -------------------------------------------------------------------------
 	// Logging:
 
-	// LogFunc is the function used to log logError() and logInfo() messages.
+	// LogWriter is the writer to which logError() and logInfo() output.
 	// If you leave it nil, no logging will be done.
-	LogFunc func(a ...interface{})
+	LogWriter io.Writer
 
-	// VerboseReceiver specifies if the receiver should print
-	// informational messages to the standard output.
+	// VerboseReceiver specifies if Receiver should
+	// write informational log messages to LogWriter.
 	VerboseReceiver bool
 
-	// VerboseSender specifies if Send() should print
-	// informational messages to the standard output.
+	// VerboseSender specifies if Sender should write
+	// informational log messages to LogWriter.
 	VerboseSender bool
 } //                                                               Configuration
 
 // NewDebugConfig returns configuration settings for debugging.
 //
-// You can specify an optional log function for logging.
-// If you omit it, logError() and logInfo() output will
-// use LogPrint, which just prints to standard output.
+// You can specify an optional writer used for logging. If you omit it,
+// logError() and logInfo() will print to standard output.
 //
-// Tip: to log output to specific file in addition to standard output, use:
-//
-// udpt.NewDebugConfig(udpt.MakeLogFunc(true, "your_file_name"))
-//
-// If you pass multiple arguments, only the first will be used.
-//
-func NewDebugConfig(logFunc ...func(a ...interface{})) *Configuration {
+func NewDebugConfig(logWriter ...io.Writer) *Configuration {
 	cf := NewDefaultConfig()
 	cf.VerboseSender = true
 	cf.VerboseReceiver = true
-	//
-	if len(logFunc) > 0 {
-		cf.LogFunc = logFunc[0]
+	if len(logWriter) > 0 {
+		cf.LogWriter = logWriter[0]
 	} else {
-		cf.LogFunc = LogPrint
+		cf.LogWriter = os.Stdout
 	}
 	return cf
 } //                                                              NewDebugConfig

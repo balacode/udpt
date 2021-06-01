@@ -7,6 +7,7 @@ package udpt
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 	"time"
@@ -17,11 +18,11 @@ import (
 
 // -----------------------------------------------------------------------------
 
-// NewDebugConfig(logFunc ...func(a ...interface{})) *Configuration
+// NewDebugConfig(logWriter ...io.Writer) *Configuration
 //
 // go test -run Test_config_NewDebugConfig_
-//
-func Test_config_NewDebugConfig_(t *testing.T) {
+
+func Test_config_NewDebugConfig_1(t *testing.T) {
 	//
 	// returns *Configuration as a string and strips memory addresses
 	formatStruct := func(cf *Configuration) string {
@@ -30,37 +31,24 @@ func Test_config_NewDebugConfig_(t *testing.T) {
 		ret := string(rx.ReplaceAll([]byte(s), []byte("), ")))
 		return ret
 	}
-	{
-		// test!
-		got := NewDebugConfig()
-		gotS := formatStruct(got)
-		//
-		// debug configuration should match the one returned
-		// by NewDefaultConfig() but with logging activated
-		want := NewDefaultConfig()
-		want.VerboseSender = true
-		want.VerboseReceiver = true
-		want.LogFunc = LogPrint
-		wantS := formatStruct(want)
-		//
-		if gotS != wantS {
-			t.Error("0xEB0A18", "\n",
-				"want:", wantS, "\n",
-				" got:", gotS,
-			)
-		}
-	}
-	{
-		isFuncCalled := false
-		logFunc := func(a ...interface{}) {
-			isFuncCalled = true
-		}
-		// test!
-		cf := NewDebugConfig(logFunc)
-		cf.LogFunc()
-		if !isFuncCalled {
-			t.Error("0xEE3AC7")
-		}
+	// --------------------
+	got := NewDebugConfig()
+	// --------------------
+	gotS := formatStruct(got)
+	//
+	// debug configuration should match the one returned
+	// by NewDefaultConfig() but with logging activated
+	want := NewDefaultConfig()
+	want.VerboseSender = true
+	want.VerboseReceiver = true
+	want.LogWriter = os.Stdout
+	wantS := formatStruct(want)
+	//
+	if gotS != wantS {
+		t.Error("0xEB0A18", "\n",
+			"want:", wantS, "\n",
+			" got:", gotS,
+		)
 	}
 }
 

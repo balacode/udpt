@@ -61,7 +61,7 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 	//
 	// enable verbose logging but don't print the output
 	cf := NewDefaultConfig()
-	cf.LogFunc = func(a ...interface{}) {}
+	cf.LogWriter = nil
 	cf.VerboseSender = true
 	cf.VerboseReceiver = true
 	//

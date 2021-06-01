@@ -17,73 +17,6 @@ import (
 // to run all tests in this file:
 // go test -v -run Test_log_*
 
-// -----------------------------------------------------------------------------
-
-// LogPrint(a ...interface{})
-//
-// go test -run Test_log_LogPrint_
-//
-func Test_log_LogPrint_(t *testing.T) {
-	LogPrint()
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// MakeLogFunc(printMsg bool, logFile string) func(a ...interface{})
-//
-// go test -run Test_log_MakeLogFunc_*
-
-func Test_log_MakeLogFunc_1(t *testing.T) {
-	//
-	// prepare: delete log file and mock time.Now()
-	logFile := "udpt.Test_log_MakeLogFunc_.tmp"
-	_ = os.Remove(logFile)
-	var tm = time.Now()
-	logTimeNow = func() time.Time {
-		return tm
-	}
-	// test!
-	fn := MakeLogFunc(false, logFile)
-	if fn == nil {
-		t.Error("0xEA9A06", "MakeLogFunc returned nil")
-	}
-	fn("abc", 123, "45", "de")
-	//
-	// check results
-	time.Sleep(500 * time.Millisecond) // wait for logger finish writing
-	data, err := ioutil.ReadFile(logFile)
-	if err != nil {
-		t.Error("0xE08D49", err)
-		return
-	}
-	got := string(data)
-	want := "@tm abc 123 45 de\n"
-	want = strings.ReplaceAll(want, "@tm", tm.String()[:19])
-	//
-	if got != want {
-		t.Errorf("0xEF57A5"+" wrong text in log file "+
-			"\n want: %#v"+
-			"\n  got: %#v",
-			want, got)
-	}
-	// cleanup
-	_ = os.Remove(logFile)
-	logTimeNow = time.Now
-}
-
-func Test_log_MakeLogFunc_2(t *testing.T) {
-	const testFile = "udpt.Test_log_MakeLogFunc_.tmp"
-	const s = "test message #5067124389"
-	_ = os.Remove(testFile)
-	fn := MakeLogFunc(false, testFile)
-	fn(s)
-	time.Sleep(time.Second)
-	data, err := ioutil.ReadFile(testFile)
-	if !strings.Contains(string(data), s) || err != nil {
-		t.Error("0xEC7ED0")
-	}
-	_ = os.Remove(testFile)
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (le *logEntry) Output()
 //
@@ -229,42 +162,15 @@ func Test_log_openLogFile_2(t *testing.T) {
 
 // -----------------------------------------------------------------------------
 
-// logInit()
+// (lw *logWriter) initChan()
 //
-// go test -run Test_log_logInit_
+// go test -run Test_log_initChan_
 //
-func Test_log_logInit_(t *testing.T) {
-	logInit()
-	if logChan == nil {
+func Test_log_initChan_(t *testing.T) {
+	lw := &logWriter{}
+	lw.initChan()
+	if lw.logChan == nil {
 		t.Error("0xE39B91", "logChan not initialized")
-	}
-}
-
-// logMakeMessage(tm time.Time, a ...interface{}) string
-//
-// go test -run Test_log_logMakeMessage_
-//
-func Test_log_logMakeMessage_(t *testing.T) {
-	for _, it := range []struct {
-		a    []interface{}
-		want string
-	}{
-		{nil, "@tm "},
-		{[]interface{}{"line1\nline2"}, "@tm line1\n@tm line2"},
-		{[]interface{}{"abc", 123, "de", 34}, "@tm abc 123 de 34"},
-	} {
-		var (
-			tm   = time.Now()
-			tms  = tm.String()[:19]
-			got  = logMakeMessage(tm, it.a...)
-			want = strings.ReplaceAll(it.want, "@tm", tms)
-		)
-		if got != want {
-			t.Errorf("0xEB14AF"+" logMakeMessage(<%s>, %#v)"+
-				"\n want: %#v"+
-				"\n  got: %#v",
-				tms, it.a, want, got)
-		}
 	}
 }
 
