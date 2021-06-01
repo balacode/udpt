@@ -55,7 +55,7 @@ type Receiver struct {
 	// These settings normally don't need to be changed.
 	Config *Configuration
 
-	// ReceiveData is a callback function you must specify. This Receiver
+	// Receive is a callback function you must specify. This Receiver
 	// will call it when a data item has been fully transferred.
 	//
 	// 'k' and 'v' will contain the key and value sent
@@ -64,7 +64,7 @@ type Receiver struct {
 	// The reason there are two parameters is to separate metadata like
 	// timestamps or filenames from the content of the transferred resource.
 	//
-	ReceiveData func(k string, v []byte) error
+	Receive func(k string, v []byte) error
 
 	// -------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ type Receiver struct {
 
 // Run runs the receiver in a loop to process incoming packets.
 //
-// It calls ReceiveData when a data transfer is complete, after the
+// It calls Receive when a data transfer is complete, after the
 // receiver has received, decrypted and re-assembled a data item.
 //
 func (rc *Receiver) Run() error {
@@ -165,8 +165,8 @@ func (rc *Receiver) initRunDI(
 	if err != nil {
 		return rc.logError(0xE8A5C6, "invalid Receiver.CryptoKey:", err)
 	}
-	if rc.ReceiveData == nil {
-		return rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
+	if rc.Receive == nil {
+		return rc.logError(0xE82C9E, "nil Receiver.Receive")
 	}
 	udpAddr, err := netResolveUDPAddr("udp",
 		fmt.Sprintf("0.0.0.0:%d", rc.Port))
@@ -280,14 +280,14 @@ func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 		return nil, rc.logError(0xE1A99A, "unknown packet alteration")
 	}
 	if it.IsLoaded() {
-		if rc.ReceiveData == nil {
-			return nil, rc.logError(0xE49E2A, "nil Receiver.ReceiveData")
+		if rc.Receive == nil {
+			return nil, rc.logError(0xE49E2A, "nil Receiver.Receive")
 		}
 		data, err := it.UnpackBytes(rc.Config.Compressor)
 		if err != nil {
 			return nil, rc.logError(0xE3DB1D, err)
 		}
-		err = rc.ReceiveData(it.Key, data)
+		err = rc.Receive(it.Key, data)
 		if err != nil {
 			return nil, rc.logError(0xE77B4D, err)
 		}

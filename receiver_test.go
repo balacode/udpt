@@ -22,10 +22,10 @@ import (
 // newRunnableReceiver() creates a Receiver with all required fields set
 func newRunnableReceiver() Receiver {
 	ret := Receiver{
-		Port:        9876,
-		CryptoKey:   []byte("0123456789abcdefghijklmnopqrst12"),
-		Config:      NewDefaultConfig(),
-		ReceiveData: func(k string, v []byte) error { return nil },
+		Port:      9876,
+		CryptoKey: []byte("0123456789abcdefghijklmnopqrst12"),
+		Config:    NewDefaultConfig(),
+		Receive:   func(k string, v []byte) error { return nil },
 	}
 	ret.Config.ReplyTimeout = 500 * time.Millisecond
 	ret.Config.WriteTimeout = 500 * time.Millisecond
@@ -124,12 +124,12 @@ func Test_Receiver_Run_08(t *testing.T) {
 	}
 }
 
-// must fail to start: ReceiveData is not specified
+// must fail to start: Receive is not specified
 func Test_Receiver_Run_09(t *testing.T) {
 	rc := newRunnableReceiver()
-	rc.ReceiveData = nil
+	rc.Receive = nil
 	err := rc.Run()
-	if !matchError(err, "nil Receiver.ReceiveData") {
+	if !matchError(err, "nil Receiver.Receive") {
 		t.Error("0xE7C0AC", "wrong error:", err)
 	}
 }
@@ -356,7 +356,7 @@ func Test_Receiver_initRun_6(t *testing.T) {
 	}
 }
 
-// must fail because ReceiveData is not assigned
+// must fail because Receive is not assigned
 func Test_Receiver_initRun_7(t *testing.T) {
 	var c1, c2 bool
 	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
@@ -373,12 +373,12 @@ func Test_Receiver_initRun_7(t *testing.T) {
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
 	}
-	// fail because ReceiveData is not assigned
+	// fail because Receive is not assigned
 	err := rc.initRunDI(netResolveUDPAddr, netListenUDP)
-	if !matchError(err, "nil Receiver.ReceiveData") {
+	if !matchError(err, "nil Receiver.Receive") {
 		t.Error("0xE2F00D", "wrong error:", err)
 	}
-	rc.ReceiveData = func(k string, v []byte) error { return nil }
+	rc.Receive = func(k string, v []byte) error { return nil }
 	//
 	// at this point, none of the net functions must have been called
 	if c1 {
@@ -436,7 +436,7 @@ func Test_Receiver_buildReply_1(t *testing.T) {
 	rc.Config.Cipher.SetKey([]byte(testAESKey))
 	rc.Config.LogWriter = &tlog
 	recKey, recVal := "", ""
-	rc.ReceiveData = func(k string, v []byte) error {
+	rc.Receive = func(k string, v []byte) error {
 		recKey, recVal = k, string(v)
 		return nil
 	}

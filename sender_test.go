@@ -486,7 +486,7 @@ func makeConfigAndReceiver(cryptoKey []byte, received *map[string][]byte,
 	cf.WriteTimeout = 250 * time.Millisecond
 	//
 	rc := Receiver{Port: 9876, CryptoKey: cryptoKey, Config: cf,
-		ReceiveData: func(k string, v []byte) error {
+		Receive: func(k string, v []byte) error {
 			(*received)[k] = []byte(v)
 			return nil
 		},

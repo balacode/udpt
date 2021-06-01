@@ -46,8 +46,8 @@ func main() {
     rc := udpt.Receiver{Port: 9876, CryptoKey: cryptoKey,
         //
         // receives fully-transferred data items sent to the receiver
-        ReceiveData: func(k string, v []byte) error {
-            fmt.Println("Receiver.ReceiveData k:", k, "v:", string(v))
+        Receive: func(k string, v []byte) error {
+            fmt.Println("Receiver.Receive k:", k, "v:", string(v))
             received = string(v)
             return nil
         },
