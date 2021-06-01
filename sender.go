@@ -522,7 +522,9 @@ func (sd *Sender) collectConfirmations() {
 // guaranteed, some confirmations may not be received. This method
 // will only wait for the duration specified in Config.ReplyTimeout.
 func (sd *Sender) waitForAllConfirmations() {
-	sd.logInfo("Waiting . . .")
+	if sd.Config.VerboseSender {
+		sd.logInfo("Waiting . . .")
+	}
 	t0 := time.Now()
 	sd.wg.Wait()
 	for {
