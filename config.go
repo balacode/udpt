@@ -130,11 +130,11 @@ func NewDefaultConfig() *Configuration {
 		SendRetries:       10,
 		//
 		// Timeouts and Intervals:
-		ReplyTimeout:       15 * time.Second,
-		SendPacketInterval: 2 * time.Millisecond,
+		ReplyTimeout:       10 * time.Second,
+		SendPacketInterval: 1 * time.Millisecond,
 		SendRetryInterval:  250 * time.Millisecond,
-		SendWaitInterval:   50 * time.Millisecond,
-		WriteTimeout:       15 * time.Second,
+		SendWaitInterval:   25 * time.Millisecond,
+		WriteTimeout:       10 * time.Second,
 		//
 		// Logging: (default nil/zero values)
 	}
