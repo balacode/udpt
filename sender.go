@@ -275,7 +275,12 @@ func (sd *Sender) AverageResponseMs() float64 {
 // sent data item have been delivered. I.e. all packets
 // have been sent, resent if needed, and confirmed.
 func (sd *Sender) DeliveredAllParts() bool {
-	ret := true
+	defer func() {
+		if r := recover(); r != nil {
+			_ = sd.logError(0xEC7A22, "Sender.DeliveredAllParts panic:", r)
+		}
+	}()
+	ret := len(sd.packets) > 0
 	for _, pk := range sd.packets {
 		if !bytes.Equal(pk.sentHash, pk.confirmedHash) {
 			ret = false
