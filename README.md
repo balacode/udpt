@@ -51,12 +51,6 @@ func main() {
             received = string(v)
             return nil
         },
-        // provides existing data items for hashing by the Receiver. Only the
-        // hash will be sent back to the sender, to confirm the transfer.
-        ProvideData: func(k string) ([]byte, error) {
-            fmt.Println("Receiver.ProvideData (k:" + k + "): " + received)
-            return []byte(received), nil
-        },
     }
     go func() { _ = rc.Run() }()
     defer func() { rc.Stop() }()

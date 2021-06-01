@@ -7,7 +7,6 @@ package udpt
 
 import (
 	"bytes"
-	"errors"
 	"net"
 	"reflect"
 	"strings"
@@ -27,7 +26,6 @@ func newRunnableReceiver() Receiver {
 		CryptoKey:   []byte("0123456789abcdefghijklmnopqrst12"),
 		Config:      NewDefaultConfig(),
 		ReceiveData: func(k string, v []byte) error { return nil },
-		ProvideData: func(k string) ([]byte, error) { return nil, nil },
 	}
 	ret.Config.ReplyTimeout = 500 * time.Millisecond
 	ret.Config.WriteTimeout = 500 * time.Millisecond
@@ -133,16 +131,6 @@ func Test_Receiver_Run_09(t *testing.T) {
 	err := rc.Run()
 	if !matchError(err, "nil Receiver.ReceiveData") {
 		t.Error("0xE7C0AC", "wrong error:", err)
-	}
-}
-
-// must fail to start: ProvideData is not specified
-func Test_Receiver_Run_10(t *testing.T) {
-	rc := newRunnableReceiver()
-	rc.ProvideData = nil
-	err := rc.Run()
-	if !matchError(err, "nil Receiver.ProvideData") {
-		t.Error("0xEF5FF2", "wrong error:", err)
 	}
 }
 
@@ -368,7 +356,7 @@ func Test_Receiver_initRun_6(t *testing.T) {
 	}
 }
 
-// must fail because ReceiveData or ProvideData is not assigned
+// must fail because ReceiveData is not assigned
 func Test_Receiver_initRun_7(t *testing.T) {
 	var c1, c2 bool
 	netResolveUDPAddr := func(string, string) (*net.UDPAddr, error) {
@@ -391,13 +379,6 @@ func Test_Receiver_initRun_7(t *testing.T) {
 		t.Error("0xE2F00D", "wrong error:", err)
 	}
 	rc.ReceiveData = func(k string, v []byte) error { return nil }
-	//
-	// fail because ProvideData is not assigned
-	err = rc.initRunDI(netResolveUDPAddr, netListenUDP)
-	if !matchError(err, "nil Receiver.ProvideData") {
-		t.Error("0xE3E29F", "wrong error:", err)
-	}
-	rc.ProvideData = func(k string) ([]byte, error) { return nil, nil }
 	//
 	// at this point, none of the net functions must have been called
 	if c1 {
@@ -710,79 +691,6 @@ func Test_Receiver_receiveFragment_9(t *testing.T) {
 	}
 	if !matchError(err, "received no data") {
 		t.Error("0xE13A6F", "wrong error:", err)
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error)
-//
-// go test -run Test_Receiver_sendDataItemHash_*
-
-func Test_Receiver_sendDataItemHash_1(t *testing.T) {
-	var rc Receiver
-	data, err := rc.sendDataItemHash([]byte{})
-	if data != nil {
-		t.Error("0xE30A2F")
-	}
-	if !matchError(err, "missing header") {
-		t.Error("0xED4B27", "wrong error:", err)
-	}
-}
-
-func Test_Receiver_sendDataItemHash_2(t *testing.T) {
-	var rc Receiver
-	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
-	if data != nil {
-		t.Error("0xED8A3E")
-	}
-	if !matchError(err, "nil ProvideData") {
-		t.Error("0xE65C25", "wrong error:", err)
-	}
-}
-
-func Test_Receiver_sendDataItemHash_3(t *testing.T) {
-	var rc Receiver
-	rc.ProvideData = func(k string) ([]byte, error) {
-		return nil, errors.New("test error")
-	}
-	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
-	if data != nil {
-		t.Error("0xEA5B15")
-	}
-	if !matchError(err, "test error") {
-		t.Error("0xEE3C84", "wrong error:", err)
-	}
-}
-
-func Test_Receiver_sendDataItemHash_4(t *testing.T) {
-	var rc Receiver
-	rc.ProvideData = func(k string) ([]byte, error) {
-		return nil, nil
-	}
-	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
-	if string(data) != "HASH:"+
-		"E3B0C44298FC1C149AFBF4C8996FB924"+
-		"27AE41E4649B934CA495991B7852B855" {
-		t.Error("0xE8F93C")
-	}
-	if err != nil {
-		t.Error("0xE0D7A2", err)
-	}
-}
-
-func Test_Receiver_sendDataItemHash_5(t *testing.T) {
-	var rc Receiver
-	rc.ProvideData = func(k string) ([]byte, error) {
-		return []byte("0123456789"), nil
-	}
-	data, err := rc.sendDataItemHash([]byte(tagDataItemHash))
-	if string(data) != "HASH:"+
-		"84D89877F0D4041EFB6BF91A16F0248F"+
-		"2FD573E6AF05C19F96BEDB9F882F7882" {
-		t.Error("0xE37BD7")
-	}
-	if err != nil {
-		t.Error("0xEF13C6", err)
 	}
 }
 

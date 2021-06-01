@@ -21,7 +21,6 @@ package udpt
 //   type fragmentHeader struct
 //   ) readFragmentHeader(recv []byte) (*fragmentHeader, error)
 //   ) receiveFragment(recv []byte) ([]byte, error)
-//   ) sendDataItemHash(req []byte) ([]byte, error)
 //
 // # Logging Methods
 //   ) logError(id uint32, a ...interface{}) error
@@ -67,24 +66,6 @@ type Receiver struct {
 	//
 	ReceiveData func(k string, v []byte) error
 
-	// ProvideData is a callback function you must specify. This
-	// Receiver will call it to read back the named data item.
-	//
-	// This is needed to send back a confirmation hash to the Sender
-	// to confirm the transfer. The Receiver carries out the hashing.
-	//
-	// If the resource specified by key 'k' is found,
-	// it should return its bytes with a nil error.
-	//
-	// If the resource is not found, return (nil, nil).
-	//
-	// If there is some error, return (nil, <error>).
-	//
-	// NOTE: This callback may be removed because the hashing could be done
-	// internally by the Receiver, so there'll be no need for a callback.
-	//
-	ProvideData func(k string) ([]byte, error)
-
 	// -------------------------------------------------------------------------
 
 	// conn is the UDP connection on which Receiver listens;
@@ -103,10 +84,6 @@ type Receiver struct {
 //
 // It calls ReceiveData when a data transfer is complete, after the
 // receiver has received, decrypted and re-assembled a data item.
-//
-// It calls ProvideData when it needs to calculate the hash of a
-// previously-received data item. This hash is sent to the sender
-// so it can confirm that a data transfer is successful.
 //
 func (rc *Receiver) Run() error {
 	defer rc.Stop()
@@ -191,9 +168,6 @@ func (rc *Receiver) initRunDI(
 	if rc.ReceiveData == nil {
 		return rc.logError(0xE82C9E, "nil Receiver.ReceiveData")
 	}
-	if rc.ProvideData == nil {
-		return rc.logError(0xE48CC6, "nil Receiver.ProvideData")
-	}
 	udpAddr, err := netResolveUDPAddr("udp",
 		fmt.Sprintf("0.0.0.0:%d", rc.Port))
 	if err != nil {
@@ -214,9 +188,6 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	switch {
 	case len(recv) == 0:
 		_ = rc.logError(0xE6B3BA, "received no data")
-		//
-	case bytes.HasPrefix(recv, []byte(tagDataItemHash)):
-		reply, err = rc.sendDataItemHash(recv)
 		//
 	case bytes.HasPrefix(recv, []byte(tagFragment)):
 		reply, err = rc.receiveFragment(recv)
@@ -332,24 +303,6 @@ func (rc *Receiver) receiveFragment(recv []byte) ([]byte, error) {
 	reply := append([]byte(tagConfirmation), confirmedHash...)
 	return reply, nil
 } //                                                             receiveFragment
-
-// sendDataItemHash handles a tagDataItemHash sent by a Sender.
-func (rc *Receiver) sendDataItemHash(req []byte) ([]byte, error) {
-	if !bytes.HasPrefix(req, []byte(tagDataItemHash)) {
-		return nil, rc.logError(0xE7B653, "missing header")
-	}
-	if rc.ProvideData == nil {
-		return nil, rc.logError(0xE73A1C, "nil ProvideData")
-	}
-	k := string(req[len(tagDataItemHash):])
-	v, err := rc.ProvideData(k)
-	if err != nil {
-		return nil, rc.logError(0xE7F7C9, err)
-	}
-	hash := getHash(v)
-	reply := []byte(tagDataItemHash + fmt.Sprintf("%X", hash))
-	return reply, nil
-} //                                                            sendDataItemHash
 
 // -----------------------------------------------------------------------------
 // # Logging Methods

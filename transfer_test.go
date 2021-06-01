@@ -73,10 +73,6 @@ func testTransfer(itemCount, itemSize int, t *testing.T) {
 			received[k] = []byte(v)
 			return nil
 		},
-		ProvideData: func(k string) ([]byte, error) {
-			v := received[k]
-			return v, nil
-		},
 	}
 	go func() { _ = rc.Run() }()
 	defer func() { rc.Stop() }()

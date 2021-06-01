@@ -32,10 +32,6 @@ package udpt
 //
 // # Internal Lifecycle Methods (sd *Sender)
 //   ) beginSend(k string, v []byte) (hash []byte, err error)
-//   ) requestDataItemHash(
-//         k string,
-//         connect func() (netUDPConn, error),
-//     ) []byte
 //   ) makePackets(k string, comp []byte) error
 //   ) connect() (netUDPConn, error)
 //   ) connectDI( . . .
@@ -53,7 +49,6 @@ package udpt
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -381,10 +376,6 @@ func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
 			fmt.Sprintf("Send key: %s size: %d hash: %X",
 				k, len(v), hash))
 	}
-	remoteHash := sd.requestDataItemHash(k, sd.connect)
-	if bytes.Equal(hash, remoteHash) {
-		return nil, nil
-	}
 	comp, err := sd.Config.Compressor.Compress(v)
 	if err != nil {
 		return nil, sd.logError(0xE2EB59, err)
@@ -397,54 +388,6 @@ func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
 	}
 	return hash, nil
 } //                                                                   beginSend
-
-// requestDataItemHash requests and waits for the listening receiver to
-// return the hash of the data item identified by key 'k'. If the receiver
-// can locate the data item, it returns its hash, otherwise it returns nil.
-func (sd *Sender) requestDataItemHash(
-	k string,
-	connect func() (netUDPConn, error),
-) []byte {
-	pk, err := sd.makePacket([]byte(tagDataItemHash + k))
-	if err != nil {
-		_ = sd.logError(0xE7DF8B, err)
-		return nil
-	}
-	tempConn, err := connect()
-	if err != nil {
-		_ = sd.logError(0xE34A8E, err)
-		return nil
-	}
-	err = pk.Send(tempConn, sd.Config.Cipher)
-	if err != nil {
-		_ = sd.logError(0xE89B11, err)
-		return nil
-	}
-	encReply := make([]byte, sd.Config.PacketSizeLimit)
-	reply, _, err := readAndDecrypt(tempConn, sd.Config.ReplyTimeout,
-		sd.Config.Cipher, encReply)
-	if err != nil {
-		_ = sd.logError(0xE97FC3, err)
-		return nil
-	}
-	var hash []byte
-	if len(reply) > 0 {
-		if !bytes.HasPrefix(reply, []byte(tagDataItemHash)) {
-			_ = sd.logError(0xE08AD4, "invalid tag in reply")
-			return nil
-		}
-		hexHash := string(reply[len(tagDataItemHash):])
-		if hexHash == "not_found" {
-			return nil
-		}
-		hash, err = hex.DecodeString(hexHash)
-		if err != nil {
-			_ = sd.logError(0xE6E7A9, "bad hash")
-			return nil
-		}
-	}
-	return hash
-} //                                                         requestDataItemHash
 
 // makePackets creates the packets for sending over UDP,
 // by partitioning compressed message 'comp'
@@ -628,10 +571,6 @@ func (sd *Sender) close() {
 func (sd *Sender) endSend(k string, hash []byte) error {
 	if !sd.DeliveredAllParts() {
 		return sd.logError(0xE1C3A7, "undelivered packets")
-	}
-	remoteHash := sd.requestDataItemHash(k, sd.connect)
-	if !bytes.Equal(hash, remoteHash) {
-		return sd.logError(0xE1F101, "hash mismatch")
 	}
 	if sd.Config.VerboseSender {
 		sd.LogStats()
