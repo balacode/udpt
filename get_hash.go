@@ -20,7 +20,7 @@ func getHash(data []byte) []byte {
 func getHashDI(data []byte, hs hash.Hash) []byte {
 	n, err := hs.Write(data)
 	if n != len(data) || err != nil {
-		// this should never happen
+		// this should never happen (see hash.Hash.Write in Go docs)
 		panic(makeError(0xE51EC0, err).Error())
 	}
 	ret := hs.Sum(nil)

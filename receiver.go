@@ -184,6 +184,8 @@ func (rc *Receiver) initRunDI(
 	return nil
 } //                                                                   initRunDI
 
+// buildReply builds a reply to the received data. Presently, the only packet
+// type received is a fragment (FRAG), replied with confirmation (CONF) packet.
 func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	switch {
 	case len(recv) == 0:
@@ -199,6 +201,7 @@ func (rc *Receiver) buildReply(recv []byte) (reply []byte, err error) {
 	return reply, err
 } //                                                                  buildReply
 
+// sendReply sends 'reply' to the specified connection
 func (rc *Receiver) sendReply(conn netUDPConn, addr net.Addr, reply []byte) {
 	deadline := time.Now().Add(rc.Config.WriteTimeout)
 	err := conn.SetWriteDeadline(deadline)
