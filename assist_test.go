@@ -74,6 +74,7 @@ type mockNetUDPConn struct {
 	readFromData       []byte
 }
 
+// ReadFrom implements PacketConn.ReadFrom().
 func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	mk.nReadFrom++
 	if mk.failReadFrom {
@@ -88,6 +89,7 @@ func (mk *mockNetUDPConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	return n, addr, nil
 }
 
+// Write implements Conn.Write().
 func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
 	mk.nWrite++
 	if mk.failWrite {
@@ -97,6 +99,7 @@ func (mk *mockNetUDPConn) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+// WriteTo implements PacketConn.WriteTo().
 func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	mk.nWriteTo++
 	if mk.failWriteTo {
@@ -106,6 +109,7 @@ func (mk *mockNetUDPConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	return len(b), nil
 }
 
+// SetReadDeadline implements Conn.SetReadDeadline().
 func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
 	mk.nSetReadDeadline++
 	if mk.failSetReadDeadline {
@@ -114,6 +118,7 @@ func (mk *mockNetUDPConn) SetReadDeadline(time.Time) error {
 	return nil
 }
 
+// SetWriteBuffer sets the size of the transmit buffer of the connection.
 func (mk *mockNetUDPConn) SetWriteBuffer(bytes int) error {
 	mk.nSetWriteBuffer++
 	if mk.failSetWriteBuffer {
@@ -123,6 +128,7 @@ func (mk *mockNetUDPConn) SetWriteBuffer(bytes int) error {
 	return nil
 }
 
+// SetWriteDeadline implements Conn.SetWriteDeadline().
 func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
 	mk.nSetWriteDeadline++
 	if mk.failSetWriteDeadline {
@@ -132,6 +138,7 @@ func (mk *mockNetUDPConn) SetWriteDeadline(deadline time.Time) error {
 	return nil
 }
 
+// Close closes the connection.
 func (mk *mockNetUDPConn) Close() error {
 	mk.nClose++
 	if mk.failClose {

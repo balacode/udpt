@@ -139,6 +139,7 @@ func Test_Receiver_Run_09(t *testing.T) {
 //
 // go test -run Test_Receiver_Stop_*
 
+// calling Stop on a new Receiver should not panic
 func Test_Receiver_Stop_1(t *testing.T) {
 	var rc Receiver
 	rc.Stop()
@@ -147,6 +148,7 @@ func Test_Receiver_Stop_1(t *testing.T) {
 	}
 }
 
+// if conn.close() errors, conn must be set to nil and error must be logged
 func Test_Receiver_Stop_2(t *testing.T) {
 	var tlog strings.Builder
 	rc := Receiver{
@@ -504,6 +506,7 @@ func Test_Receiver_buildReply_3(t *testing.T) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // (rc *Receiver) sendReply(conn netUDPConn, addr net.Addr, reply []byte)
 
+// must succeed
 func Test_Receiver_sendReply_1(t *testing.T) {
 	var (
 		rc   = Receiver{Config: NewDefaultConfig()}
@@ -516,7 +519,9 @@ func Test_Receiver_sendReply_1(t *testing.T) {
 	rc.Config.LogWriter = &tlog
 	deadline := time.Now().Add(7 * time.Millisecond)
 	//
+	// ------------------------------------------
 	rc.sendReply(cn, addr, []byte{1, 2, 3, 4, 5})
+	// ------------------------------------------
 	//
 	since := cn.writeDeadline.Sub(deadline)
 	if since > time.Millisecond || cn.writeDeadline.IsZero() {
@@ -542,13 +547,16 @@ func Test_Receiver_sendReply_1(t *testing.T) {
 	}
 }
 
+// must fail if conn.SetWriteDeadline() returns an error
 func Test_Receiver_sendReply_2(t *testing.T) {
 	var (
 		rc   = Receiver{Config: NewDefaultConfig()}
 		cn   = &mockNetUDPConn{failSetWriteDeadline: true}
 		addr = &net.UDPAddr{IP: []byte{127, 0, 0, 0}, Port: 9876}
 	)
+	// ------------------------
 	rc.sendReply(cn, addr, nil)
+	// ------------------------
 	if cn.nSetWriteDeadline != 1 {
 		t.Error("0xED1AD3")
 	}
@@ -557,13 +565,16 @@ func Test_Receiver_sendReply_2(t *testing.T) {
 	}
 }
 
+// must fail if conn.WriteTo() returns an error
 func Test_Receiver_sendReply_3(t *testing.T) {
 	var (
 		rc   = Receiver{Config: NewDefaultConfig()}
 		cn   = &mockNetUDPConn{failWriteTo: true}
 		addr = &net.UDPAddr{IP: []byte{127, 0, 0, 0}, Port: 9876}
 	)
+	// ------------------------
 	rc.sendReply(cn, addr, nil)
+	// ------------------------
 	if cn.nSetWriteDeadline != 1 {
 		t.Error("0xEC75DC")
 	}
@@ -580,6 +591,7 @@ func Test_Receiver_sendReply_3(t *testing.T) {
 //
 // go test -run Test_Receiver_receiveFragment_*
 
+// must fail because received data is zero-length, therefore has no header
 func Test_Receiver_receiveFragment_1(t *testing.T) {
 	var rc Receiver
 	data, err := rc.receiveFragment([]byte{})
@@ -606,6 +618,7 @@ func Test_Receiver_receiveFragment_2(t *testing.T) {
 const testHash = "B4E7119D881C4877" + "C9E2BC95B182C542" +
 	"281217587BCF75A5" + "435E8F9F72AB4E62"
 
+// must fail because serial number 'sn' in the header is not numeric
 func Test_Receiver_receiveFragment_3(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
@@ -618,6 +631,7 @@ func Test_Receiver_receiveFragment_3(t *testing.T) {
 	}
 }
 
+// must fail because fragment 'count' in the header is not numeric
 func Test_Receiver_receiveFragment_4(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
@@ -630,6 +644,7 @@ func Test_Receiver_receiveFragment_4(t *testing.T) {
 	}
 }
 
+// must fail because serial number 'sn' in the header exceeds the fragment count
 func Test_Receiver_receiveFragment_5(t *testing.T) {
 	rc := Receiver{Config: NewDefaultConfig()}
 	data, err := rc.receiveFragment([]byte(tagFragment +
@@ -732,6 +747,7 @@ func Test_Receiver_logInfo_1(t *testing.T) {
 	}
 }
 
+// test if logInfo() writes to LogWriter
 func Test_Receiver_logInfo_2(t *testing.T) {
 	var tlog strings.Builder
 	rc := Receiver{Config: NewDefaultConfig()}

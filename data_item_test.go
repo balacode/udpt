@@ -180,6 +180,7 @@ func Test_dataItem_Retain_(t *testing.T) {
 //
 // go test -run Test_dataItem_UnpackBytes_*
 
+// must fail trying to unpack an empty item
 func Test_dataItem_UnpackBytes_1(t *testing.T) {
 	zc := &zlibCompressor{}
 	var dataItem0 dataItem
@@ -192,6 +193,7 @@ func Test_dataItem_UnpackBytes_1(t *testing.T) {
 	}
 }
 
+// must succeed
 func Test_dataItem_UnpackBytes_2(t *testing.T) {
 	source := []byte(strings.Repeat(
 		"The quick brown fox jumps over the lazy dog. ", 300,
@@ -236,6 +238,7 @@ func Test_dataItem_UnpackBytes_2(t *testing.T) {
 	}
 }
 
+// must fail when everything succeeds but the hash is wrong
 func Test_dataItem_UnpackBytes_3(t *testing.T) {
 	source := []byte(strings.Repeat(
 		"The quick brown fox jumps over the lazy dog. ", 300,
@@ -261,7 +264,7 @@ func Test_dataItem_UnpackBytes_3(t *testing.T) {
 		Hash:             getHash(source),
 		CompressedPieces: compPieces,
 	}
-	dataItem1.Hash = []byte{0}
+	dataItem1.Hash = []byte{0} // <- causes the failure
 	zc = &zlibCompressor{}
 	uncomp, err := dataItem1.UnpackBytes(zc)
 	if uncomp != nil {
@@ -272,9 +275,8 @@ func Test_dataItem_UnpackBytes_3(t *testing.T) {
 	}
 }
 
+// must fail to uncompress an item containing garbage bytes
 func Test_dataItem_UnpackBytes_4(t *testing.T) {
-	//
-	// try to uncompress an item containing garbage bytes
 	var dataItem3 = dataItem{
 		Hash: []byte{0xA1, 0x96, 0x9E, 0xBF, 0x93, 0xE5},
 		CompressedPieces: [][]byte{{

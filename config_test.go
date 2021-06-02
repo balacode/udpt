@@ -22,6 +22,8 @@ import (
 //
 // go test -run Test_config_NewDebugConfig_
 
+// debug configuration should match the one returned
+// by NewDefaultConfig() but with logging activated
 func Test_config_NewDebugConfig_1(t *testing.T) {
 	//
 	// returns *Configuration as a string and strips memory addresses
@@ -36,8 +38,6 @@ func Test_config_NewDebugConfig_1(t *testing.T) {
 	// --------------------
 	gotS := formatStruct(got)
 	//
-	// debug configuration should match the one returned
-	// by NewDefaultConfig() but with logging activated
 	want := NewDefaultConfig()
 	want.VerboseSender = true
 	want.VerboseReceiver = true

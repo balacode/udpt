@@ -13,6 +13,7 @@ import (
 //
 // go test -run Test_makeError_*
 
+// test if makeError builds error messages properly
 func Test_makeError_1(t *testing.T) {
 	for _, it := range []struct {
 		id uint32
@@ -37,6 +38,7 @@ func Test_makeError_1(t *testing.T) {
 	}
 }
 
+// makeError must strip error IDs from inner messages, leaving only its ID
 func Test_makeError_(t *testing.T) {
 	a := makeError(0xEE5D1E, "some error description")
 	b := makeError(0xE4C1F0, a.Error())

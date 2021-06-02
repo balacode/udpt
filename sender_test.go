@@ -127,6 +127,7 @@ func Test_Sender_Send_1(t *testing.T) {
 	}
 }
 
+// must fail because connect() errored
 func Test_Sender_Send_2(t *testing.T) {
 	connect := func() (netUDPConn, error) {
 		return nil, makeError(0xEF2DC4, "failed connect")
@@ -139,6 +140,7 @@ func Test_Sender_Send_2(t *testing.T) {
 	}
 }
 
+// must fail because sendUndeliveredPackets() errored
 func Test_Sender_Send_3(t *testing.T) {
 	sendUndeliveredPackets := func() error {
 		return makeError(0xE9AF68, "failed sendUndeliveredPackets")
