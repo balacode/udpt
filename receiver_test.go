@@ -735,20 +735,8 @@ func Test_Receiver_logError_(t *testing.T) {
 //
 // go test -run Test_Receiver_logInfo_*
 
-func Test_Receiver_logInfo_1(t *testing.T) {
-	var tlog strings.Builder
-	var rc Receiver
-	//
-	rc.logInfo("info text")
-	//
-	ts := tlog.String()
-	if ts != "" {
-		t.Error("0xEF3F1C")
-	}
-}
-
 // test if logInfo() writes to LogWriter
-func Test_Receiver_logInfo_2(t *testing.T) {
+func Test_Receiver_logInfo_(t *testing.T) {
 	var tlog strings.Builder
 	rc := Receiver{Config: NewDefaultConfig()}
 	rc.Config.LogWriter = &tlog
