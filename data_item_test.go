@@ -21,18 +21,18 @@ import (
 // go test -run Test_dataItem_IsLoaded_
 //
 func Test_dataItem_IsLoaded_(t *testing.T) {
-	var dataItem0 dataItem
-	if dataItem0.IsLoaded() != false {
+	var d0 dataItem
+	if d0.IsLoaded() != false {
 		t.Error("0xE3FA57")
 	}
-	var dataItem1 dataItem
-	dataItem1.CompressedPieces = [][]byte{{}, {1}}
-	if dataItem1.IsLoaded() != false {
+	var d1 dataItem
+	d1.CompressedPieces = [][]byte{{}, {1}}
+	if d1.IsLoaded() != false {
 		t.Error("0xE60B69")
 	}
-	var dataItem2 dataItem
-	dataItem2.CompressedPieces = [][]byte{{1}, {23}}
-	if dataItem2.IsLoaded() != true {
+	var d2 dataItem
+	d2.CompressedPieces = [][]byte{{1}, {23}}
+	if d2.IsLoaded() != true {
 		t.Error("0xE25AC1")
 	}
 }
@@ -180,30 +180,17 @@ func Test_dataItem_Retain_(t *testing.T) {
 //
 // go test -run Test_dataItem_UnpackBytes_*
 
-// must fail trying to unpack an empty item
-func Test_dataItem_UnpackBytes_1(t *testing.T) {
-	zc := &zlibCompressor{}
-	var dataItem0 dataItem
-	data, err := dataItem0.UnpackBytes(zc)
-	if data != nil {
-		t.Error("0xED52E6")
-	}
-	if !matchError(err, "data item is incomplete") {
-		t.Error("0xEE0C63", "wrong error:", err)
-	}
-}
-
 // must succeed
-func Test_dataItem_UnpackBytes_2(t *testing.T) {
+func Test_dataItem_UnpackBytes_1(t *testing.T) {
 	source := []byte(strings.Repeat(
 		"The quick brown fox jumps over the lazy dog. ", 300,
 	))
-	hash := getHash(source)
 	zc := &zlibCompressor{}
 	comp, err := zc.Compress(source)
 	if err != nil {
 		t.Error("0xE4A56C", "Compress failed")
 	}
+	hash := getHash(source)
 	var compPieces [][]byte
 	{
 		a := comp[:]
@@ -216,25 +203,37 @@ func Test_dataItem_UnpackBytes_2(t *testing.T) {
 			a = a[n:]
 		}
 	}
-	var dataItem1 = dataItem{
-		Hash:             hash,
-		CompressedPieces: compPieces,
-	}
-	uncomp, err := dataItem1.UnpackBytes(zc)
+	var di = dataItem{Hash: hash, CompressedPieces: compPieces}
+	// ------------------------------
+	uncomp, err := di.UnpackBytes(zc)
+	// ------------------------------
 	if err != nil {
 		t.Error("0xEF6D12", err)
 	}
 	if !bytes.Equal(source, uncomp) {
 		t.Error("0xE91A65", "corrupted data")
 	}
-	if !bytes.Equal(hash, dataItem1.Hash) {
+	if !bytes.Equal(hash, di.Hash) {
 		t.Error("0xEC4E68", "corrupted hash")
 	}
-	if dataItem1.CompressedSizeInfo != len(comp) {
+	if di.CompressedSizeInfo != len(comp) {
 		t.Error("0xEB4A34", "wrong CompressedSizeInfo")
 	}
-	if dataItem1.UncompressedSizeInfo != len(source) {
+	if di.UncompressedSizeInfo != len(source) {
 		t.Error("0xEC1E61", "wrong UncompressedSizeInfo")
+	}
+}
+
+// must fail trying to unpack an empty item
+func Test_dataItem_UnpackBytes_2(t *testing.T) {
+	zc := &zlibCompressor{}
+	var di0 dataItem
+	data, err := di0.UnpackBytes(zc)
+	if data != nil {
+		t.Error("0xED52E6")
+	}
+	if !matchError(err, "data item is incomplete") {
+		t.Error("0xEE0C63", "wrong error:", err)
 	}
 }
 
@@ -260,13 +259,12 @@ func Test_dataItem_UnpackBytes_3(t *testing.T) {
 			a = a[n:]
 		}
 	}
-	var dataItem1 = dataItem{
-		Hash:             getHash(source),
-		CompressedPieces: compPieces,
-	}
-	dataItem1.Hash = []byte{0} // <- causes the failure
+	var di = dataItem{Hash: getHash(source), CompressedPieces: compPieces}
 	zc = &zlibCompressor{}
-	uncomp, err := dataItem1.UnpackBytes(zc)
+	// ------------------------------
+	di.Hash = []byte{0} // <- this must cause it to fail
+	uncomp, err := di.UnpackBytes(zc)
+	// ------------------------------
 	if uncomp != nil {
 		t.Error("0xED14FA")
 	}
@@ -277,7 +275,7 @@ func Test_dataItem_UnpackBytes_3(t *testing.T) {
 
 // must fail to uncompress an item containing garbage bytes
 func Test_dataItem_UnpackBytes_4(t *testing.T) {
-	var dataItem3 = dataItem{
+	var di = dataItem{
 		Hash: []byte{0xA1, 0x96, 0x9E, 0xBF, 0x93, 0xE5},
 		CompressedPieces: [][]byte{{
 			0xC6, 0x44, 0x0D, 0xAC, 0xA9, 0x55, 0x4D, 0xEF,
@@ -285,7 +283,7 @@ func Test_dataItem_UnpackBytes_4(t *testing.T) {
 		}},
 	}
 	zc := &zlibCompressor{}
-	uncomp, err := dataItem3.UnpackBytes(zc)
+	uncomp, err := di.UnpackBytes(zc)
 	if uncomp != nil {
 		t.Error("0xE59B01")
 	}
