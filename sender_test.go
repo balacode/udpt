@@ -17,9 +17,8 @@ import (
 // go test -v -run Test_Sender_*
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// func Send(addr string, k string, v []byte, cryptoKey []byte,
-//     config ...*Configuration,
-// ) error
+
+// Send(addr, k string, v, cryptoKey []byte, config ...*Configuration) error
 //
 // go test -run Test_Send_*
 
@@ -37,8 +36,7 @@ func Test_Send_A(t *testing.T) {
 
 // -----------------------------------------------------------------------------
 
-// SendString(addr string, k, v string, cryptoKey []byte,
-//     config ...*Configuration,
+// SendString(addr, k, v string, cryptoKey []byte, config ...*Configuration,
 // ) error
 //
 // go test -run Test_SendString_

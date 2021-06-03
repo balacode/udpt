@@ -7,12 +7,9 @@ package udpt
 
 // # Functions
 //
-//   Send(addr string, k string, v []byte, cryptoKey []byte,
-//       config ...*Configuration,
-//   ) error
+//   Send(addr, k string, v, cryptoKey []byte, config ...*Configuration) error
 //
-//   SendString(addr string, k, v string, cryptoKey []byte,
-//       config ...*Configuration,
+//   SendString(addr, k, v string, cryptoKey []byte, config ...*Configuration,
 //   ) error
 //
 // # Sender Type
@@ -81,9 +78,7 @@ import (
 // config is an optional Configuration you can customize. If you leave it out,
 // Send() will use the configuration returned by NewDefaultConfig().
 //
-func Send(addr string, k string, v []byte, cryptoKey []byte,
-	config ...*Configuration,
-) error {
+func Send(addr, k string, v, cryptoKey []byte, config ...*Configuration) error {
 	if len(config) > 1 {
 		return makeError(0xE8C0D4, "too many 'config' arguments")
 	}
@@ -118,8 +113,7 @@ func Send(addr string, k string, v []byte, cryptoKey []byte,
 // config is an optional Configuration you can customize. If you leave it out,
 // SendString() will use the configuration returned by NewDefaultConfig().
 //
-func SendString(addr string, k, v string, cryptoKey []byte,
-	config ...*Configuration,
+func SendString(addr, k, v string, cryptoKey []byte, config ...*Configuration,
 ) error {
 	return Send(addr, k, []byte(v), cryptoKey, config...)
 } //                                                                  SendString
@@ -172,10 +166,6 @@ type Sender struct {
 	// dataHash contains the hash of all bytes of the data item being sent
 	dataHash []byte
 
-	// stats contains UDP transfer statistics, such as the transfer
-	// speed and the number of packets delivered and lost
-	stats udpStats
-
 	// packets contains all the packets of the currently transferred data item;
 	// some of them may have been delivered, while others may need (re)sending
 	packets []senderPacket
@@ -183,6 +173,10 @@ type Sender struct {
 	// startTime is the time the first packet was sent, after
 	// the bytes of the data item have been compressed
 	startTime time.Time
+
+	// stats contains UDP transfer statistics, such as the transfer
+	// speed and the number of packets delivered and lost
+	stats udpStats
 
 	// wg is used by waitForAllConfirmations()
 	// to wait for sendUndeliveredPackets()

@@ -234,7 +234,7 @@ func Test_Receiver_initRun_2(t *testing.T) {
 	rc.Config.VerboseReceiver = true
 	rc.Config.LogWriter = &tlog
 	rc.initRunDI(netResolveUDPAddr, netListenUDP)
-	////// CHECK WHAT'S IN tlog
+	/// check what's in tlog
 	if !c1 {
 		t.Error("0xE31BE4")
 	}
