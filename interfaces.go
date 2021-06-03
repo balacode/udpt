@@ -35,4 +35,9 @@ type netUDPConn interface {
 	Close() error
 } //                                                                  netUDPConn
 
+// netDialUDP wraps net.DialUDP and returns netUDPConn instead of *net.UDPConn
+func netDialUDP(network string, laddr, raddr *net.UDPAddr) (netUDPConn, error) {
+	return net.DialUDP(network, laddr, raddr)
+} //                                                                  netDialUDP
+
 // end

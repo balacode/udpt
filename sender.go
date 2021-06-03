@@ -434,17 +434,13 @@ func (sd *Sender) makePackets(k string, comp []byte) error {
 // Note that it doesn't change the value of Sender.conn
 //
 func (sd *Sender) connect() (netUDPConn, error) {
-	fn := func(network string, laddr *net.UDPAddr, raddr *net.UDPAddr,
-	) (netUDPConn, error) {
-		return net.DialUDP(network, laddr, raddr)
-	}
-	return sd.connectDI(fn)
+	return sd.connectDI(netDialUDP)
 } //                                                                     connect
 
 // connectDI is only used by connect() and provides a parameter
 // for dependency injection, to enable mocking during testing.
 func (sd *Sender) connectDI(
-	netDialUDP func(string, *net.UDPAddr, *net.UDPAddr) (netUDPConn, error),
+	netDialUDP func(_ string, _, _ *net.UDPAddr) (netUDPConn, error),
 ) (netUDPConn, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", sd.Address)
 	if err != nil {

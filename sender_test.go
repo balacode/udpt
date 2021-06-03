@@ -256,10 +256,6 @@ func Test_Sender_LogStats_(t *testing.T) {
 // must succeed
 func Test_Sender_connect_1(t *testing.T) {
 	sd := Sender{Config: NewDefaultConfig(), Address: "127.0.0.1:9876"}
-	netDialUDP := func(network string, laddr, raddr *net.UDPAddr,
-	) (netUDPConn, error) {
-		return net.DialUDP(network, laddr, raddr)
-	}
 	udpConn, err := sd.connectDI(netDialUDP)
 	if udpConn == nil {
 		t.Error("0xEC4B85")
