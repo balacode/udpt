@@ -28,7 +28,7 @@ package udpt
 //   ) LogStats(w ...io.Writer)
 //
 // # Internal Lifecycle Methods (sd *Sender)
-//   ) beginSend(k string, v []byte) (hash []byte, err error)
+//   ) beginSend(k string, v []byte) error
 //   ) makePackets(k string, comp []byte) error
 //   ) connect() (netUDPConn, error)
 //   ) connectDI( . . .
@@ -208,8 +208,8 @@ func (sd *Sender) sendDI(k string, v []byte,
 	if sd.Config == nil {
 		sd.Config = NewDefaultConfig()
 	}
-	hash, err := sd.beginSend(k, v)
-	if hash == nil {
+	err := sd.beginSend(k, v)
+	if err != nil {
 		return err
 	}
 	newConn, err := connect()
@@ -350,42 +350,41 @@ func (sd *Sender) LogStats(w ...io.Writer) {
 // # Internal Lifecycle Methods (sd *Sender)
 
 // beginSend checks if the sender is properly configured before sending
-func (sd *Sender) beginSend(k string, v []byte) (hash []byte, err error) {
+func (sd *Sender) beginSend(k string, v []byte) error {
 	//
 	// setup cipher
 	if sd.Config.Cipher == nil {
-		return nil, sd.logError(0xE83D07, "nil Sender.Config.Cipher")
+		return sd.logError(0xE83D07, "nil Sender.Config.Cipher")
 	}
-	err = sd.Config.Cipher.SetKey(sd.CryptoKey)
+	err := sd.Config.Cipher.SetKey(sd.CryptoKey)
 	if err != nil {
-		return nil, sd.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
+		return sd.logError(0xE02D7B, "invalid Sender.CryptoKey:", err)
 	}
 	// check settings
 	err = sd.Config.Validate()
 	if err != nil {
-		return nil, sd.logError(0xE5D92D, "invalid Sender.Config:", err)
+		return sd.logError(0xE5D92D, "invalid Sender.Config:", err)
 	}
 	err = sd.validateAddress()
 	if err != nil {
-		return nil, sd.logError(0xE5A04A, err)
+		return sd.logError(0xE5A04A, err)
 	}
-	hash = getHash(v)
 	if sd.Config.VerboseSender {
+		hash := getHash(v)
 		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send key: %s size: %d hash: %X",
 				k, len(v), hash))
 	}
 	comp, err := sd.Config.Compressor.Compress(v)
 	if err != nil {
-		return nil, sd.logError(0xE2EB59, err)
+		return sd.logError(0xE2EB59, err)
 	}
-	sd.dataHash = hash
 	sd.startTime = time.Now()
 	err = sd.makePackets(k, comp)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return hash, nil
+	return nil
 } //                                                                   beginSend
 
 // makePackets creates the packets for sending over UDP,
