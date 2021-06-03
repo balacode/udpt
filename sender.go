@@ -36,7 +36,7 @@ package udpt
 //   ) collectConfirmations()
 //   ) waitForAllConfirmations()
 //   ) close()
-//   ) endSend(k string, hash []byte) error
+//   ) endSend() error
 //
 // # Internal Helper Methods (sd *Sender)
 //   ) logError(id uint32, a ...interface{}) error
@@ -231,7 +231,7 @@ func (sd *Sender) sendDI(k string, v []byte,
 		time.Sleep(sd.Config.SendRetryInterval)
 	}
 	sd.close()
-	return sd.endSend(k, hash)
+	return sd.endSend()
 } //                                                                      sendDI
 
 // SendString transfers a key and value string
@@ -563,9 +563,8 @@ func (sd *Sender) close() {
 	}
 } //                                                                       close
 
-// endSend finializes the Send() by checking if the message was successfully
-// delivered by requesting a confirmation from the Receiver.
-func (sd *Sender) endSend(k string, hash []byte) error {
+// endSend finializes Send() by checking if the message was delivered
+func (sd *Sender) endSend() error {
 	if !sd.DeliveredAllParts() {
 		return sd.logError(0xE1C3A7, "undelivered packets")
 	}
