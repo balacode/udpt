@@ -42,16 +42,11 @@ func main() {
     cryptoKey := []byte("aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0")
     //
     // set-up and run the receiver
-    received := ""
     rc := udpt.Receiver{Port: 9876, CryptoKey: cryptoKey,
-        //
-        // receives fully-transferred data items sent to the receiver
         Receive: func(k string, v []byte) error {
-            fmt.Println("Receiver.Receive k:", k, "v:", string(v))
-            received = string(v)
+            fmt.Println("Received k:", k, "v:", string(v))
             return nil
-        },
-    }
+        }}
     go func() { _ = rc.Run() }()
     defer func() { rc.Stop() }()
     time.Sleep(500 * time.Millisecond)
