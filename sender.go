@@ -369,11 +369,11 @@ func (sd *Sender) beginSend(k string, v []byte) error {
 	if err != nil {
 		return sd.logError(0xE5A04A, err)
 	}
+	sd.dataHash = getHash(v)
 	if sd.Config.VerboseSender {
-		hash := getHash(v)
 		sd.logInfo("\n" + strings.Repeat("-", 80) + "\n" +
 			fmt.Sprintf("Send key: %s size: %d hash: %X",
-				k, len(v), hash))
+				k, len(v), sd.dataHash))
 	}
 	comp, err := sd.Config.Compressor.Compress(v)
 	if err != nil {
