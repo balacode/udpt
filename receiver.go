@@ -179,6 +179,7 @@ func (rc *Receiver) initRunDI(
 	}
 	rc.conn, err = netListenUDP("udp", udpAddr)
 	if err != nil {
+		rc.conn = nil // avoid non-nil interface with nil concrete value
 		return rc.logError(0xEBF95F, err)
 	}
 	return nil
