@@ -37,7 +37,11 @@ type netUDPConn interface {
 
 // netDialUDP wraps net.DialUDP and returns netUDPConn instead of *net.UDPConn
 func netDialUDP(network string, laddr, raddr *net.UDPAddr) (netUDPConn, error) {
-	return net.DialUDP(network, laddr, raddr)
+	conn, err := net.DialUDP(network, laddr, raddr)
+	if conn == nil {
+		return nil, err
+	}
+	return conn, err
 } //                                                                  netDialUDP
 
 // end
