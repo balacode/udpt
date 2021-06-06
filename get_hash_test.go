@@ -33,7 +33,7 @@ func Test_getHash_2(t *testing.T) {
 	got := fmt.Sprintf("%X", h)
 	if got != "BA7816BF8F01CFEA414140DE5DAE2223"+
 		"B00361A396177A9CB410FF61F20015AD" {
-		t.Error("0xE00CE9")
+		t.Error("0xEF0B35")
 	}
 }
 
