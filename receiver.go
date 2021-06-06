@@ -5,6 +5,12 @@
 
 package udpt
 
+// Receive(
+//     port int,
+//     cryptoKey []byte,
+//     receive func(k string, v []byte) error,
+// ) error
+//
 // type Receiver struct
 //
 // # Public Methods
@@ -28,6 +34,7 @@ package udpt
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"fmt"
 	"net"
@@ -35,6 +42,38 @@ import (
 	"strings"
 	"time"
 )
+
+// Receive sets up and runs a Receiver.
+//
+// Once it starts running, this function will only
+// exit if the context is done or cancelled.
+//
+// It will only return an error if it fails to start
+// because the port or cryptoKey is invalid.
+//
+func Receive(
+	ctx context.Context,
+	port int,
+	cryptoKey []byte,
+	receive func(k string, v []byte) error,
+) error {
+	ch := make(chan error, 1)
+	var rc Receiver
+	go func() {
+		rc = Receiver{Port: port, CryptoKey: cryptoKey, Receive: receive}
+		err := rc.Run()
+		ch <- err
+	}()
+	defer rc.Stop()
+	select {
+	case err := <-ch:
+		return err
+	case <-ctx.Done():
+		return nil
+	}
+} //                                                                     Receive
+
+// -----------------------------------------------------------------------------
 
 // Receiver receives data items sent by Send() or SendString().
 type Receiver struct {
