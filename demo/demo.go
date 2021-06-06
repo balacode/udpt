@@ -7,7 +7,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/balacode/udpt"
 )
@@ -24,15 +23,13 @@ func main() {
 			return nil
 		}}
 	go func() { _ = rc.Run() }()
-	defer func() { rc.Stop() }()
-	time.Sleep(500 * time.Millisecond)
 	//
 	// send a message to the receiver
-	err := udpt.SendString("127.0.0.1:9876", "msg", "Hello World!", cryptoKey)
+	err := udpt.SendString("127.0.0.1:9876", "main", "Hello World!", cryptoKey)
 	if err != nil {
 		fmt.Println("failed sending:", err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	rc.Stop()
 } //                                                                        main
 
 // end

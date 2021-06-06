@@ -23,15 +23,14 @@ Compresses, encrypts and transfers data between a sender and receiver using UDP 
 
 ## Hello World:
 
-This demo runs a receiver using RunReceiver() which listens for incoming data,
-then sends a "Hello World" to the receiver using Sender.SendString().
+This demo starts a Receiver which listens for incoming data, then
+sends a "Hello World" to the receiver using Sender.SendString().
 
 ```go
 package main
 
 import (
     "fmt"
-    "time"
 
     "github.com/balacode/udpt"
 )
@@ -48,15 +47,13 @@ func main() {
             return nil
         }}
     go func() { _ = rc.Run() }()
-    defer func() { rc.Stop() }()
-    time.Sleep(500 * time.Millisecond)
     //
     // send a message to the receiver
-    err := udpt.SendString("127.0.0.1:9876", "msg", "Hello World!", cryptoKey)
+    err := udpt.SendString("127.0.0.1:9876", "main", "Hello World!", cryptoKey)
     if err != nil {
         fmt.Println("failed sending:", err)
     }
-    time.Sleep(500 * time.Millisecond)
+    rc.Stop()
 } //                                                                        main
 ```
 
