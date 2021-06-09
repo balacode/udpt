@@ -7,7 +7,6 @@ package udpt
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -53,7 +52,7 @@ func Test_log_logEntry_Output_2(t *testing.T) {
 	if ts != "" {
 		t.Error("0xE8BB8F")
 	}
-	data, err := ioutil.ReadFile(logEntryTestFile)
+	data, err := os.ReadFile(logEntryTestFile)
 	if string(data) != s+"\n" || err != nil {
 		t.Error("0xED98CA")
 	}
@@ -72,7 +71,7 @@ func Test_log_logEntry_Output_3(t *testing.T) {
 	//
 	le.outputDI(&tlog, openLogFile)
 	//
-	data, err := ioutil.ReadFile(logEntryTestFile)
+	data, err := os.ReadFile(logEntryTestFile)
 	if data != nil || !os.IsNotExist(err) {
 		t.Error("0xE7BC99")
 	}
@@ -98,7 +97,7 @@ func Test_log_logEntry_Output_4(t *testing.T) {
 		t.Error("0xEA1B28")
 	}
 	// must not create/write to file
-	data, err := ioutil.ReadFile(logEntryTestFile)
+	data, err := os.ReadFile(logEntryTestFile)
 	if data != nil || !os.IsNotExist(err) {
 		t.Error("0xEB38C2")
 	}
@@ -134,7 +133,7 @@ func Test_log_openLogFile_1(t *testing.T) {
 	wrc.Write([]byte(msg2))
 	wrc.Close()
 	//
-	data, err := ioutil.ReadFile(testfile)
+	data, err := os.ReadFile(testfile)
 	if err != nil {
 		t.Error("0xE7B84B", err)
 	}
