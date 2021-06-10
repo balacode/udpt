@@ -177,10 +177,6 @@ type Sender struct {
 	// stats contains UDP transfer statistics, such as the transfer
 	// speed and the number of packets delivered and lost
 	stats udpStats
-
-	// wg is used by waitForAllConfirmations()
-	// to wait for sendUndeliveredPackets()
-	wg sync.WaitGroup
 } //                                                                      Sender
 
 // -----------------------------------------------------------------------------
@@ -454,6 +450,7 @@ func (sd *Sender) connectDI(
 // sendUndeliveredPackets sends all undelivered
 // packets to the destination Receiver.
 func (sd *Sender) sendUndeliveredPackets() error {
+	var wg sync.WaitGroup
 	n := len(sd.packets)
 	for i := 0; i < n; i++ {
 		pk := &sd.packets[i]
@@ -461,15 +458,16 @@ func (sd *Sender) sendUndeliveredPackets() error {
 			continue
 		}
 		time.Sleep(sd.Config.SendPacketInterval)
-		sd.wg.Add(1)
+		wg.Add(1)
 		go func() {
 			err := pk.Send(sd.conn, sd.Config.Cipher)
 			if err != nil {
 				_ = sd.logError(0xE67BA4, err)
 			}
-			sd.wg.Done()
+			wg.Done()
 		}()
 	}
+	wg.Wait()
 	return nil
 } //                                                      sendUndeliveredPackets
 
@@ -520,7 +518,6 @@ func (sd *Sender) waitForAllConfirmations() {
 		sd.logInfo("Waiting . . .")
 	}
 	t0 := time.Now()
-	sd.wg.Wait()
 	for {
 		time.Sleep(sd.Config.SendWaitInterval)
 		if sd.DeliveredAllParts() {
