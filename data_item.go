@@ -35,14 +35,12 @@ type dataItem struct {
 // If the item has no pieces, returns false.
 //
 func (di *dataItem) IsLoaded() bool {
-	ret := len(di.CompressedPieces) > 0
 	for _, piece := range di.CompressedPieces {
 		if len(piece) < 1 {
-			ret = false
-			break
+			return false
 		}
 	}
-	return ret
+	return len(di.CompressedPieces) > 0
 } //                                                                    IsLoaded
 
 // -----------------------------------------------------------------------------
